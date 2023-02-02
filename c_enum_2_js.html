@@ -1,0 +1,658 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C枚举转成JS对象</title>
+    <style>
+        .input-area {
+            display: flex;
+            flex-direction: row;
+        }
+        #file-area {
+            width: 150px;
+            height: 50px;
+            background: #ccc;
+            border: 1px solid #000;
+            text-align: center;
+            line-height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <h3>C枚举转成JS对象</h3>
+    
+    <div class="input-area">
+        <div>
+            <div id="file-area">文件拖到这里上传</div>
+        </div>
+        <div>
+            <input type="file" id="fileInput"/>
+
+            <br/>
+            <input type="button" onClick="copyContent()" value="复制代码" />
+            <input type="button" onClick="copyContent2()" value="复制（无注释）代码" />
+            <span id="showTips">
+
+            </span><input type="button" onClick="downloadAction()" value="下载代码" />
+            </span><input type="button" onClick="downloadAction2()" value="下载（无注释）代码" />
+
+        </div>
+    </div>
+    
+    
+    <div id="show-area"></div>
+    <div style="display: none;" id="show-area-2"></div>
+    by muzico.2022.07.21 (功能：支持多枚举；支持指定值；支持枚举值后面跟注释；支持OC的定义的枚举；支持拖拉文件加载；优化逻辑)
+
+    <script>
+        var globalText = ''
+        var globalText_noComment = ''
+    </script>
+
+    <script>
+        function clearContent() {
+            globalText = ''
+            globalText_noComment = ''
+
+            var i = document.getElementById('text-area');
+                if (i == null) {
+                    // 获取窗口宽度
+                    if (window.innerWidth)
+                        winWidth = window.innerWidth;
+                    else if ((document.body) && (document.body.clientWidth))
+                        winWidth = document.body.clientWidth;
+                    // 获取窗口高度
+                    if (window.innerHeight)
+                        winHeight = window.innerHeight;
+                    else if ((document.body) && (document.body.clientHeight))
+                        winHeight = document.body.clientHeight;
+                    // 通过深入 Document 内部对 body 进行检测，获取窗口大小
+                    if (document.documentElement && document.documentElement.clientHeight && document.documentElement.clientWidth)
+                    {
+                        winHeight = document.documentElement.clientHeight;
+                        winWidth = document.documentElement.clientWidth;
+                    }
+
+
+
+
+                    var opinput=document.createElement('textarea');
+                    opinput.setAttribute('id', 'text-area');
+                    opinput.style.width = winWidth - 50 + 'px'
+                    opinput.style.height = winHeight - 160 + 'px'
+                    var a = document.getElementById('show-area');
+                    a.appendChild(opinput);
+                    i = document.getElementById('text-area');
+                }
+                i.innerHTML = "";
+
+
+
+                var i2 = document.getElementById('text-area-2');
+                if (i2 == null) {
+                    // // 获取窗口宽度
+                    // if (window.innerWidth)
+                    //     winWidth = window.innerWidth;
+                    // else if ((document.body) && (document.body.clientWidth))
+                    //     winWidth = document.body.clientWidth;
+                    // // 获取窗口高度
+                    // if (window.innerHeight)
+                    //     winHeight = window.innerHeight;
+                    // else if ((document.body) && (document.body.clientHeight))
+                    //     winHeight = document.body.clientHeight;
+                    // // 通过深入 Document 内部对 body 进行检测，获取窗口大小
+                    // if (document.documentElement && document.documentElement.clientHeight && document.documentElement.clientWidth)
+                    // {
+                    //     winHeight = document.documentElement.clientHeight;
+                    //     winWidth = document.documentElement.clientWidth;
+                    // }
+
+
+                    var opinput=document.createElement('textarea');
+                    opinput.setAttribute('id', 'text-area-2');
+                    // opinput.style.width = winWidth - 50 + 'px'
+                    // opinput.style.height = winHeight - 160 + 'px'
+                    var a = document.getElementById('show-area-2');
+                    a.appendChild(opinput);
+                    i2 = document.getElementById('text-area-2');
+                }
+                i2.innerHTML = "";
+        }
+    </script>
+
+    <script>
+        function handleFileReader(reader) {
+            clearContent()
+
+            reader.onload = function fileReadCompleted() {
+                let keepArr = []
+                let keepComment = {}
+
+                let textStr = reader.result
+                let newStr = textStr
+                let hasMultiLineCommentFlag = false
+
+                let hasSingleLineCommentFlag = false
+
+                snsArr = newStr.split('\n')
+                snsArr.forEach((item,index)=>{
+                    let checkOK = true
+
+                    if (checkOK && item.indexOf("}") == 0) {
+                        checkOK = false
+                    }
+
+                    if (checkOK && item.indexOf("#import") == 0) {
+                        checkOK = false
+                    }
+
+                    if (checkOK && item.indexOf("#ifndef") == 0) {
+                        checkOK = false
+                    }
+
+                    if (checkOK && item.indexOf("#define") == 0) {
+                        checkOK = false
+                    }
+
+
+                    //OC支持
+                    if (checkOK && item.indexOf("typedef NS_ENUM(") != -1) {
+                        let index0 = item.indexOf("typedef NS_ENUM(")
+                        let index1 = item.indexOf(")")
+                        let tempStr = item.substring(index0, index1 + 1)
+                        item = item.replace(tempStr, "enum")
+                    }
+
+                    // if (item.indexOf("typedef enum") == 0) {
+                    //     checkOK = false
+                    // }
+
+                    // if (item.indexOf("enum") == 0) {
+                    //     checkOK = false
+                    // }
+
+
+                    // if (item.indexOf("}") == 0) {
+                    //     checkOK = false
+                    // }
+
+                    if (checkOK && item.indexOf("#endif") == 0) {
+                        checkOK = false
+                    }
+
+                    
+
+
+                    if (checkOK && item.indexOf("//") == 0) {
+                        checkOK = false
+                        return
+                        // hasSingleLineCommentFlag = true
+                    }
+
+
+                    // if (hasSingleLineCommentFlag == false) {
+
+                    // }
+
+                    if (checkOK) {
+                        item = item.replace(/^\s+/, '').replace(/\s+$/, '')
+                    }
+
+                    if (checkOK && item.indexOf("//") == 0) {
+                        checkOK = false
+                    }
+
+                    if (checkOK && item.length == 0) {
+                        checkOK = false
+                    }
+
+
+                    let muteMateStartIndex = item.indexOf("/*")
+                    let muteMateEndIndex = item.indexOf("*/")
+                    if (checkOK) {
+                        if (muteMateStartIndex != -1 && muteMateEndIndex != -1) {
+                            // console.log("这里有一个完整的多行注释")
+                            // console.log("muteMateStartIndex:",muteMateStartIndex)
+                            // console.log("muteMateEndIndex:",muteMateEndIndex)
+
+
+                            let str0 = item.substring(0, muteMateStartIndex)
+                            let str1 = item.substring(muteMateEndIndex+2, item.length)
+                            let strSum = str0 + str1
+                            if (strSum.length == 0) {
+                                checkOK = false
+                            }
+
+                        } else if (muteMateStartIndex != -1 && muteMateEndIndex == -1) {
+                            // console.log("这里有一个多行注释的开头")
+                            hasMultiLineCommentFlag = true
+                        } else if (muteMateStartIndex == -1 && muteMateEndIndex != -1) {
+                            // console.log("这里有一个多行注释的结尾")
+                            hasMultiLineCommentFlag = false
+
+                            item = item.substr(muteMateEndIndex+2,item.length)
+                            if (item.length == 0) {
+                                checkOK = false
+                            }
+                        }
+                    }
+                    
+
+                    if (hasMultiLineCommentFlag) {
+                        checkOK = false
+                    }
+
+                    if (checkOK == true) {
+                        if (item.lastIndexOf(",") != -1) {
+                            arr2=item.split(',');
+
+                    // console.log("0:1:::",arr2[0])
+
+                            item = arr2[0] + ','
+
+                            let tempstr4 = arr2[1]
+                            tempstr4 = tempstr4.replace(/^\s+/, '').replace(/\s+$/, '')
+                            if (tempstr4.length > 0) {
+                                // console.log('---->>>>>',tempstr4)
+                                keepComment[arr2[0]] = tempstr4
+                            }
+                        } else if (item.lastIndexOf("//") != -1) {
+                            arr2=item.split('//');
+
+                    // console.log("0:2:::",arr2[0])
+                            item = arr2[0] + ','
+
+                            let tempstr4 = arr2[1]
+                            tempstr4 = tempstr4.replace(/^\s+/, '').replace(/\s+$/, '')
+                            if (tempstr4.length > 0) {
+                                // console.log('---->>>>>',tempstr4)
+                                keepComment[arr2[0]] = "//"+tempstr4
+                            }
+                        }
+                    }
+
+                    if (checkOK) {
+                        keepArr.push(item)
+                        // console.log("index:",index,item)
+                    }
+                })
+                // console.log(keepArr)
+                // console.log(keepComment)
+
+                // var targetDic = {}
+                // for (var i = 0; i < keepArr.length; i++) {
+                //     targetDic[keepArr[i]] = i
+                // }
+                // console.log("=============>>>>>")
+                // console.log(targetDic)
+
+
+                // var targetStr = 'const ADDRESS = {\n'
+                // for (var i = 0; i < keepArr.length; i++) {
+                //     targetStr = targetStr + '  ' + keepArr[i] + ': ' + i + ',\n'
+                // }
+                // targetStr += '};'
+                // console.log("=============>>>>>")
+                // console.log(targetStr)
+
+
+
+                let tempStr = keepArr.join('\n')
+                // console.log(tempStr)
+
+
+
+                let arr3 = tempStr.split('enum {');
+                // console.log('arr3:',arr3)
+                
+                
+                let keepArr2 = []
+                for (let i = 1; i < arr3.length; i++) {
+                    let theStr = arr3[i]
+                    // console.log("theStr: ",theStr)
+
+                    // let hasComma = theStr.indexOf(",")
+                    // let hasNote1 = theStr.indexOf("//")
+                    // let hasNote2 = theStr.indexOf("/*")
+
+
+                    let keepArr3 = []
+                    let arr4 = theStr.split(',');
+
+                    // if (hasComma) {
+                    //     arr4 = theStr.split(',');
+                    // } else if (hasNote1) {
+                    //     arr4 = theStr.split('//');
+                    // } else if (hasNote2) {
+                    //     arr4 = theStr.split('/*');
+                    // }
+                    // console.log("arr4: ",arr4)
+
+                    for (let j = 0; j < arr4.length; j++) {
+                        let theStr2 = arr4[j]
+                        theStr2 = theStr2.replace('\n','')
+                        let checkOK = true
+                        if (theStr2.indexOf("}") == 0) {
+                            checkOK = false
+                        }
+                        if (checkOK == true) {
+                            // console.log('index:', i,'theStr:',theStr)
+                            keepArr3.push(theStr2)
+                        }
+                    }
+                    keepArr2.push(keepArr3)
+                    
+                }
+
+                // console.log(keepArr2)
+
+                let resultStr = ''
+                let resultStr_noComment = ''
+                let keepArr4 = []
+                let keepArr4_noComment = []
+
+
+                let ADDRESS_MP232AFlag = false
+                let ADDRESS_MP232AIndex = 0
+                let ADDRESS_MP232A = []
+
+                for (let i = 0; i < keepArr2.length; i++) {
+                    ADDRESS_MP232AFlag = false
+                    ADDRESS_MP232AIndex = 0
+                    let arr = keepArr2[i]
+                    let tempStr = ''
+                    let tempStr_noComment = ''
+                    if (i == 0) {
+                        tempStr = 'const ADDRESS = {\n'
+                        tempStr_noComment = 'const ADDRESS = {\n'
+                    } else {
+                        tempStr = 'const ADDRESS_'+ i +' = {\n'
+                        tempStr_noComment = 'const ADDRESS_'+ i +' = {\n'
+                    }
+
+                    let k = 0
+                    for (let j = 0; j < arr.length; j++) {
+                        // console.log(arr[j], typeof arr[j], typeof 'ID_IIR100_1_TYPE', arr[j] == 'ID_IIR100_1_TYPE')
+
+                        let tempstr3 = arr[j]
+                        if (tempstr3.indexOf('=') > 0) {
+                            // tempstr3 = tempstr3.replace(' ', '')
+                            tempstr3 = tempstr3.split(' ').join('')
+                            // console.log('===>>>',tempstr3)
+                            let tempArr = tempstr3.split('=')
+                            tempstr3 = tempArr[0]
+                            k = parseInt(tempArr[1]) 
+                        }
+
+
+                        if (tempstr3 == 'ID_IIR100_1_TYPE') {
+                            ADDRESS_MP232AFlag = true
+                            ADDRESS_MP232AIndex = k
+                        }
+
+                        if (ADDRESS_MP232AFlag == true) {
+                            ADDRESS_MP232A.push(tempstr3)
+                        }
+
+
+                        let theComment = keepComment[tempstr3]
+                        if (theComment != null) {
+                            if (tempstr3.length > 0) {
+                                tempStr = tempStr + '  ' + tempstr3 + ': ' + k + ',    ' + theComment + '\n'
+                            }
+                        } else {
+                            if (tempstr3.length > 0) {
+                                tempStr = tempStr + '  ' + tempstr3 + ': ' + k + ',\n'
+                            }
+                        }
+                        if (tempstr3.length > 0) {
+                            tempStr_noComment = tempStr_noComment + '  ' + tempstr3 + ': ' + k + ',\n'
+                        }
+                        
+
+                        
+                        k++
+                    }
+                    tempStr += '};'
+
+                    tempStr_noComment += '};'
+                    keepArr4.push(tempStr)
+                    keepArr4_noComment.push(tempStr_noComment)
+                    resultStr += tempStr
+                    resultStr_noComment += tempStr_noComment
+                    if (i != keepArr2.length - 1) {
+                        resultStr += '\n\n\n'
+                        resultStr_noComment += '\n\n\n'
+                    }
+                }
+
+                if (ADDRESS_MP232A.length > 0) {
+                    resultStr += '\n\n\n'
+                    resultStr += 'const ADDRESS_MP232A = {\n'
+
+
+                    resultStr_noComment += '\n\n\n'
+                    resultStr_noComment += 'const ADDRESS_MP232A = {\n'
+
+                    for (let j = 0; j < ADDRESS_MP232A.length; j++) {
+                        let theKey = ADDRESS_MP232A[j]
+                        let theComment = keepComment[theKey]
+                        if (theComment != null) {
+                            resultStr = resultStr + '  ' + theKey + ': ' + (ADDRESS_MP232AIndex + j) + ',    ' + theComment + '\n'
+                        } else {
+                            resultStr = resultStr + '  ' + theKey + ': ' + (ADDRESS_MP232AIndex + j) + ',\n'
+                        }
+
+                        resultStr_noComment = resultStr_noComment + '  ' + theKey + ': ' + (ADDRESS_MP232AIndex + j) + ',\n'
+                    }
+                    resultStr += '};'
+                    resultStr_noComment += '};'
+                }
+                
+                globalText = resultStr
+                globalText_noComment = resultStr_noComment
+
+
+                let i = document.getElementById('text-area');
+                if (i == null) {
+                    // 获取窗口宽度
+                    if (window.innerWidth)
+                        winWidth = window.innerWidth;
+                    else if ((document.body) && (document.body.clientWidth))
+                        winWidth = document.body.clientWidth;
+                    // 获取窗口高度
+                    if (window.innerHeight)
+                        winHeight = window.innerHeight;
+                    else if ((document.body) && (document.body.clientHeight))
+                        winHeight = document.body.clientHeight;
+                    // 通过深入 Document 内部对 body 进行检测，获取窗口大小
+                    if (document.documentElement && document.documentElement.clientHeight && document.documentElement.clientWidth)
+                    {
+                        winHeight = document.documentElement.clientHeight;
+                        winWidth = document.documentElement.clientWidth;
+                    }
+
+
+
+
+                    let opinput=document.createElement('textarea');
+                    opinput.setAttribute('id', 'text-area');
+                    opinput.style.width = winWidth - 50 + 'px'
+                    opinput.style.height = winHeight - 160 + 'px'
+                    let a = document.getElementById('show-area');
+                    a.appendChild(opinput);
+                    i = document.getElementById('text-area');
+                }
+                i.innerHTML = resultStr;
+
+
+
+
+
+
+                let i2 = document.getElementById('text-area-2');
+                if (i2 == null) {
+                    // // 获取窗口宽度
+                    // if (window.innerWidth)
+                    //     winWidth = window.innerWidth;
+                    // else if ((document.body) && (document.body.clientWidth))
+                    //     winWidth = document.body.clientWidth;
+                    // // 获取窗口高度
+                    // if (window.innerHeight)
+                    //     winHeight = window.innerHeight;
+                    // else if ((document.body) && (document.body.clientHeight))
+                    //     winHeight = document.body.clientHeight;
+                    // // 通过深入 Document 内部对 body 进行检测，获取窗口大小
+                    // if (document.documentElement && document.documentElement.clientHeight && document.documentElement.clientWidth)
+                    // {
+                    //     winHeight = document.documentElement.clientHeight;
+                    //     winWidth = document.documentElement.clientWidth;
+                    // }
+
+
+                    let opinput=document.createElement('textarea');
+                    opinput.setAttribute('id', 'text-area-2');
+                    // opinput.style.width = winWidth - 50 + 'px'
+                    // opinput.style.height = winHeight - 160 + 'px'
+                    let a = document.getElementById('show-area-2');
+                    a.appendChild(opinput);
+                    i2 = document.getElementById('text-area-2');
+                }
+                i2.innerHTML = resultStr_noComment;
+            }
+        }
+    </script>
+
+    <script>
+        window.onload = function() {
+            var fileArea = document.getElementById("file-area")
+            fileArea.addEventListener("dragenter", function() {
+                fileArea.innerHTML = "请松手"
+            }, false)
+            fileArea.addEventListener("dragleave", function() {
+                fileArea.innerHTML = "文件拖到这里上传"
+            }, false)
+            fileArea.addEventListener("dragover", function(ev) {
+                ev.preventDefault()
+            }, false)
+            fileArea.addEventListener("drop", function(ev) {
+                fileArea.innerHTML = "文件处理。。。"
+                ev.preventDefault()
+                let fileReader = new FileReader()
+                let file = ev.dataTransfer.files[0]
+                // fileReader.onload = function() {
+                //     console.log("成功", this.result)
+                // }
+                // fileReader.onerror = function() {
+                //     console.log("读取失败")
+                // }
+                handleFileReader(fileReader)
+                fileReader.readAsText(file)
+            }, false)
+        }
+    </script>
+
+    <script>
+        window.onresize=function(){
+            var i = document.getElementById('text-area');
+                if (i != null) {
+                    // 获取窗口宽度
+                    if (window.innerWidth)
+                        winWidth = window.innerWidth;
+                    else if ((document.body) && (document.body.clientWidth))
+                        winWidth = document.body.clientWidth;
+                    // 获取窗口高度
+                    if (window.innerHeight)
+                        winHeight = window.innerHeight;
+                    else if ((document.body) && (document.body.clientHeight))
+                        winHeight = document.body.clientHeight;
+                    // 通过深入 Document 内部对 body 进行检测，获取窗口大小
+                    if (document.documentElement && document.documentElement.clientHeight && document.documentElement.clientWidth)
+                    {
+                        winHeight = document.documentElement.clientHeight;
+                        winWidth = document.documentElement.clientWidth;
+                    }
+
+                    i.style.width = winWidth - 50 + 'px'
+                    i.style.height = winHeight - 160 + 'px'
+                }
+            }
+    </script>
+
+    <script>
+        function copyContent() {
+            const input = document.querySelector('#text-area');
+            input.select();
+            if (document.execCommand('copy')) {
+                document.execCommand('copy');
+                // console.log('复制成功');
+
+                document.getElementById('showTips').innerHTML = "复制成功"
+            } else {
+                document.getElementById('showTips').innerHTML = "复制失败"
+            }
+        }
+
+        function copyContent2() {
+            const input = document.querySelector('#text-area-2');
+            input.select();
+            if (document.execCommand('copy')) {
+                document.execCommand('copy');
+                // console.log('复制成功');
+
+                document.getElementById('showTips').innerHTML = "复制成功"
+            } else {
+                document.getElementById('showTips').innerHTML = "复制失败"
+            }
+        }
+    </script>
+
+    <script>
+        function downloadAction() {
+            if (globalText.length > 0) {
+                var timestamp = Date.parse(new Date())
+                exportRaw(timestamp + '.js', globalText)
+            }
+        }
+        function downloadAction2() {
+            if (globalText_noComment.length > 0) {
+                var timestamp = Date.parse(new Date())
+                exportRaw(timestamp + '_noComment.js', globalText_noComment)
+            }
+        }
+
+        function fakeClick(obj) {
+            var ev = document.createEvent("MouseEvents");
+            ev.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            obj.dispatchEvent(ev);
+        }
+
+        function exportRaw(name, data) {
+            var urlObject = window.URL || window.webkitURL || window;
+            var export_blob = new Blob([data]);
+            var save_link = document.createElementNS("http://www.w3.org/1999/xhtml", "a")
+            save_link.href = urlObject.createObjectURL(export_blob);
+            save_link.download = name;
+            fakeClick(save_link);
+        }
+    </script>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function selectedFileChanged(){
+            // console.log(this.files)
+
+            if (this.files.length === 0) {
+                console.log('请选择文件！')
+                return
+            }
+
+
+            const reader = new FileReader()
+            handleFileReader(reader)
+            reader.readAsText(this.files[0])
+        })
+    </script>
+</body>
+</html>

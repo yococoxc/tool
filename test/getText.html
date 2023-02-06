@@ -13,6 +13,7 @@ function show()
     reader.onload = function() 
     {
         //alert(this.result)
+     wx.miniProgram.postMessage({ data: {b: this.result} });
         story.value=this.result
     }
     var f = document.getElementById("filePicker").files[0];

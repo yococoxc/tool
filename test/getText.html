@@ -55,7 +55,7 @@ function show() {
         let text = theXXX;
         console.log('the text :', text);
         let url = `/pages/shared/shared?text=${text}`;
-        wx.miniProgram.navigateTo({
+        wx.miniProgram.redirectTo({
             url,
         });
     }

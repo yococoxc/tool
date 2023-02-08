@@ -9,7 +9,8 @@
 <body>
 <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
 <script>
-    var theXXX = '';
+    var theText = '';
+    var theName = '';
     var that;
 </script>
 
@@ -35,20 +36,22 @@
 
     function show() {
         let file = document.getElementById("filePicker").files[0];
+        theName = file.name;
         document.getElementById('myAnchor').innerHTML="您当前选择的文件是"+file.name;
         document.getElementById("loadButton").style.display = '';
 
         uploadFile(file).then(function(result){
             //处理 result
             // console.log('result',result);
-            theXXX = result;
+            theText = result;
 
         })
     }
     function handleClick() {
-        let text = theXXX;
+        let text = theText;
+        let name = theName;
         // console.log('the text :', text);
-        let url = `/pages/shared/shared?text=${text}`;
+        let url = `/pages/shared/shared?text=${text}&name=${name}`;
         wx.miniProgram.redirectTo({
             url,
         });

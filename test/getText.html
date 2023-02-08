@@ -39,7 +39,10 @@ function show() {
 
 <br>
 <button onclick="handleClick()">跳转detail页面</button>
-<button onclick="handleClick2()">测试携带数据返回当前页面</button>
+<button onclick="handleClick2()">redirectTo测试携带数据返回当前页面</button>
+<button onclick="handleClick3()">reLaunch测试携带数据返回当前页面</button>
+    
+<button onclick="handleClick4()">navigateTo测试携带数据返回当前页面</button>
 <br>
  
 <script>
@@ -56,6 +59,22 @@ function show() {
         console.log('the text :', text);
         let url = `/pages/shared/shared?text=${text}`;
         wx.miniProgram.redirectTo({
+            url,
+        });
+    }
+    function handleClick3() {
+        let text = theXXX;
+        console.log('the text :', text);
+        let url = `/pages/shared/shared?text=${text}`;
+        wx.miniProgram.reLaunch({
+            url,
+        });
+    }
+    function handleClick4() {
+        let text = theXXX;
+        console.log('the text :', text);
+        let url = `/pages/shared/shared?text=${text}`;
+        wx.miniProgram.navigateTo({
             url,
         });
     }

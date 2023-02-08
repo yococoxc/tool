@@ -24,13 +24,24 @@ function show() {
     var f = document.getElementById("filePicker").files[0];
     reader.readAsText(f);
 }
+function show2() {
+    var reader = new FileReader();
+    reader.onload = function() {
+        let text = this.result;
+        let url = `/pages/shared/shared?text=${text}`;
+        wx.miniProgram.redirectTo({ url });
+        story.value = text;
+        theXXX = text;
+    }
+}
 </script>
  
 微信小程序与网页交互。<br>
 微信小程序通过网页获取文本文件的内容。<br>
 <br>
 
- 
+ <input type="file" name="file" id="filePicker" onchange="show2()"  />
+    <br>
 <input type="file" name="file" id="filePicker" onchange="show()"  />
 <br>
  

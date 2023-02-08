@@ -39,6 +39,7 @@ function show() {
 
 <br>
 <button onclick="handleClick()">跳转detail页面</button>
+<button onclick="handleClick2()">测试携带数据返回当前页面</button>
 <br>
  
 <script>
@@ -46,6 +47,14 @@ function show() {
         let text = theXXX;
         console.log('the text :', text);
         let url = `/pages/detail/detail?text=${text}`;
+        wx.miniProgram.navigateTo({
+            url,
+        });
+    }
+    function handleClick2() {
+        let text = theXXX;
+        console.log('the text :', text);
+        let url = `/pages/shared/shared?text=${text}`;
         wx.miniProgram.navigateTo({
             url,
         });

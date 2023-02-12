@@ -1,0 +1,393 @@
+
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .input-area {
+            display: flex;
+            flex-direction: row;
+        }
+        #file-area {
+            width: 150px;
+            height: 50px;
+            background: #ccc;
+            border: 1px solid #000;
+            text-align: center;
+            line-height: 50px;
+        }
+        .content-area {
+            display: flex;
+            flex-direction: row;
+        }
+        .show-area {
+            display: flex;
+            flex-direction: row;
+        }
+    </style>
+</head>
+<body>
+    <h3>Android res/values/array XML 转 OC 字符串数组</h3>
+
+    <div class="input-area">
+        <div>
+            <div id="file-area">文件拖到这里上传</div>
+        </div>
+        <div>
+            <input type="file" id="fileInput"/>
+
+            <br/>
+            <input type="button" onClick="copyContentH()" value="复制 .h 文件的代码" />
+            <input type="button" onClick="copyContentM()" value="复制 .m 文件的代码"/>
+            <span id="showTips">
+
+            </span><input type="button" onClick="downloadActionH()" value="下载 .h 文件的代码" />
+            </span><input type="button" onClick="downloadActionM()" value="下载 .m 文件的代码" />
+        </div>
+    </div>
+    
+    <div id="content-area">
+        <textarea id="text-area" style="height: 100%"></textarea>
+        <textarea id="text-area2" style="height: 100%"></textarea>
+    </div>
+    
+    by muzico.2023.01.26
+
+
+    <script>
+        var globalTextH = ''
+        var globalTextM = ''
+    </script>
+
+    <script>
+        function changeTextAreaFrame() {
+            // 获取窗口宽度
+            if (window.innerWidth) {
+                winWidth = window.innerWidth;
+            } else if ((document.body) && (document.body.clientWidth)) {
+                winWidth = document.body.clientWidth;
+            }
+            // 获取窗口高度
+            if (window.innerHeight) {
+                winHeight = window.innerHeight;
+            } else if ((document.body) && (document.body.clientHeight)) {
+                winHeight = document.body.clientHeight;
+            }
+            // 通过深入 Document 内部对 body 进行检测，获取窗口大小
+            if (document.documentElement && document.documentElement.clientHeight && document.documentElement.clientWidth) {
+                winHeight = document.documentElement.clientHeight;
+                winWidth = document.documentElement.clientWidth;
+            }
+
+            var ta = document.getElementById('text-area');
+            ta.style.width = (winWidth - 40)/2 + 'px'
+            ta.style.height = winHeight - 160 + 'px'
+            ta.innerHTML = globalTextH;
+
+            var ta2 = document.getElementById('text-area2');
+            ta2.style.width = (winWidth - 40)/2 + 'px'
+            ta2.style.height = winHeight - 160 + 'px'
+            ta2.innerHTML = globalTextM;
+        }
+    </script>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function selectedFileChanged(){
+            if (this.files.length === 0) {
+                console.log('请选择文件！')
+                return
+            }
+
+            const reader = new FileReader()
+            reader.onload = function fileReadCompleted() {
+                texthandleAction(reader.result)
+            }
+            reader.readAsText(this.files[0])
+        })
+
+
+
+        window.onload = function() {
+            var fileArea = document.getElementById("file-area")
+            fileArea.addEventListener("dragenter", function() {
+                fileArea.innerHTML = "请松手"
+            }, false)
+            fileArea.addEventListener("dragleave", function() {
+                fileArea.innerHTML = "文件拖到这里上传"
+            }, false)
+            fileArea.addEventListener("dragover", function(ev) {
+                ev.preventDefault()
+            }, false)
+            fileArea.addEventListener("drop", function(ev) {
+                fileArea.innerHTML = "文件处理。。。"
+                ev.preventDefault()
+                let fileReader = new FileReader()
+                let file = ev.dataTransfer.files[0]
+                fileReader.onload = function() {
+                    fileArea.innerHTML = "新文件拖到这里上传"
+                    texthandleAction(this.result)
+                }
+                fileReader.onerror = function() {
+                    fileArea.innerHTML = "重新文件拖到这里上传"
+                }
+                fileReader.readAsText(file)
+            }, false)
+
+            //首次触发，根据界面显示内容范围
+            changeTextAreaFrame();
+            //监听大小改变，触发根据界面显示内容范围
+            window.addEventListener("resize", changeTextAreaFrame);
+        }
+
+
+
+
+        function texthandleAction(textStr) {
+            // console.log('textStr',textStr)
+
+            let startIndex = textStr.indexOf("<resources>")
+            let endIndex = textStr.indexOf("</resources>")
+            // console.log('startIndex',startIndex)
+            // console.log('endIndex',endIndex)
+
+            if (startIndex >= 0 && endIndex >=0) {
+                let targetStr = textStr.substring(startIndex + "<resources>".length, endIndex)
+                // console.log('targetStr',targetStr)
+
+                let colorArray = targetStr.split('</string-array>')
+                // console.log('colorArray',colorArray)
+
+
+                let resultArray = []
+                let colorNameMaxLength = 0;
+
+                for (let i = 0; i < colorArray.length; i++) {
+                    let tempStr = colorArray[i]
+                    // console.log('tempStr:',tempStr)
+                    let tempArray = tempStr.split(' ')
+                    // console.log('tempArray:',tempArray)
+
+                    let isStringArray = false
+                    let colorValue = '';
+                    let colorName = '';
+                    let likeName = '';
+                    let isI18n = false;
+                    let subitems = [];
+
+                    for (let j = 0; j < tempArray.length; j++) {
+                        var tempStr2 = tempArray[j]
+                        // console.log('tempStr2 ::: ', tempStr2);
+
+                        if (tempStr2 == '<string-array') {
+                            isStringArray = true
+                        } else {
+                            let hasValue = false
+                            let hasArr = tempStr2.split('>')
+                            if (hasArr.length > 1) {
+                                if (hasArr.length == 2) {
+                                    // console.log('-222-------->>>>>', hasArr);
+
+                                    colorValue = hasArr[1]
+                                    colorValue = colorValue.replace(/\#/g, '0x')
+                                    let tempColorValueArr = colorValue.split('@color/')
+                                    if (tempColorValueArr.length == 2) {
+                                        likeName = tempColorValueArr[1]
+                                    }
+
+                                    let tempNameStr = hasArr[0]
+                                    let tempNameArr = tempNameStr.split('=')
+                                    if (tempNameArr.length == 2) {
+                                        colorName = tempNameArr[1]
+                                        colorName = colorName.replace(/\"/g, '')
+                                        if (colorNameMaxLength < colorName.length) {
+                                            colorNameMaxLength = colorName.length
+                                        }
+                                    }
+                                } else {
+                                    let hasArr2 = tempStr2.split('<');
+                                    if (hasArr2.length == 3) {
+                                        let tempStr = hasArr2[1];
+                                        hasArr2 = tempStr.split('>');
+                                        // console.log('----hasArr2----->>>>>', hasArr2);
+                                        if (hasArr2.length == 2) {
+                                            let itemValue = hasArr2[1];
+                                            let hasArr3 = itemValue.split('/');
+                                            // console.log('----hasArr3----->>>>>', hasArr3);
+                                            if (hasArr3[0] === '@string') {
+                                                // console.log('------yes');
+                                                isI18n = true;
+                                                hasArr3 = hasArr3.splice(1, 1);
+                                            }
+                                            // console.log('----hasArr3---22-->>>>>', hasArr3);
+                                            if (hasArr3.length == 1) {
+                                                itemValue = hasArr3[0];
+                                                subitems.push(itemValue);
+                                            }
+
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (isStringArray) {
+                        // console.log('---------->>>>>')
+                        // console.log('likeName:',likeName)
+                        // console.log('colorName:',colorName)
+                        // console.log('colorValue:',colorValue)
+                        // console.log('subitems:',subitems)
+
+                        resultArray.push({
+                            colorName: colorName,
+                            colorValue: colorValue,
+                            likeName: likeName,
+                            isI18n: isI18n,
+                            subitems: subitems
+                        })
+                    }
+                }
+
+                let colorNameGap = '     '
+                for (let i = 0; i < colorNameMaxLength; i++) {
+                    colorNameGap += ' '
+                }
+
+                let hResultStr = '';
+                let mResultStr = '';
+
+                let date = new Date();
+                let dateString = date.getFullYear() + '/' + (date.getMonth() + 1) + "/" + date.getDate();
+
+
+                hResultStr += '//' + '\n';
+                hResultStr += '//  StringArray.h' + '\n';
+                hResultStr += '//  转换器创建' + '\n';
+                hResultStr += '//' + '\n';
+                hResultStr += '//  Created by Muzico on ' + dateString + '.' + '\n';
+                hResultStr += '//' + '\n';
+                hResultStr += '\n';
+                hResultStr += '#import <Foundation/Foundation.h>' + '\n';
+                hResultStr += '\n';
+                hResultStr += '@interface StringArray : NSObject' + '\n';
+                hResultStr += '\n';
+
+
+                mResultStr += '//' + '\n';
+                mResultStr += '//  StringArray.m' + '\n';
+                mResultStr += '//  转换器创建' + '\n';
+                mResultStr += '//' + '\n';
+                mResultStr += '//  Created by Muzico on ' + dateString + '.' + '\n';
+                mResultStr += '//' + '\n';
+                mResultStr += '\n';
+                mResultStr += '#import "StringArray.h"' + '\n';
+                mResultStr += '#import "MZCUtil.h"' + '\n';
+                mResultStr += '\n';
+                mResultStr += '@implementation StringArray' + '\n';
+                mResultStr += '\n';
+
+                for (let i = 0; i < resultArray.length; i++) {
+                    let tempObj = resultArray[i]
+
+                    hResultStr += '+ (NSArray *) ' + tempObj.colorName + ';' + '\n';
+                    
+                    mResultStr += '+ (NSArray *) ' + tempObj.colorName + '{' + '\n';
+                    mResultStr += '    NSArray *arr = @[' + '\n';
+                    for (let i = 0; i < tempObj.subitems.length; i++) {
+                        if (i == tempObj.subitems.lengt - 1) {
+                            mResultStr += '        ' + '@"' + tempObj.subitems[i] + '\n';
+                        } else {
+                            mResultStr += '        ' + '@"' + tempObj.subitems[i] + '",' + '\n';
+                        }
+                    }
+                    mResultStr += '    ];' + '\n';
+                    if (tempObj.isI18n) {
+                        mResultStr += '    return [MZCUtil i18nWithStrings:arr];' + '\n';
+                    } else {
+                        mResultStr += '    return arr;' + '\n';
+                    }
+                    mResultStr += '}' + '\n';
+                    mResultStr += '\n';
+                    
+                }
+
+
+                hResultStr += '\n';
+                hResultStr += '@end' + '\n';
+                hResultStr += '\n';
+
+                mResultStr += '@end' + '\n';
+                mResultStr += '\n';
+
+                globalTextH = hResultStr;
+                globalTextM = mResultStr;
+
+
+                document.getElementById('showTips').innerHTML = "解析成功"
+
+                changeTextAreaFrame();
+            }
+        }
+    </script>
+    <script>
+        function copyContentH() {
+            const input = document.querySelector('#text-area');
+            input.select();
+            if (document.execCommand('copy')) {
+                document.execCommand('copy');
+                document.getElementById('showTips').innerHTML = "复制成功"
+            } else {
+                document.getElementById('showTips').innerHTML = "复制失败"
+            }
+        }
+
+        function copyContentM() {
+            const input = document.querySelector('#text-area2');
+            input.select();
+            if (document.execCommand('copy')) {
+                document.execCommand('copy');
+                document.getElementById('showTips').innerHTML = "复制成功"
+            } else {
+                document.getElementById('showTips').innerHTML = "复制失败"
+            }
+        }
+    </script>
+    <script>
+        function downloadActionH() {
+            if (globalTextH.length > 0) {
+                var timestamp = Date.parse(new Date())
+                exportRaw(timestamp + 'StringArray.h', globalTextH)
+            } else {
+                document.getElementById('showTips').innerHTML = "没有内容，下载不了"
+            }
+        }
+        function downloadActionM() {
+            if (globalTextM.length > 0) {
+                var timestamp = Date.parse(new Date())
+                exportRaw(timestamp + 'StringArray.m', globalTextM)
+            } else {
+                document.getElementById('showTips').innerHTML = "没有内容，下载不了"
+            }
+        }
+
+        function fakeClick(obj) {
+            var ev = document.createEvent("MouseEvents");
+            ev.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            obj.dispatchEvent(ev);
+        }
+
+        function exportRaw(name, data) {
+            var urlObject = window.URL || window.webkitURL || window;
+            var export_blob = new Blob([data]);
+            var save_link = document.createElementNS("http://www.w3.org/1999/xhtml", "a")
+            save_link.href = urlObject.createObjectURL(export_blob);
+            save_link.download = name;
+            fakeClick(save_link);
+        }
+    </script>
+</body>
+</html>

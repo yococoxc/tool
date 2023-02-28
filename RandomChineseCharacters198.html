@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>学汉字198</title>
     <style>
         body{ font-family:"宋体"}
         * {
@@ -21,7 +21,7 @@
 
             height: 500px;
             line-height: 500px;
-            font-size: 500px;
+            /* font-size: 500px; */
             -webkit-user-select: none;
         }
         .bottom {
@@ -79,7 +79,12 @@
             let middle = document.getElementById('middle');
             middle.style.height = winHeight - 80 + 'px';
             middle.style.lineHeight = winHeight - 80 + 'px';
-            middle.style.fontSize = winHeight - 80 - 80 + 'px';
+
+            if (winHeight > winWidth) {
+                middle.style.fontSize = winWidth - 30 + 'px';
+            } else {
+                middle.style.fontSize = winHeight - 30 + 'px';
+            }
 
 
         }

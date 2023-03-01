@@ -17,28 +17,20 @@
         .middle {
             width: 100%;
             text-align: center;
-
             height: 500px;
             line-height: 500px;
             /* font-size: 500px; */
             -webkit-user-select: none;
             color: #3E5C99;
-
-
             display: flex;
             flex-direction: row;
         }
         .middle-left {
-            
             background-color: #CAD2E3;
         }
         .middle-right {
-            
-            background-color: #efefef;
-
             display: flex;
             flex-direction: column;
-            
         }
         .bottom {
             width: 100%;
@@ -56,7 +48,6 @@
         .bottom-item {
             flex: 1;
         }
-
         .bottom-right-item {
             /* flex: 1; */
             display: block;
@@ -139,54 +130,19 @@
             let middleLeft = document.getElementById('middle-left');
             middleLeft.style.width = middleLeftWidth + 'px';
 
-
             let itemHeight = middleHeight / 9;
-            let middleRightItem0 = document.getElementById('item-0');
-            middleRightItem0.style.height = itemHeight + 'px';
-            middleRightItem0.style.lineHeight = itemHeight + 'px';
-
-
-            let middleRightItem1 = document.getElementById('item-1');
-            middleRightItem1.style.height = itemHeight + 'px';
-            middleRightItem1.style.lineHeight = itemHeight + 'px';
-
-            let middleRightItem2 = document.getElementById('item-2');
-            middleRightItem2.style.height = itemHeight + 'px';
-            middleRightItem2.style.lineHeight = itemHeight + 'px';
-
-            let middleRightItem3 = document.getElementById('item-3');
-            middleRightItem3.style.height = itemHeight + 'px';
-            middleRightItem3.style.lineHeight = itemHeight + 'px';
-
-            let middleRightItem4 = document.getElementById('item-4');
-            middleRightItem4.style.height = itemHeight + 'px';
-            middleRightItem4.style.lineHeight = itemHeight + 'px';
-
-            let middleRightItem5 = document.getElementById('item-5');
-            middleRightItem5.style.height = itemHeight + 'px';
-            middleRightItem5.style.lineHeight = itemHeight + 'px';
-
-            let middleRightItem6 = document.getElementById('item-6');
-            middleRightItem6.style.height = itemHeight + 'px';
-            middleRightItem6.style.lineHeight = itemHeight + 'px';
-
-            let middleRightItem7 = document.getElementById('item-7');
-            middleRightItem7.style.height = itemHeight + 'px';
-            middleRightItem7.style.lineHeight = itemHeight + 'px';
-
-            let middleRightItem8= document.getElementById('item-8');
-            middleRightItem8.style.height = itemHeight + 'px';
-            middleRightItem8.style.lineHeight = itemHeight + 'px';
-
-
+            for (let i = 0; i < 9; i++) {
+                let tag = 'item-'+i;
+                let cell = document.getElementById(tag);
+                cell.style.height = itemHeight + 'px';
+                cell.style.lineHeight = itemHeight + 'px';
+            }
 
             if (middleHeight > middleLeftWidth) {
                 middleLeft.style.fontSize = middleLeftWidth - 30 + 'px';
             } else {
                 middleLeft.style.fontSize = middleHeight - 30 + 'px';
             }
-
-
         }
     </script>
     <script>
@@ -199,164 +155,90 @@
             {"饮食篇": ["米","面","油","肉","菜","蛋","奶","豆","糖","藕","糕","饼","谷","杏","泡","枣","虾","蜜","汁","菇","盐","酒","醋","葱","酱","姜","蒜","薯","椒","蟹","桃","梨",]},
             {"植物篇": ["梅","竹","兰","菊","草","枝","蕉","树","笋","橙","花","果","稻","柏","柳","槐","葵","樱","麦","杨","芹","芽","茄","柚","荷","叶","木","莲","柿","核","松","瓜",]},
             {"游戏篇": ["筝","棋","鼓","笛","锣","铃","号","箫","飞","船","绳","跑","跳","音","积","球","毽","滑","攀","荡","拼","圈","牌","环","捉","踢","拍","弹","弓","跷","布","捏",]},
-        ]
-
+        ];
         function beSelectedItemIndex(value) {
             let unselectColor = '#efefef';
             let selectedColor = '#ffffff';
 
-            let middleRightItem0 = document.getElementById('item-0');
-            if (value == 0) {
-                middleRightItem0.style.backgroundColor = selectedColor;
-            } else {
-                middleRightItem0.style.backgroundColor = unselectColor;
+            for (let i = 0; i < 9; i++) {
+                let tag = 'item-'+i;
+                let cell = document.getElementById(tag);
+                if (i == value) {
+                    cell.style.backgroundColor = selectedColor;
+                } else {
+                    cell.style.backgroundColor = unselectColor;
+                }
             }
-
-            let middleRightItem1 = document.getElementById('item-1');
-            if (value == 1) {
-                middleRightItem1.style.backgroundColor = selectedColor;
-            } else {
-                middleRightItem1.style.backgroundColor = unselectColor;
-            }
-
-            let middleRightItem2 = document.getElementById('item-2');
-            if (value == 2) {
-                middleRightItem2.style.backgroundColor = selectedColor;
-            } else {
-                middleRightItem2.style.backgroundColor = unselectColor;
-            }
-
-            let middleRightItem3 = document.getElementById('item-3');
-            if (value == 3) {
-                middleRightItem3.style.backgroundColor = selectedColor;
-            } else {
-                middleRightItem3.style.backgroundColor = unselectColor;
-            }
-
-            let middleRightItem4 = document.getElementById('item-4');
-            if (value == 4) {
-                middleRightItem4.style.backgroundColor = selectedColor;
-            } else {
-                middleRightItem4.style.backgroundColor = unselectColor;
-            }
-
-            let middleRightItem5 = document.getElementById('item-5');
-            if (value == 5) {
-                middleRightItem5.style.backgroundColor = selectedColor;
-            } else {
-                middleRightItem5.style.backgroundColor = unselectColor;
-            }
-
-            let middleRightItem6 = document.getElementById('item-6');
-            if (value == 6) {
-                middleRightItem6.style.backgroundColor = selectedColor;
-            } else {
-                middleRightItem6.style.backgroundColor = unselectColor;
-            }
-
-            let middleRightItem7 = document.getElementById('item-7');
-            if (value == 7) {
-                middleRightItem7.style.backgroundColor = selectedColor;
-            } else {
-                middleRightItem7.style.backgroundColor = unselectColor;
-            }
-
-            let middleRightItem8= document.getElementById('item-8');
-            if (value == 8) {
-                middleRightItem8.style.backgroundColor = selectedColor;
-            } else {
-                middleRightItem8.style.backgroundColor = unselectColor;
-            }
-
         }
         function typeSelectedWithName(name) {
             let all = [];
             arr.forEach((value,i)=>{ //数组循环
                 for(var pl in value){ //数组对象遍历
-                    if (pl === name) {
+                    if (name === undefined) {
                         all = all.concat(value[pl])
+                    } else {
+                        if (pl === name) {
+                            all = all.concat(value[pl])
+                        }
                     }
                 }
             })
             // console.log(all)
             globalArr = all;
         }
-
         function typeSelected0() {
             globalSequenceIndex = 0;
-
-            let all = [];
-            arr.forEach((value,i)=>{ //数组循环
-                for(var pl in value){ //数组对象遍历
-                    // console.log(pl); //获取key
-                    // console.log(value[pl]) //获取key的值
-                    all = all.concat(value[pl])
-                }
-            })
-            // console.log(all)
-            globalArr = all;
-
+            typeSelectedWithName();
             beSelectedItemIndex(0);
-
-            sequenceAction()
+            sequenceAction();
         }
         function typeSelected1() {
             globalSequenceIndex = 0;
-            typeSelectedWithName("自然篇")
-
+            typeSelectedWithName("自然篇");
             beSelectedItemIndex(1);
-
-            sequenceAction()
+            sequenceAction();
         }
         function typeSelected2() {
             globalSequenceIndex = 0;
-            typeSelectedWithName("人物篇")
-
+            typeSelectedWithName("人物篇");
             beSelectedItemIndex(2);
-
-            sequenceAction()
+            sequenceAction();
         }
         function typeSelected3() {
             globalSequenceIndex = 0;
-            typeSelectedWithName("动物篇")
-
+            typeSelectedWithName("动物篇");
             beSelectedItemIndex(3);
-
-            sequenceAction()
+            sequenceAction();
         }
         function typeSelected4() {
             globalSequenceIndex = 0;
-            typeSelectedWithName("生活篇")
-             
+            typeSelectedWithName("生活篇");
             beSelectedItemIndex(4);
-
-            sequenceAction()
+            sequenceAction();
         }
         function typeSelected5() {
             globalSequenceIndex = 0;
-            typeSelectedWithName("学校篇")
+            typeSelectedWithName("学校篇");
             beSelectedItemIndex(5);
-            sequenceAction()
+            sequenceAction();
         }
         function typeSelected6() {
             globalSequenceIndex = 0;
-            typeSelectedWithName("饮食篇")
-
+            typeSelectedWithName("饮食篇");
             beSelectedItemIndex(6);
-            sequenceAction()
+            sequenceAction();
         }
         function typeSelected7() {
             globalSequenceIndex = 0;
-            typeSelectedWithName("植物篇")
+            typeSelectedWithName("植物篇");
             beSelectedItemIndex(7);
-            sequenceAction()
+            sequenceAction();
         }
         function typeSelected8() {
             globalSequenceIndex = 0;
-            typeSelectedWithName("游戏篇")
-
+            typeSelectedWithName("游戏篇");
             beSelectedItemIndex(8);
-            sequenceAction()
+            sequenceAction();
         }
         function randomAction() {
             globalSequenceIndex = 0;

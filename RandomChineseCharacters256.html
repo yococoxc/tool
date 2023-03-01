@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -48,6 +49,10 @@
         .bottom-item {
             flex: 1;
         }
+        .bottom-item2 {
+            flex: 1;
+            background-color: #5d7ca1;
+        }
         .bottom-right-item {
             /* flex: 1; */
             display: block;
@@ -72,9 +77,9 @@
         </div>
         <div class="bottom" id="bottom">
             <div class="bottom-item" onclick="sequenceAction()">顺序</div>
+            <div class="bottom-item2" onclick="speechAction()">读</div>
             <div class="bottom-item" onclick="randomAction()">随机</div>
         </div>
-        
     </div>
     <script>
         var globalText = '';
@@ -245,15 +250,24 @@
 
             let index = Math.floor(Math.random()*globalArr.length);
             let text = globalArr[index];
+            globalText = text;
             document.getElementById("middle-left").innerHTML = text;
+
+            
         }
         function sequenceAction() {
             if (globalSequenceIndex >= globalArr.length) {
                 globalSequenceIndex = 0;
             }
             let text = globalArr[globalSequenceIndex];
+            globalText = text;
             document.getElementById("middle-left").innerHTML = text;
             globalSequenceIndex++;
+        }
+        function speechAction() {
+            let utterThis = new window.SpeechSynthesisUtterance(globalText);
+            utterThis.rate = 0.75
+            window.speechSynthesis.speak(utterThis);
         }
     </script>
 </body>

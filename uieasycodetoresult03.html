@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI简化代码转化目标v0.3</title>
+    <style>
+        body, div {
+            padding: 0;
+            margin: 0;
+        }
+        .contaion {
+            display: flex;
+            flex-direction: column;
+            width: calc(100vw - 10px);
+            height: calc(100vh - 10px);
+        }
+        .title {
+            height: 60px;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .title-button {
+            height: 30px;
+            /* width: 180px; */
+        }
+        .content {
+            width: 100%;
+            height: calc(100% - 60px);
+            display: flex;
+            flex-direction: row;
+        }
+        .content2 {
+            width: 40%;
+            height: 100%;
+            border: 1px solid red;
+        }
+        .content3 {
+            width: 60%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .content4 {
+            width: 100%;
+            height: 30%;
+            border: 1px solid green;
+        }
+        .content5 {
+            width: 100%;
+            height: 70%;
+            border: 1px solid blue;
+        }
+        .item {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // souece 原字符串 start 要截取的位置 newStr 要插入的字符
+        function insertStr(source, start, newStr) {
+            return source.slice(0, start) + newStr + source.slice(start)
+        }
+        window.onload = function() {
+            document.getElementById('item1').addEventListener('keydown', function (e) {
+                let event = e || window.event
+                console.log(event)
+                if (event.keyCode == 9) {
+                    console.log('tab key')
+                    let startPosition = e.target.selectionStart;
+                    let endPosition = e.target.selectionEnd;
+                    let text = document.getElementById('item1').value;
+                    let isOK = false;
+                    let newStr = '    ';
+                    if (startPosition == endPosition) {
+                        isOK = true;
+                        text = insertStr(text, startPosition, newStr);
+                    }
+                    document.getElementById('item1').value = text;
+                    event.preventDefault();
+
+                    if (isOK) {
+                        let index = startPosition + newStr.length;
+                        e.target.selectionStart = index;
+                        e.target.selectionEnd = index;
+                    }
+                }
+            })
+
+
+            // let testText = 'Test: View {' + '\n' +
+            // '    topView: TopView,' + '\n' +
+            // '    view: View,' + '\n' +
+            // '}';
+
+            // let testText = 'Test: View {'  + '\n' +
+            // '    a {'  + '\n' +
+            // '        left: 16'  + '\n' +
+            // '        width: 100'  + '\n' +
+            // // '        top: 8'  + '\n' +
+            // '        height: 180'  + '\n' +
+            // '    }'  + '\n' +
+            // '    topView: TopView {'  + '\n' +
+            // // '        left: 16'  + '\n' +
+            // '        right: 16'  + '\n' +
+            // '        top: 8'  + '\n' +
+            // '        height: 80'  + '\n' +
+            // '    }'  + '\n' +
+            // '    listView: ListView {'  + '\n' +
+            // '        top: 8'  + '\n' +
+            // '        left: 16'  + '\n' +
+            // '        right: 16'  + '\n' +
+            // '        bottom: 8'  + '\n' +
+            // '    }'  + '\n' +
+            // '}';
+
+            let testText = 'Test: View {'  + '\n' +
+            '    a {' + '\n' +
+            '        left: 20' + '\n' +
+            '        top: 10' + '\n' +
+            '        width: 80' + '\n' +
+            '        height: 140' + '\n' +
+            '        bgColor: #00ff00' + '\n' +
+            '    }' + '\n' +
+
+            '    b {' + '\n' +
+            '        top: 20' + '\n' +
+            '        right: 30' + '\n' +
+            '        width: 90' + '\n' +
+            '        height: 80' + '\n' +
+            '        bgColor: #0000ff' + '\n' +
+            '    }' + '\n' +
+
+            '    c {' + '\n' +
+            '        left: center' + '\n' +
+            '        top: center' + '\n' +
+            '        width: 100' + '\n' +
+            '        height: 110' + '\n' +
+            '        bgColor: #ff0000' + '\n' +
+            '    }' + '\n' +
+
+            '    d {' + '\n' +
+            '        y: center' + '\n' +
+            '        right: 9' + '\n' +
+            '        width: 190' + '\n' +
+            '        height: 140' + '\n' +
+            '        bgColor: #00ffff' + '\n' +
+            '    }' + '\n' +
+
+            '    e {' + '\n' +
+            '        left: 10' + '\n' +
+            '        bottom: 11' + '\n' +
+            '        width: 120' + '\n' +
+            '        height: 250' + '\n' +
+            '        bgColor: #ffff00' + '\n' +
+            '    }' + '\n' +
+
+            '    f {' + '\n' +
+            '        bottom: 10' + '\n' +
+            '        right: 11' + '\n' +
+            '        width: 100' + '\n' +
+            '        height: 60' + '\n' +
+            '        bgColor: #f0f0f0' + '\n' +
+            '    }' + '\n' +
+            '}';
+
+            // let testText = 'Test: View {'  + '\n' +
+            // '    bgColor: #F0E68C' + '\n' +
+            // '    direction: h' + '\n' +
+            // '    a {' + '\n' +
+            // // '        left.right.top: 10' + '\n' +
+            // '        height: 90' + '\n' +
+            // '    }' + '\n' +
+            // '    b {' + '\n' +
+            // // '        left.right.bottom: 20' + '\n' +
+            // '        height: 100' + '\n' +
+            // '    }' + '\n' +
+            // '    c {' + '\n' +
+            // // '        left.top.bottom: 30' + '\n' +
+            // '        width: 100' + '\n' +
+            // '    }' + '\n' +
+            // '    d {' + '\n' +
+            // // '        x.y: center' + '\n' +
+            // '        width.height: 100' + '\n' +
+            // '        bgColor: #7CFC00' + '\n' +
+            // '    }' + '\n' +
+            // '}';
+
+            document.getElementById('item1').value = testText;   
+        }       
+    </script>
+    <script>
+        function buttonAction() {
+            let text  = document.getElementById('item1').value;
+
+            let brToken = '魉魍魅魑-换行'
+            // console.log('source: \n',text);
+            text = text.replace(/[\n]/g, brToken);//移除换行
+            console.log('target: \n',text);
+
+            let aLen = text.split('{').length - 1;
+            let bLen = text.split('}').length - 1;
+            if (aLen != bLen) {
+                alert('左右花括号数量不一致，请检查内容。')
+                return;
+            }
+
+            let aPostionArray = [];
+            for (let i = 0; i < text.length; i++) {
+                if (text[i] == '{') {
+                    aPostionArray.push(i);
+                }
+            }
+            // console.log('a 的位置:', aPostionArray);
+            let bPostionArray = [];
+            for (let i = 0; i < text.length; i++) {
+                if (text[i] == '}') {
+                    bPostionArray.push(i);
+                }
+            }
+            // console.log('b 的位置:', bPostionArray);
+            // for (const key in aPostionArray) {
+            //     if (Object.hasOwnProperty.call(aPostionArray, key)) {
+            //         const element = aPostionArray[key];
+            //         console.log(text[element])
+            //     }
+            // }
+
+
+
+
+            /**********************************************************/
+            let className = '';
+            let parentClassName = '';
+            let selfPropertys = {};
+
+            let tempArr = text.split('{');
+            let classInfoText = tempArr[0];
+            classInfoText = classInfoText.replace(/\ +/g, "");//移除空格
+            // console.log(classInfoText, classInfoText.length);
+            if (classInfoText.length == 0) {
+                className = 'TestView';
+                parentClassName = 'UIView';
+            } else {
+                tempArr = classInfoText.split(':');
+
+                // console.log('tempArr:',tempArr, tempArr.length);
+                if (tempArr.length == 0) {
+                    //没有信息
+                    className = 'TestView';
+                    parentClassName = 'UIView';
+                } else if (tempArr.length == 1) {
+                    className = tempArr[0];
+                    parentClassName = 'UIView';
+                } else if (tempArr.length == 2) {
+                    className = tempArr[0];
+                    parentClassName = tempArr[1];
+                }
+            }
+
+
+            
+            let aIndex = aPostionArray[0];
+            let aNextIndex = aPostionArray[1];
+            let tempText = text.substring(aIndex, aNextIndex+1);
+            tempText = tempText.replace(/{/g,"");
+            console.log('本视图的属性',tempText);
+            let tempArr2 = tempText.split(brToken);
+            
+            for (let i = 0; i < tempArr2.length - 1; i++) {
+                let tempText2 = tempArr2[i];
+                if (tempText2.length > 0) {
+                    tempText2 = tempText2.replace(/\ +/g, "");//移除空格
+                    let tempArr2 = tempText2.split(':');
+                    console.log(tempArr2)
+                    if (tempArr2.length == 0) {}
+                    if (tempArr2.length == 1) {
+                        let key = tempArr2[0];
+                        let value = tempArr2[0];
+                        selfPropertys[key] = value;
+                    } else if (tempArr2.length == 2) {
+                        let key = tempArr2[0];
+                        let value = tempArr2[1];
+                        selfPropertys[key] = value;
+                    }
+                }
+            }
+            console.log('当前代码：属性:',selfPropertys);
+
+// console.log('当前代码：className:',className);
+// console.log('当前代码：parentClassName:',parentClassName);
+
+
+
+            /**********************************************************/
+
+            let mapDom = document.getElementById("codeUILoad");
+            let viewwidth = mapDom.clientWidth;
+            let viewheight = mapDom.clientHeight;
+            mapDom.style.width = viewwidth + 'px';
+            mapDom.style.height = viewheight + 'px';
+
+            let canvasView = document.getElementById("myCanvas");
+            canvasView.width = viewwidth;
+            canvasView.height = viewheight;
+
+            let ctx = canvasView.getContext("2d");
+
+            if (selfPropertys.bgColor != undefined) {
+                ctx.fillStyle = selfPropertys.bgColor;
+            }
+            ctx.fillRect(0,0,viewwidth,viewheight);
+
+
+            // ctx.fillStyle="#0000ff";
+            // ctx.fillRect(10,10,viewwidth - 10 - 10,90);
+
+
+            // ctx.fillStyle="#00ffff";
+            // ctx.fillRect(20,viewheight - 20 - 100,viewwidth - 20 - 20,100);
+
+
+            // ctx.fillStyle="#f0f0f0";
+            // ctx.fillRect(30,30,100,viewheight-30-30);
+
+
+            // // ctx.fillStyle="#0f0f0f";
+            // ctx.fillStyle="#7CFC00";
+            // ctx.fillRect((viewwidth-100)/2,(viewheight-100)/2,100,100);
+            
+
+            /**********************************************************/
+            let childrenNum = aLen - 1;
+
+            // for (const key in aPostionArray) {
+            //     if (Object.hasOwnProperty.call(aPostionArray, key)) {
+            //         const element = aPostionArray[key];
+            //         console.log('{',text[element],element)
+            //     }
+            // }
+            // for (const key in bPostionArray) {
+            //     if (Object.hasOwnProperty.call(bPostionArray, key)) {
+            //         const element = bPostionArray[key];
+            //         console.log('}',text[element],element)
+            //     }
+            // }
+
+            // console.log('子属性个数：',childrenNum);
+            let childrenObj = [];
+            for (let i = 0; i < childrenNum; i++) {
+                // console.log('=============================================');
+
+                let aIndex = aPostionArray[i+1];
+                let bIndex = bPostionArray[i];
+                let aPreIndex = aPostionArray[i];
+                let bPreIndex = bPostionArray[i-1];
+
+                let childPropertyName = '';
+                let childClassName = '';
+
+
+
+                let obj = {};
+                obj.propertys = {};
+                obj.setting = {};
+
+
+                /***************************
+                 * 花括号外面的内容
+                 **************************/
+                let tempText = '';
+                if (i == 0) {
+                    tempText = text.substring(aPreIndex, aIndex + 1);
+                } else {
+                    tempText = text.substring(bPreIndex, aIndex + 1);
+                }
+
+
+                // console.log(tempText);
+                tempText = tempText.replace(/{/g,"");
+                tempText = tempText.replace(/}/g,"");
+                // console.log('result-------->>>>')
+                // console.log(tempText)
+                let tempArr = tempText.split(brToken);
+                // console.log(tempArr);
+
+
+                for (let i = tempArr.length - 1; i < tempArr.length; i++) {
+                    let tempText = tempArr[i];
+                    tempText = tempText.replace(/\ +/g, "");//移除空格
+                    // console.log(tempText)
+                    if (tempText.length > 0) {
+                        // console.log('处理内容');
+                        let tempArr = tempText.split(':');
+                        // console.log(tempArr);
+                        if (tempArr.length == 0) {
+                            obj.propertyName = '_view';
+                            obj.className = 'UIView';
+                        } else if (tempArr.length == 1) {
+                            obj.propertyName = tempArr[0];
+                            obj.className = 'UIView';
+                        } else if (tempArr.length == 2) {
+                            obj.propertyName = tempArr[0];
+                            obj.className = tempArr[1];
+                        }
+                    }
+                }
+
+                /***************************
+                 * 花括号里面的内容
+                 **************************/
+                // console.log('花括号里面的内容')
+                tempText = text.substring(aIndex, bIndex+1);
+                // console.log(tempText)
+                tempText = tempText.replace(/{/g,"");
+                tempText = tempText.replace(/}/g,"");
+                tempArr = tempText.split(brToken);
+                // console.log(tempArr);
+                for (let i = 0; i < tempArr.length; i++) {
+                    let tempText = tempArr[i];
+                    tempText = tempText.replace(/\ +/g, "");//移除空格
+                    // console.log(tempText)
+                    if (tempText.length > 0) {
+                        // console.log('处理内容');
+                        let tempArr = tempText.split(':');
+                        // console.log(tempArr);
+                        if (tempArr.length == 2) {
+                            let key = tempArr[0];
+                            let keyArr = key.split('.');
+                            let value = tempArr[1];
+                            // console.log(key, value);
+                            for (let i = 0; i < keyArr.length; i++) {
+                                let tempKey = keyArr[i];
+                                obj.propertys[tempKey] = value;
+                            }
+                        }
+                    }
+                }
+
+                // console.log(obj)
+                childrenObj.push(obj);
+
+                // let tempArr = tempText.split(brToken);
+                // console.log(tempArr)
+                // for (let i = 0; i < tempArr.length; i++) {
+                //     let tempText = tempArr[i];
+                //     tempText = tempText.replace(/\ +/g, "");//移除空格
+                //     if (tempText > 0) {
+                //         console.log('处理内容');
+                //         console.log(tempText);
+                //     }
+                // }
+            }
+
+            // console.log('childrenObj:',childrenObj);
+
+
+            
+            /***************************
+             *  H文件
+             **************************/
+            let theH = '';
+            theH += '\n';
+            theH += '#import <UIKit/UIKit.h>' + '\n';
+            for (let i = 0; i < childrenObj.length; i++) {
+                let obj = childrenObj[i];
+                if (obj.className != 'UIView') {
+                    theH += '#import "' + obj.className + '"' + '\n';
+                }
+            }
+            theH += '\n';
+            theH += '@interface ' + className +' : ' + parentClassName  + '\n';
+            theH += '\n';
+            for (let i = 0; i < childrenObj.length; i++) {
+                let obj = childrenObj[i];
+                theH += '@property(nonatomic,strong) ' + obj.className + ' *' + obj.propertyName + ';' + '\n';
+            }
+            theH += '\n';
+            theH += '@end' + '\n';
+
+            document.getElementById('item2').value = theH;
+
+            
+            /***************************
+             *  M文件
+             **************************/
+            
+            let theM = '';
+            theM += '\n';
+            theM += '#import "' + className + '.h"' + '\n';
+            theM += '\n';
+            theM += '@implementation ' + className + '\n';
+            theM += '\n';
+
+            /***************  初始化   ************/
+            theM += '- (instancetype) initWithFrame:(CGRect)frame {' + '\n';
+            theM += '    if (self = [super initWithFrame:frame]) {' + '\n';
+            for (let i = 0; i < childrenObj.length; i++) {
+                let obj = childrenObj[i];
+                theM += '        [self addSubview:self.' + obj.propertyName + '];' + '\n';
+            }
+            theM += '    }' + '\n';
+            theM += '    return self;' + '\n';
+            theM += '}' + '\n';
+            theM += '\n';
+
+            /***************  布局   ************/
+            theM += '#pragma mark - 布局' + '\n';
+            theM += '- (void) layoutSubviews {' + '\n';
+            theM += '    [super layoutSubviews];' + '\n';
+            theM += '    ' + '\n';
+            theM += '    CGFloat viewWidth = self.frame.size.width;' + '\n';
+            theM += '    CGFloat viewHeight = self.frame.size.height;' + '\n';
+            theM += '    ' + '\n';
+
+
+            if (selfPropertys.direction != undefined) {
+                if (selfPropertys.direction == 'h') {
+                    let itemCount = childrenObj.length;
+                    let hasWidthArr = [];
+                    let hasWidthFillArr = [];
+                    let hasWidthZeroArr = [];
+                    let hasWidthValueArr = [];
+                    for (let i = 0; i < childrenObj.length; i++) {
+                        let obj = childrenObj[i];
+                        if (obj.propertys.width == 'fill') {
+                            hasWidthArr.push(obj);
+                            hasWidthFillArr.push(obj);
+                            obj.setting.width = 'itemWidth';
+                        } else if (obj.propertys.width != undefined) {
+                            hasWidthArr.push(obj);
+                            hasWidthValueArr.push(obj);
+                            obj.setting.width = obj.propertys.width;
+                        } else {
+                            hasWidthZeroArr.push(obj);
+                            obj.setting.width = '0';
+                        }
+
+                        if (obj.propertys.height == 'fill') {
+
+                        } else if (obj.propertys.height != undefined) {
+                            obj.setting.height = obj.propertys.height;
+                        } else {
+                            obj.setting.height = 0;
+                        }
+                    }
+                    // console.log('hasWidthFillArr',hasWidthFillArr)
+                    // console.log('hasWidthZeroArr',hasWidthZeroArr)
+                    // console.log('hasWidthValueArr',hasWidthValueArr)
+                    if (hasWidthFillArr.length > 0) {
+                        if (hasWidthValueArr.length == 0) {
+                            theM += '    CGFloat itemWidth = viewWidth / (' + hasWidthFillArr.length + ' * 1.0);' + '\n';
+                        } else {
+                            theM += '    CGFloat itemWidth = (viewWidth';
+                            for (let i = 0; i < hasWidthValueArr.length; i++) {
+                                let obj = hasWidthValueArr[i];
+                                theM += ' - ' + obj.setting.width
+                            }
+                            theM += ' ) / (' + hasWidthFillArr.length + ' * 1.0);' + '\n';
+                        }
+                    }
+
+                    theM += '    CGFloat tempX = 0;' + '\n';
+                    theM += '    ' + '\n';
+
+                    for (let i = 0; i < childrenObj.length; i++) {
+                        let obj = childrenObj[i];
+                        if (obj.propertys.y != undefined) {
+
+                        } else {
+                            theM += '    CGFloat ' + obj.propertyName + 'Y = 0;' + '\n';
+                        }
+                        if (obj.setting.width != undefined) {
+                            theM += '    CGFloat ' + obj.propertyName + 'Width = ' + obj.setting.width + ';' + '\n';
+                        }
+                        if (obj.setting.height != undefined) {
+                            theM += '    CGFloat ' + obj.propertyName + 'Height = ' + obj.setting.height + ';' + '\n';
+                        }
+
+
+                        theM += '    self.' + obj.propertyName + '.frame = CGRectMake(tempX, ' + obj.propertyName + 'Y, ' + obj.propertyName + 'Width, ' + obj.propertyName + 'Height);' + '\n';
+                        theM += '    tempX += ' + obj.propertyName + 'Width;' + '\n';
+                        theM += '    ' + '\n';
+
+
+
+                        ctx.fillRect(30,30,100,viewheight-30-30);
+                    }
+                    
+
+                }
+            } else {
+
+                let tempX = 0;
+                let tempY = 0;
+                let tempW = 0;
+                let tempH = 0;
+
+                for (let i = 0; i < childrenObj.length; i++) {
+                    let obj = childrenObj[i];
+
+                    let y = 0;
+                    if (obj.propertys.top != undefined) {
+                        y = obj.propertys.top;
+                    }
+                    if (obj.propertys.y != undefined) {
+                        y = obj.propertys.y;
+                    }
+
+                    let objXName = obj.propertyName + 'X';
+                    let objYName = obj.propertyName + 'Y';
+                    let objWidthName = obj.propertyName + 'Width';
+                    let objHeightName = obj.propertyName + 'Height';
+
+                    /*****
+                     *    x、width计算。left，right、width。
+                     *****/
+                    if (obj.propertys.width != undefined) {
+                        theM += '    CGFloat ' + objWidthName + ' = ' + obj.propertys.width + ';' + '\n';
+                        tempW = obj.propertys.width;
+                        if (obj.propertys.x != undefined) {
+                            if (obj.propertys.x == 'center') {
+                                theM += '    CGFloat ' + objXName + ' = (viewWidth -  ' + objWidthName + ') / 2.0;' + '\n';
+                                tempX = (viewwidth - tempW) / 2.0;
+                            } else {
+                                theM += '    CGFloat ' + objXName + ' = ' + obj.propertys.x + ';' + '\n';
+                                tempX = obj.propertys.x;
+                            }
+                        } else if (obj.propertys.left != undefined) {
+                            if (obj.propertys.left == 'center') {
+                                theM += '    CGFloat ' + objXName + ' = (viewWidth -  ' + objWidthName + ') / 2.0;' + '\n';
+                                tempX = (viewwidth - tempW) / 2.0;
+                            } else {
+                                theM += '    CGFloat ' + objXName + ' = ' + obj.propertys.left + ';' + '\n';
+                                tempX = obj.propertys.left;
+                            }
+                        } else if (obj.propertys.right != undefined) {
+                            theM += '    CGFloat ' + objXName + ' = viewWidth - ' + objWidthName + ' - ' + obj.propertys.right + ';' + '\n';
+                            tempX = viewwidth - tempW - obj.propertys.right;
+                        } else {
+                            theM += '    CGFloat ' + objXName + ' = 0;' + '\n';
+                            tempX = 0;
+                        }
+                    } else {
+                        if (obj.propertys.x != undefined) {
+                            theM += '    CGFloat ' + objXName + ' = ' + obj.propertys.x + ';' + '\n';
+                            tempX = obj.propertys.x;
+                            if (obj.propertys.right != undefined) {
+                                theM += '    CGFloat ' + objWidthName + ' = viewWidth - ' + obj.propertys.x + ' - ' + obj.propertys.right + ';' + '\n';
+                                tempW = viewwidth - tempX - obj.propertys.right;
+                            } else {
+                                tempW = viewwidth - tempX;
+                            }
+                        } else if (obj.propertys.left != undefined) {
+                            theM += '    CGFloat ' + objXName + ' = ' + obj.propertys.left + ';' + '\n';
+                            tempX = obj.propertys.left;
+                            if (obj.propertys.right != undefined) {
+                                theM += '    CGFloat ' + objWidthName + ' = viewWidth - ' + obj.propertys.left + ' - ' + obj.propertys.right + ';' + '\n';
+                                tempW = viewwidth - tempX - obj.propertys.right;
+                            } else {
+                                tempW = viewwidth - tempX;
+                            }
+                        } else if (obj.propertys.right != undefined) {
+                            theM += '    CGFloat ' + objXName + ' = 0;' + '\n';
+                            theM += '    CGFloat ' + objWidthName + ' = 0;' + '\n';
+                            tempX = 0;
+                            tempW = viewwidth - obj.propertys.right;
+                        } else {
+                            theM += '    CGFloat ' + objXName + ' = 0;' + '\n';
+                            theM += '    CGFloat ' + objWidthName + ' = 0;' + '\n';
+                            tempX = 0;
+                            tempW = 0;
+                        }
+                    }
+
+
+                    /*****
+                     *    y、height计算。top、bottom、height。
+                     *****/
+                    if (obj.propertys.height != undefined) {
+                        theM += '    CGFloat ' + objHeightName + ' = ' + obj.propertys.height + ';' + '\n';
+                        tempH = obj.propertys.height;
+                        if (obj.propertys.y != undefined) {
+                            if (obj.propertys.y == 'center') {
+                                theM += '    CGFloat ' + objYName + ' = (viewHeight -  ' + objHeightName + ') / 2.0;' + '\n';
+                                tempY = (viewheight - tempH) / 2.0;
+                            } else {
+                                theM += '    CGFloat ' + objYName + ' = ' + obj.propertys.y + ';' + '\n';
+                                tempY = obj.propertys.y;
+                            }
+                        } else if (obj.propertys.top != undefined) {
+                            if (obj.propertys.top == 'center') {
+                                theM += '    CGFloat ' + objYName + ' = (viewHeight -  ' + objHeightName + ') / 2.0;' + '\n';
+                                tempY = (viewheight - tempH) / 2.0;
+                            } else {
+                                theM += '    CGFloat ' + objYName + ' = ' + obj.propertys.top + ';' + '\n';
+                                tempY = obj.propertys.top;
+                            }
+                        } else if (obj.propertys.bottom != undefined) {
+                            theM += '    CGFloat ' + objYName + ' = viewHeight - ' + objHeightName + ' - ' + obj.propertys.bottom + ';' + '\n';
+                            tempY = viewheight - tempH - obj.propertys.bottom;
+                        } else {
+                            theM += '    CGFloat ' + objYName + ' = 0;' + '\n';
+                            tempY = 0;
+                        }
+                    } else {
+                        if (obj.propertys.y != undefined) {
+                            theM += '    CGFloat ' + objYName + ' = ' + obj.propertys.y + ';' + '\n';
+                            tempY = obj.propertys.y;
+                            if (obj.propertys.bottom != undefined) {
+                                theM += '    CGFloat ' + objHeightName + ' = viewHeight - ' + obj.propertys.y + ' - ' + obj.propertys.bottom + ';' + '\n';
+                                tempH = viewheight - tempY - obj.propertys.bottom;
+                            } else {
+                                tempH = viewheight - tempY;
+                            }
+                        } else if (obj.propertys.top != undefined) {
+                            theM += '    CGFloat ' + objYName + ' = ' + obj.propertys.top + ';' + '\n';
+                            tempY = obj.propertys.top;
+                            if (obj.propertys.bottom != undefined) {
+                                theM += '    CGFloat ' + objHeightName + ' = viewHeight - ' + obj.propertys.top + ' - ' + obj.propertys.bottom + ';' + '\n';
+                                tempH = viewheight - tempY - obj.propertys.bottom;
+                            } else {
+                                tempH = viewheight - tempY;
+                            }
+                        } else if (obj.propertys.bottom != undefined) {
+                            theM += '    CGFloat ' + objYName + ' = 0;' + '\n';
+                            theM += '    CGFloat ' + objHeightName + ' = 0;' + '\n';
+                            tempY = 0;
+                            tempH = viewheight - obj.propertys.bottom;
+                        } else {
+                            theM += '    CGFloat ' + objYName + ' = 0;' + '\n';
+                            theM += '    CGFloat ' + objHeightName + ' = 0;' + '\n';
+                            tempY = 0;
+                            tempH = 0;
+                        }
+                    }
+                    theM += '    self.' + obj.propertyName + '.frame = CGRectMake(' + obj.propertyName + 'X, ' + obj.propertyName + 'Y, ' + obj.propertyName + 'Width, ' + obj.propertyName + 'Height);' + '\n';
+                    theM += '    ' + '\n';
+
+                    if (obj.propertys.bgColor != undefined) {
+                        ctx.fillStyle = obj.propertys.bgColor;
+                    } else {
+                        ctx.fillStyle = "#f0f0f0";
+                    }
+                    
+                    ctx.fillRect(tempX,tempY,tempW,tempH);
+                }
+            }
+            
+
+            theM += '}' + '\n';
+            theM += '\n';
+
+            /***************  视图懒加载   ************/
+            theM += '#pragma mark - 懒加载' + '\n';
+            for (let i = 0; i < childrenObj.length; i++) {
+                let obj = childrenObj[i];
+                let innerPropertyName = '_' + obj.propertyName;
+
+                theM += '- (' + obj.className + ' *) ' + obj.propertyName + ' {' + '\n';
+                theM += '    if (' + innerPropertyName + ' == nil) {' + '\n';
+                theM += '        ' + innerPropertyName + ' = [' + obj.className + ' new];' + '\n';
+                if (obj.propertys.bgColor != undefined) {
+                    theM += '        ' + innerPropertyName + '.backgroundColor = "' + obj.propertys.bgColor + '";' + '\n';
+                }
+                theM += '    }' + '\n';
+                theM += '    return ' + innerPropertyName + ';' + '\n';
+                theM += '}' + '\n';
+            }
+            theM += '\n';
+            theM += '@end' + '\n';
+
+            document.getElementById('item3').value = theM;
+            /**************************************************/
+        }
+    </script>
+    <script>
+        function copyHFileCode () {
+            const input = document.querySelector('#item2');
+            input.select();
+            if (document.execCommand('copy')) {
+                document.execCommand('copy');
+                console.log('H 代码复制成功');
+
+                // document.getElementById('showTips').innerHTML = "复制成功"
+            } else {
+                // document.getElementById('showTips').innerHTML = "复制失败"
+            }
+        }
+        function copyMFileCode () {
+            const input = document.querySelector('#item3');
+            input.select();
+            if (document.execCommand('copy')) {
+                document.execCommand('copy');
+                console.log('M 代码复制成功');
+
+                // document.getElementById('showTips').innerHTML = "复制成功"
+            } else {
+                // document.getElementById('showTips').innerHTML = "复制失败"
+            }
+        }
+    </script>
+    <script>
+        let showUI = false;
+        function changeUI() {
+            if (showUI) {
+                showUI = false;
+                document.getElementById("codeLoad").hidden = false;
+                document.getElementById("canvasLoad").hidden = true;
+                document.getElementById("changeBtn").innerText = '切换UI';
+            } else {
+                showUI = true;
+                document.getElementById("codeLoad").hidden = true;
+                document.getElementById("canvasLoad").hidden = false;
+                document.getElementById("changeBtn").innerText = '切换代码';
+            }
+        }
+    </script>
+    <div class="contaion">
+        <div class="title">
+            UI简化代码转化目标v0.3
+            <div>
+                <button class="title-button" onclick="buttonAction()">生成</button>
+                <button onclick="copyHFileCode()">复制 H 代码</button>
+                <button onclick="copyMFileCode()">复制 M 代码</button>
+                <button onclick="changeUI()" id="changeBtn">切换UI</button>
+            </div>
+            
+        </div>
+        <div class="content">
+            <div class="content2">
+                <textarea class="item" id="item1"></textarea>
+            </div>
+            <div class="content3" id="codeUILoad">
+                <div class="item" id="codeLoad">
+                    <div class="content4">
+                        <textarea class="item" id="item2"></textarea>
+                    </div>
+                    <div class="content5">
+                        <textarea class="item" id="item3"></textarea>
+                    </div>
+                </div>
+                <div class="item" id="canvasLoad" hidden="hidden">
+                    <canvas class="item" id="myCanvas" />
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

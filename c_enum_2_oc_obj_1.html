@@ -1,0 +1,642 @@
+
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C枚举转成OC 类对象（只读）</title>
+    <style>
+        .input-area {
+            display: flex;
+            flex-direction: row;
+        }
+        #file-area {
+            width: 150px;
+            height: 50px;
+            background: #ccc;
+            border: 1px solid #000;
+            text-align: center;
+            line-height: 50px;
+        }
+        .loadView0 {
+            width: 100%;
+            height: calc(100vh - 150px);
+            display: flex;
+            flex-direction: row;
+        }
+        .loadView1 {
+            width: 45%;
+            height: 100%;
+        }
+
+        .loadView2 {
+            width: 55%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .loadView3 {
+            width: 100%;
+            height: 40%;
+        }
+
+        .loadView4 {
+            width: 100%;
+            height: 60%;
+        }
+        .item {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h3>C枚举转成OC 类对象（只读）</h3>
+    
+    <div class="input-area">
+        <div>
+            <div id="file-area">文件拖到这里上传</div>
+        </div>
+        <div>
+            <input type="file" id="fileInput"/><button onclick="showshowhsohw()">生成 / 转换</button>
+
+            <br/>
+            <input type="button" onClick="copyContentH()" value="复制 H 代码" />
+            <input type="button" onClick="copyContentH2()" value="复制（无注释）H 代码" />
+            <input type="button" onClick="copyContentM()" value="复制 M 代码" />
+            <!-- <input type="button" onClick="copyContentM2()" value="复制（无注释）M代码" /> -->
+            <br/>
+            <span id="showTips">
+
+            </span><input type="button" onClick="downloadActionH()" value="下载 H 代码" />
+            </span><input type="button" onClick="downloadActionH2()" value="下载（无注释）H代码" />
+            </span><input type="button" onClick="downloadActionM()" value="下载 M 代码" />
+            <!-- </span><input type="button" onClick="downloadActionM2()" value="下载（无注释）M代码" /> -->
+
+        </div>
+    </div>
+    
+    
+    <div class="loadView0">
+        <div class="loadView1">
+            <textarea class="item" id="item1"></textarea>
+        </div>
+        <div class="loadView2">
+            <div class="loadView3"><textarea class="item" id="item2"></textarea></div>
+            <div class="loadView4"><textarea class="item" id="item3"></textarea></div>
+        </div>
+        <textarea id="itemHidden" hidden></textarea>
+    </div>
+
+    <script>
+        var globalTextH = ''
+        var globalTextH_noComment = ''
+        var globalTextM = ''
+        var globalTextM_noComment = ''
+        var theFileName = '';
+    </script>
+
+    <script>
+        
+    </script>
+
+    <script>
+        function handleInputString(newStr) {
+            let keepArr = []
+            let keepComment = {}
+            let theEnumName = '';
+            let hasMultiLineCommentFlag = false
+
+            let hasSingleLineCommentFlag = false
+
+
+            snsArr = newStr.split('\n')
+            snsArr.forEach((item,index) => {
+                let checkOK = true
+
+                if (checkOK && item.indexOf("}") == 0) {
+                    checkOK = false
+                }
+
+                if (checkOK && item.indexOf("#import") == 0) {
+                    checkOK = false
+                }
+
+                if (checkOK && item.indexOf("#ifndef") == 0) {
+                    checkOK = false
+                }
+
+                if (checkOK && item.indexOf("#define") == 0) {
+                    checkOK = false
+                }
+
+
+                //OC支持
+                if (checkOK && item.indexOf("typedef NS_ENUM(") != -1) {
+                    let index0 = item.indexOf("typedef NS_ENUM(")
+                    let index1 = item.indexOf(")")
+                    let tempStr = item.substring(index0, index1 + 1)
+                    item = item.replace(tempStr, "enum")
+
+                    theEnumName = tempStr;
+                    theEnumName = theEnumName.replace(')', "")
+                    theEnumName = theEnumName.replace('typedef', "")
+                    theEnumName = theEnumName.replace('NS_ENUM', "")
+                    theEnumName = theEnumName.replace('(', "")
+
+                    
+                    theEnumName = theEnumName.replace('NSUInteger', "")
+                    theEnumName = theEnumName.replace('UInt16', "")
+
+                    theEnumName = theEnumName.replace(',', "")
+                    theEnumName = theEnumName.replace(/\ +/g, "");//移除空格
+                    console.log('theEnumName:',theEnumName,']')
+                }
+
+                // if (item.indexOf("typedef enum") == 0) {
+                //     checkOK = false
+                // }
+
+                // if (item.indexOf("enum") == 0) {
+                //     checkOK = false
+                // }
+
+
+                // if (item.indexOf("}") == 0) {
+                //     checkOK = false
+                // }
+
+                if (checkOK && item.indexOf("#endif") == 0) {
+                    checkOK = false
+                }
+
+                
+
+
+                if (checkOK && item.indexOf("//") == 0) {
+                    checkOK = false
+                    return
+                    // hasSingleLineCommentFlag = true
+                }
+
+
+                // if (hasSingleLineCommentFlag == false) {
+
+                // }
+
+                if (checkOK) {
+                    item = item.replace(/^\s+/, '').replace(/\s+$/, '')
+                }
+
+                if (checkOK && item.indexOf("//") == 0) {
+                    checkOK = false
+                }
+
+                if (checkOK && item.length == 0) {
+                    checkOK = false
+                }
+
+
+                let muteMateStartIndex = item.indexOf("/*")
+                let muteMateEndIndex = item.indexOf("*/")
+                if (checkOK) {
+                    if (muteMateStartIndex != -1 && muteMateEndIndex != -1) {
+                        // console.log("这里有一个完整的多行注释")
+                        // console.log("muteMateStartIndex:",muteMateStartIndex)
+                        // console.log("muteMateEndIndex:",muteMateEndIndex)
+
+
+                        let str0 = item.substring(0, muteMateStartIndex)
+                        let str1 = item.substring(muteMateEndIndex+2, item.length)
+                        let strSum = str0 + str1
+                        if (strSum.length == 0) {
+                            checkOK = false
+                        }
+
+                    } else if (muteMateStartIndex != -1 && muteMateEndIndex == -1) {
+                        // console.log("这里有一个多行注释的开头")
+                        hasMultiLineCommentFlag = true
+                    } else if (muteMateStartIndex == -1 && muteMateEndIndex != -1) {
+                        // console.log("这里有一个多行注释的结尾")
+                        hasMultiLineCommentFlag = false
+
+                        item = item.substr(muteMateEndIndex+2,item.length)
+                        if (item.length == 0) {
+                            checkOK = false
+                        }
+                    }
+                }
+                
+
+                if (hasMultiLineCommentFlag) {
+                    checkOK = false
+                }
+
+                if (checkOK == true) {
+                    if (item.lastIndexOf(",") != -1) {
+                        arr2=item.split(',');
+
+                // console.log("0:1:::",arr2[0])
+
+                        item = arr2[0] + ','
+
+                        let tempstr4 = arr2[1]
+                        tempstr4 = tempstr4.replace(/^\s+/, '').replace(/\s+$/, '')
+                        if (tempstr4.length > 0) {
+                            // console.log('---->>>>>',tempstr4)
+                            keepComment[arr2[0]] = tempstr4
+                        }
+                    } else if (item.lastIndexOf("//") != -1) {
+                        arr2=item.split('//');
+
+                // console.log("0:2:::",arr2[0])
+                        item = arr2[0] + ','
+
+                        let tempstr4 = arr2[1]
+                        tempstr4 = tempstr4.replace(/^\s+/, '').replace(/\s+$/, '')
+                        if (tempstr4.length > 0) {
+                            // console.log('---->>>>>',tempstr4)
+                            keepComment[arr2[0]] = "//"+tempstr4
+                        }
+                    }
+                }
+
+                if (checkOK) {
+                    keepArr.push(item)
+                    // console.log("index:",index,item)
+                }
+            })
+            console.log('==========----------=========');
+            console.log(keepArr)
+            console.log(keepComment)
+
+            // var targetDic = {}
+            // for (var i = 0; i < keepArr.length; i++) {
+            //     targetDic[keepArr[i]] = i
+            // }
+            // console.log("=============>>>>>")
+            // console.log(targetDic)
+
+
+            // var targetStr = 'const ADDRESS = {\n'
+            // for (var i = 0; i < keepArr.length; i++) {
+            //     targetStr = targetStr + '  ' + keepArr[i] + ': ' + i + ',\n'
+            // }
+            // targetStr += '};'
+            // console.log("=============>>>>>")
+            // console.log(targetStr)
+
+
+
+            let tempStr = keepArr.join('\n')
+            // console.log(tempStr)
+
+
+
+            let arr3 = tempStr.split('enum {');
+            // console.log('arr3:',arr3)
+            
+            
+            let keepArr2 = []
+            for (let i = 1; i < arr3.length; i++) {
+                let theStr = arr3[i]
+                // console.log("theStr: ",theStr)
+
+                // let hasComma = theStr.indexOf(",")
+                // let hasNote1 = theStr.indexOf("//")
+                // let hasNote2 = theStr.indexOf("/*")
+
+
+                let keepArr3 = []
+                let arr4 = theStr.split(',');
+
+                // if (hasComma) {
+                //     arr4 = theStr.split(',');
+                // } else if (hasNote1) {
+                //     arr4 = theStr.split('//');
+                // } else if (hasNote2) {
+                //     arr4 = theStr.split('/*');
+                // }
+                // console.log("arr4: ",arr4)
+
+                for (let j = 0; j < arr4.length; j++) {
+                    let theStr2 = arr4[j]
+                    theStr2 = theStr2.replace('\n','')
+                    let checkOK = true
+                    if (theStr2.indexOf("}") == 0) {
+                        checkOK = false
+                    }
+                    if (checkOK == true) {
+                        // console.log('index:', i,'theStr2:',theStr2)
+                        if (theEnumName.length > 0) {
+                            if (theStr2.indexOf(theEnumName) == 0) {
+                                theStr2 = theStr2.replace(theEnumName,'');
+                            }
+                        }
+                        keepArr3.push(theStr2);
+                    }
+                }
+                keepArr2.push(keepArr3)
+                
+            }
+
+            console.log('----=======-----=======-------')
+            console.log(keepArr2)
+            // console.log(keepArr2[0])
+
+            let keys = keepArr2[0];
+
+
+            console.log('名字：',theEnumName ,typeof theEnumName);
+            if (typeof theEnumName == 'string') {
+                if (theEnumName.length == 0) {
+                    console.log('名字为空',theFileName)
+                    if (theFileName.length > 0) {
+                        let tempArr = theFileName.split('.');
+                        theEnumName = tempArr[0];
+                    } else {
+                        theEnumName = 'NoName';
+                    }
+                }
+            }
+
+            let reusltClassName = theEnumName + 'Object';
+
+            /*********************************************************/
+            /***********     H 无注释   start      ********/
+            /*********************************************************/
+            let resultStrH_noComment = '';
+            resultStrH_noComment += "#import <Foundation/Foundation.h>" + '\n';
+            resultStrH_noComment += '\n';
+            resultStrH_noComment += "#define " + theEnumName + " ([" + reusltClassName + " shared])" + '\n';
+            resultStrH_noComment += '\n';
+            resultStrH_noComment += "@interface " + reusltClassName + " : NSObject" + '\n';
+            resultStrH_noComment += '\n';
+
+            for (let i = 0; i < keys.length; i++) {
+                let key = keys[i];
+                if (key.length > 0) {
+                    resultStrH_noComment += '@property(nonatomic,assign,readonly) int ' + key + ';' + '\n';
+                }
+            }
+
+            resultStrH_noComment += '\n';
+            resultStrH_noComment += '+ (instancetype) shared;\n';
+            resultStrH_noComment += '\n';
+            resultStrH_noComment += '@end' + '\n';
+            resultStrH_noComment += '\n';
+            /*********************************************************/
+            /***********     H 无注释   end      ********/
+            /*********************************************************/
+
+
+            /*********************************************************/
+            /***********     H 有注释   start      ********/
+            /*********************************************************/
+            let resultStrH = '';
+            resultStrH += "#import <Foundation/Foundation.h>" + '\n';
+            resultStrH += '\n';
+            resultStrH += "#define " + theEnumName + " ([" + reusltClassName + " shared])" + '\n';
+            resultStrH += '\n';
+            resultStrH += "@interface " + reusltClassName + " : NSObject" + '\n';
+            resultStrH += '\n';
+
+            for (let i = 0; i < keys.length; i++) {
+                let key = keys[i];
+                if (key.length > 0) {
+                    let comment = keepComment[key];
+                    // console.log(key, comment)
+                    
+                    // if (comment != undefined && comment.length > 0) {
+                    //     let tempArr = comment.split("//");
+                    //     if (tempArr.length > 1) {
+                    //         tempArr = tempArr.shift();
+                    //     }
+                    //     console.log('tempArr : ',tempArr)
+                    //     comment = tempArr.join('//')
+
+                    //     resultStrH += '/**' + '\n';
+                    //     resultStrH += comment + '\n';
+                    //     resultStrH += '*/' + '\n';
+                    // }
+                    if (comment != undefined && comment.length > 0) {
+                        resultStrH += '@property(nonatomic,assign,readonly) int ' + key + ';' + '    ' + comment + '\n';
+                    } else {
+
+                        resultStrH += '@property(nonatomic,assign,readonly) int ' + key + ';' + '\n';
+                    }
+                }
+            }
+
+            resultStrH += '\n';
+            resultStrH += '+ (instancetype) shared;\n';
+            resultStrH += '\n';
+            resultStrH += '@end' + '\n';
+            resultStrH += '\n';
+            /*********************************************************/
+            /***********     H 有注释   end      ********/
+            /*********************************************************/
+
+
+
+
+            /*********************************************************/
+            /***********     M 无注释   start      ********/
+            /*********************************************************/
+            let resultClassInstanceName = 'the' + reusltClassName + 'shareInstance';
+
+            let resultStrM_noComment = '';
+            resultStrM_noComment += '#import "' + reusltClassName + '.h"' + '\n';
+            resultStrM_noComment += '\n';
+            resultStrM_noComment += 'static id ' + resultClassInstanceName + ' = nil;' + '\n';
+            resultStrM_noComment += '\n';
+            resultStrM_noComment += '@implementation ' + reusltClassName + '\n';
+            resultStrM_noComment += '\n';
+            resultStrM_noComment += '+ (instancetype) shared {' + '\n';
+            resultStrM_noComment += '    static dispatch_once_t onceToken;' + '\n';
+            resultStrM_noComment += '    dispatch_once(&onceToken, ^{' + '\n';
+            resultStrM_noComment += '        ' + resultClassInstanceName + ' = [[self class] new];' + '\n';
+            resultStrM_noComment += '    });' + '\n';
+            resultStrM_noComment += '    return ' + resultClassInstanceName + ';' + '\n';
+            resultStrM_noComment += '}' + '\n';
+            resultStrM_noComment += '\n';
+            resultStrM_noComment += '\n';
+
+
+            let maxLength = 0;
+            for (let i = 0; i < keys.length; i++) {
+                let key = keys[i];
+                if (key.length > maxLength) {
+                    maxLength = key.length;
+                }
+            }
+
+            for (let i = 0; i < keys.length; i++) {
+                let key = keys[i];
+                if (key.length > 0) {
+                    // resultStrM_noComment += '- (int) ' + key + ' {' + '\n';
+                    // resultStrM_noComment += '    return ' + i + ';' + '\n';
+                    // resultStrM_noComment += '}' + '\n';
+                    // resultStrM_noComment += '\n';
+
+                    let theLength = maxLength - key.length;
+
+                    resultStrM_noComment += '- (int) ' + key + ' ';
+                    for (let i = 0; i < theLength; i++) {
+                        resultStrM_noComment += ' ';
+                    }
+
+                    resultStrM_noComment += '{' + '    return ' + i + ';' + '    }' + '\n';
+                }
+            }
+
+            resultStrM_noComment += '\n';
+            resultStrM_noComment += '@end' + '\n';
+            resultStrM_noComment += '\n';
+            /*********************************************************/
+            /***********     M 无注释   end      ********/
+            /*********************************************************/
+
+
+
+            document.getElementById('item2').value = resultStrH;
+            document.getElementById('item3').value = resultStrM_noComment;
+
+
+
+            globalTextH = resultStrH;
+            globalTextH_noComment = resultStrH_noComment;
+            globalTextM = resultStrM_noComment;
+            globalTextM_noComment = resultStrM_noComment;
+        }
+        function handleFileReader(reader) {
+            console.log('file reader',reader);
+            reader.onload = function fileReadCompleted() {
+                
+
+                let textStr = reader.result;
+
+                document.getElementById('item1').value = textStr;
+
+                handleInputString(textStr);
+            }
+        }
+        function showshowhsohw() {
+            handleInputString(document.getElementById('item1').value);
+        }
+    </script>
+
+    <script>
+        window.onload = function() {
+            var fileArea = document.getElementById("file-area")
+            fileArea.addEventListener("dragenter", function() {
+                fileArea.innerHTML = "请松手"
+            }, false)
+            fileArea.addEventListener("dragleave", function() {
+                fileArea.innerHTML = "文件拖到这里上传"
+            }, false)
+            fileArea.addEventListener("dragover", function(ev) {
+                ev.preventDefault()
+            }, false)
+            fileArea.addEventListener("drop", function(ev) {
+                fileArea.innerHTML = "文件处理。。。"
+                ev.preventDefault()
+                let fileReader = new FileReader()
+                let file = ev.dataTransfer.files[0]
+                console.log(file);
+                // fileReader.onload = function() {
+                //     console.log("成功", this.result)
+                // }
+                // fileReader.onerror = function() {
+                //     console.log("读取失败")
+                // }
+
+                theFileName = file.name;
+                console.log('theFileName:',theFileName)
+                handleFileReader(fileReader)
+                fileReader.readAsText(file)
+            }, false)
+        }
+    </script>
+
+    <script>
+    </script>
+
+    <script>
+        function copyContentH() {
+            navigator.clipboard.writeText(globalTextH);
+        }
+
+        function copyContentH2() {
+            navigator.clipboard.writeText(globalTextH_noComment);
+        }
+        function copyContentM() {
+            navigator.clipboard.writeText(globalTextM);
+        }
+
+        function copyContentM2() {
+            navigator.clipboard.writeText(globalTextM_noComment);
+        }
+    </script>
+
+    <script>
+        function downloadActionH() {
+            if (globalTextH.length > 0) {
+                var timestamp = Date.parse(new Date())
+                exportRaw(timestamp + 'H.h', globalTextH)
+            }
+        }
+        function downloadActionH2() {
+            if (globalTextH_noComment.length > 0) {
+                var timestamp = Date.parse(new Date())
+                exportRaw(timestamp + 'H_noComment.h', globalTextH_noComment)
+            }
+        }
+        function downloadActionM() {
+            if (globalTextM.length > 0) {
+                var timestamp = Date.parse(new Date())
+                exportRaw(timestamp + 'M.m', globalTextM)
+            }
+        }
+        function downloadActionM2() {
+            if (globalTextM_noComment.length > 0) {
+                var timestamp = Date.parse(new Date())
+                exportRaw(timestamp + 'M_noComment.m', globalTextM_noComment)
+            }
+        }
+
+        function fakeClick(obj) {
+            var ev = document.createEvent("MouseEvents");
+            ev.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            obj.dispatchEvent(ev);
+        }
+
+        function exportRaw(name, data) {
+            var urlObject = window.URL || window.webkitURL || window;
+            var export_blob = new Blob([data]);
+            var save_link = document.createElementNS("http://www.w3.org/1999/xhtml", "a")
+            save_link.href = urlObject.createObjectURL(export_blob);
+            save_link.download = name;
+            fakeClick(save_link);
+        }
+    </script>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function selectedFileChanged(){
+            // console.log(this.files)
+
+            if (this.files.length === 0) {
+                console.log('请选择文件！')
+                return
+            }
+
+
+            const reader = new FileReader()
+            handleFileReader(reader)
+            reader.readAsText(this.files[0])
+        })
+    </script>
+</body>
+</html>

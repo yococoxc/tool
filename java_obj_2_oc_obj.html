@@ -445,8 +445,25 @@
 
             for (let i = 0; i < theObjs.length; i++) {
                 let obj = theObjs[i];
-                if (obj.length > 0) {
-                    resultStrH_noComment += '@property(nonatomic,assign) int ' + obj.pName + ';' + '\n';
+                if (obj) {
+                    // resultStrH_noComment += '@property(nonatomic,assign) int ' + obj.pName + ';' + '\n';
+                    if (obj.pIsArr) {
+                        if (obj.pType == 'int') {
+                            resultStrH_noComment += '@property(nonatomic,strong) NSArray<NSNumber *> *' + obj.pName + ';' + '\n';
+                                resultStrH_noComment += '\n';
+                        } else if (obj.pType == 'String') {
+                            resultStrH_noComment += '@property(nonatomic,strong) NSArray<NSString *> *' + obj.pName + ';' + '\n';
+                                resultStrH_noComment += '\n';
+                        }
+                    } else {
+                        if (obj.pType == 'int') {
+                            resultStrH_noComment += '@property(nonatomic,assign) int ' + obj.pName + ';' + '\n';
+                            resultStrH_noComment += '\n';
+                        } else if (obj.pType == 'String') {
+                            resultStrH_noComment += '@property(nonatomic,copy) NSString *' + obj.pName + ';' + '\n';
+                            resultStrH_noComment += '\n';
+                        }
+                    }
                 }
             }
 

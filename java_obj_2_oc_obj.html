@@ -1,5 +1,7 @@
 
 
+
+
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -56,9 +58,9 @@
     <h3>Java 转成OC 类对象</h3>
     
     <div class="input-area">
-        <!-- <div>
+        <div>
             <div id="file-area">文件拖到这里上传</div>
-        </div> -->
+        </div>
 
         <button onclick="showshowhsohw()">生成 / 转换</button>
         <div>
@@ -400,9 +402,9 @@
 
             let className = getClassNameWithString(theStr)
 
-            console.log('处理后的内容',theStr);
-            console.log('className',className);
-            console.log('keepObjs',keepObjs);
+            // console.log('处理后的内容',theStr);
+            // console.log('className',className);
+            // console.log('keepObjs',keepObjs);
 
 
             return {className:className, objs:keepObjs}
@@ -471,9 +473,9 @@
 
             for (let i = 0; i < theObjs.length; i++) {
                 let obj = theObjs[i];
-                console.log(obj)
+                // console.log(obj)
                 if (obj) {
-                    console.log('.....')
+                    // console.log('.....')
                     if (obj.pIsArr) {
                         if (obj.pType == 'int') {
                             resultStrH += '@property(nonatomic,strong) NSArray<NSNumber *> *' + obj.pName + ';' + '\n';
@@ -593,7 +595,7 @@
                     } else {
                         if (obj.pType == 'String') {
                             let tempValue = obj.pValue;
-                            console.log('tempValue xxxx',tempValue)
+                            // console.log('tempValue xxxx',tempValue)
 
                             tempValue = tempValue.replace(/'/g, '"');//将单引号全部转成双引号
 
@@ -665,36 +667,36 @@
     </script>
 
     <script>
-        // window.onload = function() {
-        //     var fileArea = document.getElementById("file-area")
-        //     fileArea.addEventListener("dragenter", function() {
-        //         fileArea.innerHTML = "请松手"
-        //     }, false)
-        //     fileArea.addEventListener("dragleave", function() {
-        //         fileArea.innerHTML = "文件拖到这里上传"
-        //     }, false)
-        //     fileArea.addEventListener("dragover", function(ev) {
-        //         ev.preventDefault()
-        //     }, false)
-        //     fileArea.addEventListener("drop", function(ev) {
-        //         fileArea.innerHTML = "文件处理。。。"
-        //         ev.preventDefault()
-        //         let fileReader = new FileReader()
-        //         let file = ev.dataTransfer.files[0]
-        //         console.log(file);
-        //         // fileReader.onload = function() {
-        //         //     console.log("成功", this.result)
-        //         // }
-        //         // fileReader.onerror = function() {
-        //         //     console.log("读取失败")
-        //         // }
+        window.onload = function() {
+            var fileArea = document.getElementById("file-area")
+            fileArea.addEventListener("dragenter", function() {
+                fileArea.innerHTML = "请松手"
+            }, false)
+            fileArea.addEventListener("dragleave", function() {
+                fileArea.innerHTML = "文件拖到这里上传"
+            }, false)
+            fileArea.addEventListener("dragover", function(ev) {
+                ev.preventDefault()
+            }, false)
+            fileArea.addEventListener("drop", function(ev) {
+                fileArea.innerHTML = "文件处理。。。"
+                ev.preventDefault()
+                let fileReader = new FileReader()
+                let file = ev.dataTransfer.files[0]
+                console.log(file);
+                fileReader.onload = function() {
+                    console.log("文件成功", this.result)
+                }
+                fileReader.onerror = function() {
+                    console.log("文件读取失败")
+                }
 
-        //         theFileName = file.name;
-        //         console.log('theFileName:',theFileName)
-        //         handleFileReader(fileReader)
-        //         fileReader.readAsText(file)
-        //     }, false)
-        // }
+                // theFileName = file.name;
+                // console.log('theFileName:',theFileName)
+                handleFileReader(fileReader)
+                fileReader.readAsText(file)
+            }, false)
+        }
     </script>
 
     <script>

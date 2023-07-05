@@ -122,7 +122,7 @@
         "    public static final String p9[]={ 'Q', 'P' };" +"\n"+
 
         "    public static final int p10[]={" +"\n"+
-        "        100," +"\n"+
+        "        100, // tested" +"\n"+
         "        101," +"\n"+
         "        102," +"\n"+
         "        103," +"\n"+
@@ -156,6 +156,7 @@
             let hasEqualSign = str.indexOf("=") >= 0 ? true : false;
             if (hasEqualSign) {
                 //有等于号存在
+                console.log('getItemWithString',str);
 
                 let theObj = {};
 
@@ -351,12 +352,13 @@
                     
                 } else if (!hasMultipleCommentHead && !hasMultipleCommentFoot && hasSingleComment) {
                     if (!currnetMultipleComment) {
-                        theStr += item + '\n';
+                        // theStr += item + '\n';
 
-                        // console.log('----------------------------------index',index);
-                        // console.log('只存在 单行注释');
+                        console.log('----------------------------------index',index);
+                        console.log('只存在 单行注释');
                         let tempArr = item.split('//');
                         let tempItem = tempArr[0];
+                        console.log(tempArr,tempItem)
                         theStr += tempItem + '\n';
 
 
@@ -367,6 +369,35 @@
                             if (theObj.pIsArr) {
                                 // console.log('当前对象是数组对象',theObj);
                             }
+                        } else {
+                            tempItem = tempItem.replace(/(^\s*)|(\s*$)/g, "");//移除两边的空格
+                            if (tempItem.length > 0) {
+
+                                let posRight = tempItem.indexOf("}");
+                                // console.log('posRight',posRight)
+                                if (posRight == -1) {
+                                    let tempArr = tempItem.split(',');
+                                    if (tempArr.length > 0) {
+                                        for (let i = 0; i < tempArr.length; i++) {
+                                            let tempStr = tempArr[i];
+                                            if (tempStr.length > 0) {
+                                                tempStr = tempStr.replace(/(^\s*)|(\s*$)/g, "");//移除两边的空格
+                                                if (tempStr.length > 0) {
+                                                    if (currentArrayObject != null && currentArrayObject.pValue != null) {
+                                                        currentArrayObject.pValue.push(tempStr)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else if (posRight == 0) {
+                                    
+                                }
+                            }
+
+                            // currentArrayObject.pValue.push(tempItem)
+                            // console.log('=====-=-======-==-----=====', theObj,currentArrayObject)
+                            
                         }
                     }
 
@@ -402,7 +433,7 @@
 
             let className = getClassNameWithString(theStr)
 
-            // console.log('处理后的内容',theStr);
+            console.log('处理后的内容',theStr);
             // console.log('className',className);
             // console.log('keepObjs',keepObjs);
 

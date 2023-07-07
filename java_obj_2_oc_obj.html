@@ -2,6 +2,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -98,6 +99,13 @@
     <script>
         let textStr = 
         "public class TabAddrID {" +"\n"+
+
+
+        "    public static final Number p01 = 123;" +"\n"+
+        "    public static final Number p02 = 1.23;" +"\n"+
+
+
+
         "    public static final int p1 = 111;" +"\n"+
         "    /**" +"\n"+
         "    测试多注释" +"\n"+
@@ -110,13 +118,22 @@
         "    public static final int p5 = 3334; //测试单注释" +"\n"+
         "    public static final int p6 = 3335;" +"\n"+
 
+        "    public static final double p601 = 123.321;" +"\n"+
+
         "    public static final int p7[]={" +"\n"+
         "        222," +"\n"+
+        "    };" +"\n"+
+
+
+        "    public static final double p701[] = {" +"\n"+
+        "        1.1," +"\n"+
+        "        1.2," +"\n"+
         "    };" +"\n"+
 
         "    public static final String p8[]={" + ' "A",' +"\n"+
         "        'B'," +"\n"+
         "        'C'," +"\n"+
+        '        "D",' +"\n"+
         "    };" +"\n"+
 
         "    public static final String p9[]={ 'Q', 'P' };" +"\n"+
@@ -127,6 +144,14 @@
         "        102," +"\n"+
         "        103," +"\n"+
         "    };" +"\n"+
+
+
+        "    public static final Number p11[] = {" +"\n"+
+        "        99," +"\n"+
+        "        88.6," +"\n"+
+        "    };" +"\n"+
+
+
         "}"
 
         
@@ -477,6 +502,7 @@
             for (let i = 0; i < theObjs.length; i++) {
                 let obj = theObjs[i];
                 if (obj) {
+                    // console.log(i,'------->>>>>>>>>',obj)
                     // resultStrH_noComment += '@property(nonatomic,assign) int ' + obj.pName + ';' + '\n';
                     if (obj.pIsArr) {
                         if (obj.pType == 'int') {
@@ -485,6 +511,12 @@
                         } else if (obj.pType == 'String') {
                             resultStrH_noComment += '@property(nonatomic,strong) NSArray<NSString *> *' + obj.pName + ';' + '\n';
                                 resultStrH_noComment += '\n';
+                        } else if (obj.pType == 'double') {
+                            resultStrH_noComment += '@property(nonatomic,strong) NSArray<NSNumber *> *' + obj.pName + ';' + '\n';
+                            resultStrH_noComment += '\n';
+                        } else if (obj.pType == 'Number') {
+                            resultStrH_noComment += '@property(nonatomic,strong) NSArray<NSNumber *> *' + obj.pName + ';' + '\n';
+                            resultStrH_noComment += '\n';
                         }
                     } else {
                         if (obj.pType == 'int') {
@@ -492,6 +524,12 @@
                             resultStrH_noComment += '\n';
                         } else if (obj.pType == 'String') {
                             resultStrH_noComment += '@property(nonatomic,copy) NSString *' + obj.pName + ';' + '\n';
+                            resultStrH_noComment += '\n';
+                        } else if (obj.pType == 'double') {
+                            resultStrH_noComment += '@property(nonatomic,assign) double ' + obj.pName + ';' + '\n';
+                            resultStrH_noComment += '\n';
+                        } else if (obj.pType == 'Number') {
+                            resultStrH_noComment += '@property(nonatomic,strong) NSNumber *' + obj.pName + ';' + '\n';
                             resultStrH_noComment += '\n';
                         }
                     }
@@ -531,6 +569,12 @@
                         } else if (obj.pType == 'String') {
                             resultStrH += '@property(nonatomic,strong) NSArray<NSString *> *' + obj.pName + ';' + '\n';
                             resultStrH += '\n';
+                        } else if (obj.pType == 'double') {
+                            resultStrH += '@property(nonatomic,strong) NSArray<NSNumber *> *' + obj.pName + ';' + '\n';
+                            resultStrH += '\n';
+                        } else if (obj.pType == 'Number') {
+                            resultStrH += '@property(nonatomic,strong) NSArray<NSNumber *> *' + obj.pName + ';' + '\n';
+                            resultStrH += '\n';
                         }
                     } else {
                         if (obj.pType == 'int') {
@@ -538,6 +582,12 @@
                             resultStrH += '\n';
                         } else if (obj.pType == 'String') {
                             resultStrH += '@property(nonatomic,copy) NSString *' + obj.pName + ';' + '\n';
+                            resultStrH += '\n';
+                        } else if (obj.pType == 'double') {
+                            resultStrH += '@property(nonatomic,assign) double ' + obj.pName + ';' + '\n';
+                            resultStrH += '\n';
+                        } else if (obj.pType == 'Number') {
+                            resultStrH += '@property(nonatomic,strong) NSNumber *' + obj.pName + ';' + '\n';
                             resultStrH += '\n';
                         }
                     }
@@ -639,6 +689,24 @@
                             }
                             tempKeepStr += '    ]';
                             resultStrM_noComment += '    _' + obj.pName + ' = ' + tempKeepStr + ';\n';
+                        } else if (obj.pType == 'double') {
+                            let tempKeepStr = '';
+                            tempKeepStr += '@[' + '\n';
+                            for (let j = 0; j < obj.pValue.length; j++) {
+                                let tempItem = obj.pValue[j];
+                                tempKeepStr += '        ' + '@('+ tempItem +'),' + '\n';
+                            }
+                            tempKeepStr += '    ]';
+                            resultStrM_noComment += '    _' + obj.pName + ' = ' + tempKeepStr + ';\n';
+                        } else if (obj.pType == 'Number') {
+                            let tempKeepStr = '';
+                            tempKeepStr += '@[' + '\n';
+                            for (let j = 0; j < obj.pValue.length; j++) {
+                                let tempItem = obj.pValue[j];
+                                tempKeepStr += '        ' + '@('+ tempItem +'),' + '\n';
+                            }
+                            tempKeepStr += '    ]';
+                            resultStrM_noComment += '    _' + obj.pName + ' = ' + tempKeepStr + ';\n';
                         }
                     } else {
                         if (obj.pType == 'String') {
@@ -670,6 +738,10 @@
                             resultStrM_noComment += '    _' + obj.pName + ' = ' + tempValue + ';\n';
                         } else if (obj.pType == 'int') {
                             resultStrM_noComment += '    _' + obj.pName + ' = ' + obj.pValue + ';\n';
+                        } else if (obj.pType == 'double') {
+                            resultStrM_noComment += '    _' + obj.pName + ' = ' + obj.pValue + ';\n';
+                        } else if (obj.pType == 'Number') {
+                            resultStrM_noComment += '    _' + obj.pName + ' = ' + '@(' + obj.pValue + ')' +';\n';
                         }
                         
                     }

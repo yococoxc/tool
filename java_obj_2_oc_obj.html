@@ -152,6 +152,40 @@
         "    };" +"\n"+
 
 
+
+
+        "    public static final int p12[2][5] = {" +"\n"+
+        "        {1,2,3,4,5}," +"\n"+
+        "        {11,12,13,14,15}," +"\n"+
+        "    };" +"\n"+
+
+
+
+        "    public static final String p13[2][5] = {" +"\n"+
+        "        { 'A', 'B' , 'C' }," +"\n"+
+        '        { "a","b" } ,' +"\n"+
+        "    };" +"\n"+
+        
+
+
+        "    public static final int p14 = 40;" +"\n"+
+        "    public static final int p15 = 80;" +"\n"+
+
+
+        "    public static final Number p16[] = {" +"\n"+
+        "        p14," +"\n"+
+        "        p15," +"\n"+
+        "    };" +"\n"+
+
+
+        "    public static final Number p17 = p01;" +"\n"+
+        "    public static final Number p18 = 20;" +"\n"+
+
+
+        "    public static final int p19 = p01;" +"\n"+
+        "    public static final int p20 = 20;" +"\n"+
+
+
         "}"
 
         
@@ -181,9 +215,10 @@
             let hasEqualSign = str.indexOf("=") >= 0 ? true : false;
             if (hasEqualSign) {
                 //有等于号存在
-                console.log('getItemWithString',str);
+                // console.log('getItemWithString',str);
 
                 let theObj = {};
+                theObj.pIsArrArr = false;
 
                 let objIsString  = false;
                 let objIsInt  = false;
@@ -202,7 +237,11 @@
                 let objDefineNameIndex = theObjDefineArray.length - 1;
                 let objDefineTypeIndex = theObjDefineArray.length - 2;
 
+
                 let theObjIsArray = theObjDefine.indexOf('[]') >= 0 ? true : false;
+                let theObjIsArrayArray = false;
+                let theObjArrayArrayCount = 0;
+
                 if (theObjIsArray) {
                     //是数组
                     let tempObjDefineArray = theObjDefine.split('[]');
@@ -219,7 +258,48 @@
                     objDefineTypeIndex = theObjDefineArray.length - 2;
                 } else {
                     //不是数组
+
+                    let theObjLeftPos = theObjDefine.indexOf('[');
+                    let theObjRightPos = theObjDefine.indexOf(']');
+                    if (theObjLeftPos >= 0 && theObjRightPos >= 0 && theObjRightPos > theObjLeftPos) {
+                        //判断到是数组，但不是[]，而是[3]这种类型
+                        // console.log("判断到是数组，但不是[]，而是[3]这种类型",theObjDefine)
+
+                        let tempObjDefineArray = theObjDefine.split('[');
+                        // console.log(tempObjDefineArray)
+
+                        theObjDefineArray = tempObjDefineArray[0].split(' ');
+                        let tempObjDefineArrayKeep = [];
+                        for (let i = 0; i < theObjDefineArray.length; i++) {
+                            let tempItem = theObjDefineArray[i];
+                            if ( typeof(tempItem) == 'string' && tempItem.length > 0) {
+                                tempObjDefineArrayKeep.push(tempItem)
+                            }
+                        }
+                        theObjDefineArray = tempObjDefineArrayKeep;
+                        objDefineNameIndex = theObjDefineArray.length - 1;
+                        objDefineTypeIndex = theObjDefineArray.length - 2;
+
+                        // let tempObjDefineArrayKeep2 = [];
+                        // for (let i = 1; i < tempObjDefineArray.length; i++) {
+                        //     tempObjDefineArrayKeep2.push()
+                        // }
+                        let arrayCount = tempObjDefineArray.length - 1;
+                        if (arrayCount == 2) {
+                            let temp123 = tempObjDefineArray[1];
+                            let temp123Array = temp123.split(']');
+                            let temp123Value = temp123Array[0];
+                            temp123Value = temp123Value.replace(/(^\s*)|(\s*$)/g, "");//移除两边的空格
+                            // console.log('temp123',temp123)
+                            theObjIsArrayArray = true;
+                            theObjArrayArrayCount = parseInt(temp123Value);
+                        }
+
+
+                    }
                 }
+
+
                 let objDefineName = '';
                 let objDefineType = '';
                 if (objDefineNameIndex > 0) {objDefineName = theObjDefineArray[objDefineNameIndex];}
@@ -228,11 +308,83 @@
                 theObj.pType = objDefineType;
                 theObj.pIsArr = theObjIsArray;
 
+                if (theObjIsArrayArray) {
+                    theObj.pIsArrArr = true;
+                    theObj.pArrArrCount = theObjArrayArrayCount;
+                    theObj.pArrArrIndex = 0; 
+                }
+
                 if (objDefineType == 'int') { objIsInt = true; }
                 if (objDefineType == 'String') { objIsString = true; }
 
                 let theObjContent = theObjArray[1];
-                if (theObjIsArray) {
+                if (theObjIsArrayArray) {
+                    //数据提取超级麻烦。。。。
+                    // console.log('数组数组对象的内容',theObjContent);
+
+                    let keepContent = [];
+
+                    for (let i = 0; i < theObjArrayArrayCount; i++) {
+                        keepContent.push([]);
+                    }
+
+                    let posLeft = theObjContent.indexOf('{');
+                    let posRight = theObjContent.indexOf('}');
+                    
+                    if (posLeft >= 0 && posRight >= 0 && posRight > posLeft) {
+                        //这是一个完整的赋值内容。
+                        // console.log('这是一个完整的赋值内容');
+
+                        let leftCount = theObjContent.split('{').length - 1;
+                        let rightCount = theObjContent.split('}').length - 1;
+
+                        theObj.hasFirstLeft = true;
+
+                        if (leftCount == rightCount) {
+                            theObj.hasFirstRight = true;
+                        }
+
+
+                        let tempStr = theObjContent.slice(posLeft + 1, posRight);
+                        let tempArr = tempStr.split(',');
+                        let tempArrKeep = [];
+                        for (let i = 0; i < tempArr.length; i++) {
+                            let tempStr2 = tempArr[i];
+                            // let tempArr2 = tempStr2.split(' ');
+                            tempStr2 = tempStr2.replace(/(^\s*)|(\s*$)/g, "");//移除两边的空格
+                            // console.log(tempStr2,'---------','['+tempStr2+']');
+                            keepContent.push(tempStr2)
+                        }
+                        // console.log('tempArr',tempArr)
+
+                    } else if (posLeft >= 0 && posRight == -1) {
+                        //只有左花括号，没有右花括号
+                        let tempArr = theObjContent.split('{');
+                        // console.log('只有左花括号',tempArr);
+
+
+                        theObj.hasFirstLeft = true;
+
+                        for (let i = 0; i < tempArr.length; i++) {
+                            let temp = tempArr[i];
+                            temp = temp.replace(/(^\s*)|(\s*$)/g, "");//移除两边的空格
+                            if (temp.length > 0) {
+                                let tempArr2 = temp.split(',');
+                                // console.log('temp--',temp,tempArr2)
+                                for (let j = 0; j < tempArr2.length; j++) {
+                                    let tempStr2 = tempArr2[j];
+                                    tempStr2 = tempStr2.replace(/(^\s*)|(\s*$)/g, "");//移除两边的空格
+                                    if (tempStr2.length > 0) {
+                                        keepContent.push(tempStr2);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    theObj.pValue = keepContent;
+
+                } else if (theObjIsArray) {
                     //数据提取有点麻烦。。。。
                     // console.log('数组对象的内容',theObjContent);
 
@@ -342,32 +494,89 @@
                             if (theObj.pIsArr) {
                                 // console.log('当前对象是数组对象',theObj);
                                 currentArrayObject = theObj;
+                            } else if (theObj.pIsArrArr) {
+                                // console.log('当前对象是数组数组对象',theObj);
+                                currentArrayObject = theObj;
                             }
                         } else {
                             // console.log('这个解析不了对象',item);
                             item = item.replace(/(^\s*)|(\s*$)/g, "");//移除两边的空格
                             if (item.length > 0) {
 
-                                let posRight = item.indexOf("}");
-                                // console.log('posRight',posRight)
-                                if (posRight == -1) {
-                                    let tempArr = item.split(',');
-                                    if (tempArr.length > 0) {
-                                        for (let i = 0; i < tempArr.length; i++) {
-                                            let tempStr = tempArr[i];
-                                            if (tempStr.length > 0) {
-                                                tempStr = tempStr.replace(/(^\s*)|(\s*$)/g, "");//移除两边的空格
+                                // console.log(currentArrayObject)
+                                if (currentArrayObject != null && currentArrayObject.pIsArrArr) {
+
+                                    // console.log('______ssasd-ada----a-sda')
+
+                                    let posLeft = item.indexOf('{');
+                                    let posRight = item.indexOf('}');
+
+                                    if (currentArrayObject.hasFirstLeft) {
+                                        //已经存在第一个左花括号
+                                        // console.log('已经存在第一个左花括号',posLeft,posRight)
+                                        if (posLeft >= 0 && posRight >= 0 && posRight > posLeft) {
+                                            //这行也存在一个完整的花括号，莫非是数组？
+                                            // console.log('->'+item+'<-')
+
+                                            if (item.split("")[item.length - 1] == ',') {
+                                                // console.log('最后一个字符串是逗号');
+                                                item = item.substring(0, item.length - 1);
+                                            }
+
+
+                                            let leftCount = item.split('{').length - 1;
+                                            let rightCount = item.split('}').length - 1;
+                                            if (leftCount == rightCount) {
+                                                let tempItemArray = item.split('}');
+                                                let tempItem = tempItemArray[0];
+                                                tempItemArray = tempItem.split('{');
+                                                tempItem = tempItemArray[1];
+
+                                                // console.log('tempItem',tempItem)
+
+                                                tempItemArray = tempItem.split(',');
+                                                for (let i = 0; i < tempItemArray.length; i++) {
+                                                    let tempTemp = tempItemArray[i];
+                                                    tempTemp = tempTemp.replace(/(^\s*)|(\s*$)/g, "");//移除两边的空格
+                                                    currentArrayObject.pValue[currentArrayObject.pArrArrIndex].push(tempTemp)
+                                                }
+
+                                                currentArrayObject.pArrArrIndex++;
+                                            }
+
+
+                                        }
+                                    }
+
+
+
+
+                                } else {
+
+                                    let posRight = item.indexOf("}");
+                                    // console.log('posRight',posRight)
+                                    if (posRight == -1) {
+                                        let tempArr = item.split(',');
+                                        if (tempArr.length > 0) {
+                                            for (let i = 0; i < tempArr.length; i++) {
+                                                let tempStr = tempArr[i];
                                                 if (tempStr.length > 0) {
-                                                    if (currentArrayObject != null && currentArrayObject.pValue != null) {
-                                                        currentArrayObject.pValue.push(tempStr)
+                                                    tempStr = tempStr.replace(/(^\s*)|(\s*$)/g, "");//移除两边的空格
+                                                    if (tempStr.length > 0) {
+                                                        if (currentArrayObject != null && currentArrayObject.pValue != null) {
+                                                            currentArrayObject.pValue.push(tempStr)
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
+                                    } else if (posRight == 0) {
+                                        
                                     }
-                                } else if (posRight == 0) {
-                                    
+
                                 }
+
+                                
 
                                 
                             }
@@ -379,11 +588,11 @@
                     if (!currnetMultipleComment) {
                         // theStr += item + '\n';
 
-                        console.log('----------------------------------index',index);
-                        console.log('只存在 单行注释');
+                        // console.log('----------------------------------index',index);
+                        // console.log('只存在 单行注释');
                         let tempArr = item.split('//');
                         let tempItem = tempArr[0];
-                        console.log(tempArr,tempItem)
+                        // console.log(tempArr,tempItem)
                         theStr += tempItem + '\n';
 
 
@@ -504,13 +713,19 @@
                 if (obj) {
                     // console.log(i,'------->>>>>>>>>',obj)
                     // resultStrH_noComment += '@property(nonatomic,assign) int ' + obj.pName + ';' + '\n';
-                    if (obj.pIsArr) {
+                    if (obj.pIsArrArr) {
+                        resultStrH_noComment += '//共有 ' + obj.pValue.length + ' 个数组'  + '\n';
+                        resultStrH_noComment += '@property(nonatomic,strong) NSArray<NSArray<NSNumber *> *> *' + obj.pName + ';' + '\n';
+                        resultStrH_noComment += '\n';
+                    } else if (obj.pIsArr) {
+                        resultStrH_noComment += '//共有 ' + obj.pValue.length + ' 个内容' + '\n';
+
                         if (obj.pType == 'int') {
                             resultStrH_noComment += '@property(nonatomic,strong) NSArray<NSNumber *> *' + obj.pName + ';' + '\n';
-                                resultStrH_noComment += '\n';
+                            resultStrH_noComment += '\n';
                         } else if (obj.pType == 'String') {
                             resultStrH_noComment += '@property(nonatomic,strong) NSArray<NSString *> *' + obj.pName + ';' + '\n';
-                                resultStrH_noComment += '\n';
+                            resultStrH_noComment += '\n';
                         } else if (obj.pType == 'double') {
                             resultStrH_noComment += '@property(nonatomic,strong) NSArray<NSNumber *> *' + obj.pName + ';' + '\n';
                             resultStrH_noComment += '\n';
@@ -562,7 +777,13 @@
                 // console.log(obj)
                 if (obj) {
                     // console.log('.....')
-                    if (obj.pIsArr) {
+                    if (obj.pIsArrArr) {
+                        resultStrH += '//共有 ' + obj.pValue.length + ' 个数组'  + '\n';
+                        resultStrH += '@property(nonatomic,strong) NSArray<NSArray<NSNumber *> *> *' + obj.pName + ';' + '\n';
+                        resultStrH += '\n';
+                    } else if (obj.pIsArr) {
+                        resultStrH += '//共有 ' + obj.pValue.length + ' 个内容'  + '\n';
+
                         if (obj.pType == 'int') {
                             resultStrH += '@property(nonatomic,strong) NSArray<NSNumber *> *' + obj.pName + ';' + '\n';
                             resultStrH += '\n';
@@ -668,14 +889,71 @@
             for (let i = 0; i < theObjs.length; i++) {
                 let obj = theObjs[i];
                 if (obj) {
-                    if (obj.pIsArr) {
+                    if (obj.pIsArrArr) {
+                        let tempKeepStr = '';
+                        tempKeepStr += '@[' + '\n';
+
+                        if (obj.pValue.length > 0) {
+                            for (let i = 0; i < obj.pValue.length; i++) {
+                                tempKeepStr += '        @[' + '\n';
+
+                                let tempArr = obj.pValue[i];
+                                for (let j = 0; j < tempArr.length; j++) {
+                                    let tempArrItem = tempArr[j];
+
+                                    let isExsit = false;
+
+                                    for (let k = 0; k < theObjs.length; k++) {
+                                        if (tempArrItem == theObjs[k].pName) {
+                                            isExsit = true;
+                                            break
+                                        }
+                                    }
+
+
+                                    if (isExsit) {
+                                        tempKeepStr += '            ' +'_'+ tempArrItem + '' + ',' + '\n';
+                                    } else {
+                                        if (obj.pType == 'int' || obj.pType == 'double' || obj.pType == 'Number') {
+                                            tempKeepStr += '            ' +'@('+ tempArrItem + ')' + ',' + '\n';
+                                        } else if (obj.pType == 'String') {
+                                            tempKeepStr += '            ' +'@'+ tempArrItem + '' + ',' + '\n';
+                                        }
+                                    }
+
+
+                                    
+                                }
+
+                                tempKeepStr += '        ],' + '\n';
+                            }
+                        }
+
+                        tempKeepStr += '    ]';
+                        resultStrM_noComment += '    _' + obj.pName + ' = ' + tempKeepStr + ';\n';
+                    } else if (obj.pIsArr) {
                         if (obj.pType == 'String') {
                             let tempKeepStr = '';
                             tempKeepStr += '@[' + '\n';
                             for (let j = 0; j < obj.pValue.length; j++) {
                                 let tempItem = obj.pValue[j];
                                 tempItem = tempItem.replace(/'/g, '"');//将单引号全部转成双引号
-                                tempKeepStr += '        ' + '@' + tempItem + ',' + '\n';
+
+                                let isExsit = false;
+
+                                for (let k = 0; k < theObjs.length; k++) {
+                                    if (tempItem == theObjs[k].pName) {
+                                        isExsit = true;
+                                        break
+                                    }
+                                }
+
+                                if (isExsit) {
+                                    tempKeepStr += '        ' + '_' + tempItem + ',' + '\n';
+                                } else {
+                                    tempKeepStr += '        ' + '@' + tempItem + ',' + '\n';
+                                }
+                                
                             }
                             tempKeepStr += '    ]';
                             resultStrM_noComment += '    _' + obj.pName + ' = ' + tempKeepStr + ';\n';
@@ -685,7 +963,21 @@
                             tempKeepStr += '@[' + '\n';
                             for (let j = 0; j < obj.pValue.length; j++) {
                                 let tempItem = obj.pValue[j];
-                                tempKeepStr += '        ' + '@('+ tempItem +'),' + '\n';
+
+                                let isExsit = false;
+
+                                for (let k = 0; k < theObjs.length; k++) {
+                                    if (tempItem == theObjs[k].pName) {
+                                        isExsit = true;
+                                        break
+                                    }
+                                }
+
+                                if (isExsit) {
+                                    tempKeepStr += '        ' + '_'+ tempItem +',' + '\n';
+                                } else {
+                                    tempKeepStr += '        ' + '@('+ tempItem +'),' + '\n';
+                                }
                             }
                             tempKeepStr += '    ]';
                             resultStrM_noComment += '    _' + obj.pName + ' = ' + tempKeepStr + ';\n';
@@ -694,7 +986,21 @@
                             tempKeepStr += '@[' + '\n';
                             for (let j = 0; j < obj.pValue.length; j++) {
                                 let tempItem = obj.pValue[j];
-                                tempKeepStr += '        ' + '@('+ tempItem +'),' + '\n';
+
+                                let isExsit = false;
+
+                                for (let k = 0; k < theObjs.length; k++) {
+                                    if (tempItem == theObjs[k].pName) {
+                                        isExsit = true;
+                                        break
+                                    }
+                                }
+
+                                if (isExsit) {
+                                    tempKeepStr += '        ' + '_'+ tempItem +',' + '\n';
+                                } else {
+                                    tempKeepStr += '        ' + '@('+ tempItem +'),' + '\n';
+                                }
                             }
                             tempKeepStr += '    ]';
                             resultStrM_noComment += '    _' + obj.pName + ' = ' + tempKeepStr + ';\n';
@@ -703,7 +1009,21 @@
                             tempKeepStr += '@[' + '\n';
                             for (let j = 0; j < obj.pValue.length; j++) {
                                 let tempItem = obj.pValue[j];
-                                tempKeepStr += '        ' + '@('+ tempItem +'),' + '\n';
+
+                                let isExsit = false;
+
+                                for (let k = 0; k < theObjs.length; k++) {
+                                    if (tempItem == theObjs[k].pName) {
+                                        isExsit = true;
+                                        break
+                                    }
+                                }
+
+                                if (isExsit) {
+                                    tempKeepStr += '        ' + '_'+ tempItem +',' + '\n';
+                                } else {
+                                    tempKeepStr += '        ' + '@('+ tempItem +'),' + '\n';
+                                }
                             }
                             tempKeepStr += '    ]';
                             resultStrM_noComment += '    _' + obj.pName + ' = ' + tempKeepStr + ';\n';
@@ -734,14 +1054,82 @@
                             // if (stringContentSingleQuotationMarks == 0) {
                                 
                             // }
-                            tempValue = '@' + tempValue;
-                            resultStrM_noComment += '    _' + obj.pName + ' = ' + tempValue + ';\n';
+
+
+                            let isExsit = false;
+
+                            for (let k = 0; k < theObjs.length; k++) {
+                                if (tempValue == theObjs[k].pName) {
+                                    isExsit = true;
+                                    break
+                                }
+                            }
+
+                            if (isExsit) {
+                                
+                                resultStrM_noComment += '    _' + obj.pName + ' = ' + tempValue + ';\n';
+                            } else {
+
+                                tempValue = '@' + tempValue;
+                                resultStrM_noComment += '    _' + obj.pName + ' = ' + tempValue + ';\n';
+                            }
                         } else if (obj.pType == 'int') {
-                            resultStrM_noComment += '    _' + obj.pName + ' = ' + obj.pValue + ';\n';
+                            let isExsit = false;
+
+                            for (let k = 0; k < theObjs.length; k++) {
+                                if (obj.pValue == theObjs[k].pName) {
+                                    isExsit = true;
+                                    break
+                                }
+                            }
+
+                            if (isExsit) {
+                                resultStrM_noComment += '    _' + obj.pName + ' = _' + obj.pValue + ';\n';
+                            } else {
+                                resultStrM_noComment += '    _' + obj.pName + ' = ' + obj.pValue + ';\n';
+                            }
                         } else if (obj.pType == 'double') {
-                            resultStrM_noComment += '    _' + obj.pName + ' = ' + obj.pValue + ';\n';
+
+
+                            let isExsit = false;
+
+                            for (let k = 0; k < theObjs.length; k++) {
+                                if (obj.pValue == theObjs[k].pName) {
+                                    isExsit = true;
+                                    break
+                                }
+                            }
+
+                            if (isExsit) {
+                                resultStrM_noComment += '    _' + obj.pName + ' = _' + obj.pValue + ';\n';
+                            } else {
+                                resultStrM_noComment += '    _' + obj.pName + ' = ' + obj.pValue + ';\n';
+                            }
                         } else if (obj.pType == 'Number') {
-                            resultStrM_noComment += '    _' + obj.pName + ' = ' + '@(' + obj.pValue + ')' +';\n';
+
+                            let isExsit = false;
+                            let isNumber = false;
+
+                            for (let k = 0; k < theObjs.length; k++) {
+                                if (obj.pValue == theObjs[k].pName) {
+                                    isExsit = true;
+                                    if (obj.pType == 'Number') {
+                                        isNumber = true;
+                                    }
+                                    break
+                                }
+                            }
+
+                            if (isExsit) {
+                                if (isNumber) {
+                                    resultStrM_noComment += '    _' + obj.pName + ' = ' + '_' + obj.pValue + '' +';\n';
+                                } else {
+                                    resultStrM_noComment += '    _' + obj.pName + ' = ' + '@(' + obj.pValue + ')' +';\n';
+                                }
+                                
+                            } else {
+                                resultStrM_noComment += '    _' + obj.pName + ' = ' + '@(' + obj.pValue + ')' +';\n';
+                            }
                         }
                         
                     }

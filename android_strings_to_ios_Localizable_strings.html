@@ -1,0 +1,265 @@
+
+
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .input-area {
+            display: flex;
+            flex-direction: row;
+        }
+        #file-area {
+            width: 150px;
+            height: 50px;
+            background: #ccc;
+            border: 1px solid #000;
+            text-align: center;
+            line-height: 50px;
+        }
+        .content-area {
+            display: flex;
+            flex-direction: row;
+        }
+        .show-area {
+            display: flex;
+            flex-direction: row;
+        }
+    </style>
+</head>
+<body>
+    <h3>Android 语言包 res/values/string.xml XML文件 转 iOS Localizable.strings</h3>
+
+    <div class="input-area">
+        <div>
+            <div id="file-area">文件拖到这里上传</div>
+        </div>
+        <div>
+            <input type="file" id="fileInput"/>
+
+            <br/>
+            <span id="showTips"></span>
+            <input type="button" onClick="copyContentH()" value="复制 .strings 文件的内容" />
+            </span><input type="button" onClick="downloadActionH()" value="下载 .strings 文件" />
+        </div>
+    </div>
+    
+    <div id="content-area">
+        <textarea id="text-area" style="height: 100%"></textarea>
+        <textarea id="text-area2" style="height: 100%"></textarea>
+    </div>
+    
+    by muzico.2023.09.07
+
+
+    <script>
+        var globalTextH = ''
+        var globalTextM = ''
+    </script>
+
+    <script>
+        function changeTextAreaFrame() {
+            // 获取窗口宽度
+            if (window.innerWidth) {
+                winWidth = window.innerWidth;
+            } else if ((document.body) && (document.body.clientWidth)) {
+                winWidth = document.body.clientWidth;
+            }
+            // 获取窗口高度
+            if (window.innerHeight) {
+                winHeight = window.innerHeight;
+            } else if ((document.body) && (document.body.clientHeight)) {
+                winHeight = document.body.clientHeight;
+            }
+            // 通过深入 Document 内部对 body 进行检测，获取窗口大小
+            if (document.documentElement && document.documentElement.clientHeight && document.documentElement.clientWidth) {
+                winHeight = document.documentElement.clientHeight;
+                winWidth = document.documentElement.clientWidth;
+            }
+
+            var ta = document.getElementById('text-area');
+            ta.style.width = (winWidth - 40)/2 + 'px'
+            ta.style.height = winHeight - 160 + 'px'
+            ta.innerHTML = globalTextH;
+
+            var ta2 = document.getElementById('text-area2');
+            ta2.style.width = (winWidth - 40)/2 + 'px'
+            ta2.style.height = winHeight - 160 + 'px'
+            ta2.innerHTML = globalTextM;
+        }
+    </script>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function selectedFileChanged(){
+            if (this.files.length === 0) {
+                console.log('请选择文件！')
+                return
+            }
+
+            const reader = new FileReader()
+            reader.onload = function fileReadCompleted() {
+                texthandleAction(reader.result)
+            }
+            reader.readAsText(this.files[0])
+        })
+
+
+
+        window.onload = function() {
+            var fileArea = document.getElementById("file-area")
+            fileArea.addEventListener("dragenter", function() {
+                fileArea.innerHTML = "请松手"
+            }, false)
+            fileArea.addEventListener("dragleave", function() {
+                fileArea.innerHTML = "文件拖到这里上传"
+            }, false)
+            fileArea.addEventListener("dragover", function(ev) {
+                ev.preventDefault()
+            }, false)
+            fileArea.addEventListener("drop", function(ev) {
+                fileArea.innerHTML = "文件处理。。。"
+                ev.preventDefault()
+                let fileReader = new FileReader()
+                let file = ev.dataTransfer.files[0]
+                fileReader.onload = function() {
+                    fileArea.innerHTML = "新文件拖到这里上传"
+                    texthandleAction(this.result)
+                }
+                fileReader.onerror = function() {
+                    fileArea.innerHTML = "重新文件拖到这里上传"
+                }
+                fileReader.readAsText(file)
+            }, false)
+
+            //首次触发，根据界面显示内容范围
+            changeTextAreaFrame();
+            //监听大小改变，触发根据界面显示内容范围
+            window.addEventListener("resize", changeTextAreaFrame);
+        }
+
+
+
+
+        function texthandleAction(textStr) {
+            globalTextH = textStr;
+            // console.log('textStr',textStr)
+
+            let startIndex = textStr.indexOf("<resources>")
+            let endIndex = textStr.indexOf("</resources>")
+            // console.log('startIndex',startIndex)
+            // console.log('endIndex',endIndex)
+
+            if (startIndex >= 0 && endIndex >=0) {
+                let targetStr = textStr.substring(startIndex, endIndex)
+                // console.log('targetStr',targetStr)
+
+                let strArray = targetStr.split('</string>')
+
+                // console.log('strArray',strArray)
+
+
+                let resultArray = []
+                let colorNameMaxLength = 0;
+
+                for (let i = 0; i < strArray.length; i++) {
+
+
+                    let strValue = '';
+                    let strKey = '';
+
+                    
+                    let tempStr = strArray[i]
+                    // console.log('tempStr:',tempStr)
+                    let tempArray = tempStr.split('<string')
+                    // console.log('tempArray:',tempArray)
+                    if (tempArray.length == 2) {
+                        let tempStr2 = tempArray[1];
+                        // console.log('target tempStr2:',tempStr2);
+                        let tempArray2 = tempStr2.split('>');
+                        if (tempArray2.length == 2) {
+                            strKey = tempArray2[0];
+                            let tempArray2_0 = strKey.split('=');
+                            if (tempArray2_0.length == 2) {
+                                strKey = tempArray2_0[1];
+                            }
+                            strKey = strKey.replace(/^\"|\"$/g,'');//移除两边的双引号
+
+                            strValue = tempArray2[1];
+                        }
+                    }
+
+                    if (strKey.length > 0) {
+                        resultArray.push({
+                            strKey: strKey,
+                            strValue: strValue,
+                        });
+                    }
+                }
+
+
+                // console.log('===================');
+                // console.log(resultArray)
+
+
+                let resultStr = '';
+
+                for (let i = 0; i < resultArray.length; i++) {
+                    let obj = resultArray[i];
+                    resultStr += '"' + obj.strKey + '"' + '=' + '"' + obj.strValue + '"' + ';';
+                    resultStr += '\n';
+                }
+
+
+
+
+                globalTextM = resultStr;
+
+
+                document.getElementById('showTips').innerHTML = "解析成功"
+
+                changeTextAreaFrame();
+            }
+        }
+    </script>
+    <script>
+        function copyContentH() {
+            const input = document.querySelector('#text-area2');
+            input.select();
+            if (document.execCommand('copy')) {
+                document.execCommand('copy');
+                document.getElementById('showTips').innerHTML = "复制成功"
+            } else {
+                document.getElementById('showTips').innerHTML = "复制失败"
+            }
+        }
+    </script>
+    <script>
+        function downloadActionH() {
+            if (globalTextH.length > 0) {
+                var timestamp = Date.parse(new Date())
+                exportRaw(timestamp + 'Localizable.strings', globalTextM)
+            } else {
+                document.getElementById('showTips').innerHTML = "没有内容，下载不了"
+            }
+        }
+
+        function fakeClick(obj) {
+            var ev = document.createEvent("MouseEvents");
+            ev.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            obj.dispatchEvent(ev);
+        }
+
+        function exportRaw(name, data) {
+            var urlObject = window.URL || window.webkitURL || window;
+            var export_blob = new Blob([data]);
+            var save_link = document.createElementNS("http://www.w3.org/1999/xhtml", "a")
+            save_link.href = urlObject.createObjectURL(export_blob);
+            save_link.download = name;
+            fakeClick(save_link);
+        }
+    </script>
+</body>
+</html>

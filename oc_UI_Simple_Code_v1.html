@@ -699,8 +699,6 @@
             if (globalObjectArray.length > 0) {
                 for (let i = 0;  i < globalObjectArray.length; i++) {
                     let obj = globalObjectArray[i];
-
-                    var timestamp = Date.parse(new Date())
                     exportRaw(obj.class + '.h', globalTextHArray[i])
                 }                
             }
@@ -709,9 +707,7 @@
             if (globalObjectArray.length > 0) {
                 for (let i = 0;  i < globalObjectArray.length; i++) {
                     let obj = globalObjectArray[i];
-
-                    var timestamp = Date.parse(new Date())
-                    exportRaw(obj.class + '.h', globalTextMArray[i])
+                    exportRaw(obj.class + '.m', globalTextMArray[i])
                 }                
             }
         }

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>Document</title>
+    <style>
+        body, div {
+            margin: 0;
+            padding: 0;
+        }
+        .main-view {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        textarea {
+            resize: none;
+        }
+        .content-view {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .content-view {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+        }
+
+        #input-area {
+            height: calc(100% - 10px);
+            width: 40%;
+        }
+
+        #output-area {
+            height: calc(100% - 10px);
+            width: 60%;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-view">
+        <div>Objective-C 类添加属性，生成器 by muzico.2024/06/05</div>
+        <div class="content-view">
+            <textarea id="input-area"></textarea>
+            <textarea id="output-area"></textarea>
+        </div>
+        <div>
+            <button onclick="demo()">demo</button>
+            <button onclick="action()">转换</button>
+        </div>
+    </div>
+    <script>
+        function demo() {
+            let str = "";
+            str += "@interface UIView (Test)" + '\n';
+            str += '\n';
+
+            str += "@property (nonatomic,assign) BOOL v0;" + '\n';
+
+            str += '\n';
+            str += "@property ( nonatomic, assign ) float v1;" + '\n';
+            str += "@property (nonatomic,assign) double v2;" + '\n';
+            str += "@property ( nonatomic , assign ) CGFloat v3;" + '\n';
+
+            str += '\n';
+            str += "@property(nonatomic,assign) NSInteger v4;" + '\n';
+            str += "@property(nonatomic,assign) NSUInteger v5;" + '\n';
+
+            str += '\n';
+            str += "@property(nonatomic,assign) char v6;" + '\n';
+            str += "@property(nonatomic,assign) short v7;" + '\n';
+            str += "@property(nonatomic,assign) int v8;" + '\n';
+            str += "@property(nonatomic,assign) long v9;" + '\n';
+            str += "@property(nonatomic,assign) long long v10;" + '\n';
+
+            str += '\n';
+            str += "@property(nonatomic,assign) unsigned char v11;" + '\n';
+            str += "@property(nonatomic,assign) unsigned short v12;" + '\n';
+            str += "@property(nonatomic,assign) unsigned int v13;" + '\n';
+            str += "@property(nonatomic,assign) unsigned long v14;" + '\n';
+            str += "@property(nonatomic,assign) unsigned long long v15;" + '\n';
+
+
+            str += '\n';
+            str += "@property (nonatomic,assign) CGSize v100;" + '\n';
+            str += "@property (nonatomic,assign) CGRect v101;" + '\n';
+            str += "@property (nonatomic,assign) CGPoint v102;" + '\n';
+            str += "@property (nonatomic,assign) NSRange v103;" + '\n';
+            str += "@property (nonatomic,assign) UIEdgeInsets v104;" + '\n';
+            str += "@property (nonatomic,assign) UIOffset v105;" + '\n';
+            str += "@property (nonatomic,assign) CGAffineTransform v106;" + '\n';
+            str += "@property (nonatomic,assign) CGVector v107;" + '\n';
+
+
+            str += '\n';
+            str += "#支持类" + '\n';
+            str += "@property(nonatomic,copy) NSString *v200;" + '\n';
+            str += "@property(nonatomic,strong) NSString * v201;" + '\n';
+            str += "@property(nonatomic,strong) NSNumber * v202;" + '\n';
+            str += "@property(nonatomic,strong) UIView * v203;" + '\n';
+            str += "@property(nonatomic,strong) UIColor * v204;" + '\n';
+            str += '\n';
+            str += '@end' + '\n';
+
+            const textarea = document.getElementById("input-area");
+            textarea.value = str;
+
+        }
+        function action() {
+            const textarea = document.getElementById("input-area");
+            const content = textarea.value;
+            // console.log(content);
+
+            let arr = content.split('\n');
+            // console.log(arr);
+
+            let theClassName = "";
+            let theCategoryName = "";
+
+            let propertyArray = [];
+
+            for (const item of arr) {
+                if (item.length == 0) {
+                    continue;
+                }
+                let tempStr = item.trim();
+                // console.log('item:',tempStr);
+                if (tempStr == "@end") {
+                    // console.log('结束解析内容...');
+                    break;
+                }
+                if (tempStr.startsWith("@interface ")) {
+                    // console.log('发现头部内容');
+                    tempStr = tempStr.replace('(', ' ');
+                    tempStr = tempStr.replace(')', ' ');
+                    let tempArr = tempStr.split(' ');
+                    // console.log(tempArr);
+
+                    let tempKeep = [];
+                    for (const tempItem of tempArr) {
+                        if (tempItem.length > 0) {
+                            tempKeep.push(tempItem);
+                        }
+                    }
+                    tempArr = tempKeep;
+
+                    if (tempArr.length >= 3) {
+                        theClassName = tempArr[1];
+                        theCategoryName = tempArr[2];
+                    }
+                    // console.log('类名:',theClassName,' 分类名:',theCategoryName);
+                    continue;
+                }
+
+                if (tempStr.startsWith("@property")) {
+                    console.log('发现属性内容');
+                    tempStr = tempStr.replace("@property", '');
+
+                    let obj = {
+                        // hasNonatomic: false,
+                        // hasAssign: false,
+                        // hasStrong: false,
+                        // hasCopy: false,
+                    };
+
+                    let leftIndex = tempStr.indexOf('(');
+                    let rightIndex = tempStr.indexOf(')');
+                    let otherStr = tempStr.substring(leftIndex + 1, rightIndex);
+                    otherStr = otherStr.replace(/ /g, "");
+                    console.log('otherStr:',otherStr);
+                    let tempOtherArr = otherStr.split(',');
+                    console.log('tempOtherArr:',tempOtherArr);
+                    for (const tempItem of tempOtherArr) {
+                        if (tempItem == 'nonatomic') {
+                            obj.hasNonatomic = true;
+                        } else if (tempItem == 'assign') {
+                            obj.hasAssign = true;
+                        } else if (tempItem == 'strong') {
+                            obj.hasStrong = true;
+                        } else if (tempItem == 'copy') {
+                            obj.hasCopy = true;
+                        }
+                    }
+
+
+                    let contentStr = tempStr.substring(rightIndex + 1,  tempStr.length);
+                    let contentStrArr = contentStr.split(';');
+                    contentStr = contentStrArr[0];
+                    contentStr = contentStr.trim();
+                    contentStr = contentStr.replace("*", '* ');
+                    console.log('contentStr:',contentStr);
+                    let tempContentArr = contentStr.split(' ');
+                    let tempContentKeep = [];
+                    for (const tempItem of tempContentArr) {
+                        if (tempItem.length > 0) {
+                            if (tempItem == '*') {
+                                obj.isClass = true;
+                            } else {
+                                tempContentKeep.push(tempItem);
+                            }
+                            
+                        }
+                    }
+                    tempContentArr = tempContentKeep;
+                    console.log('tempContentArr:',tempContentArr);
+                    if (tempContentArr.length == 2) {
+                        obj.type = tempContentArr[0];
+                        obj.name = tempContentArr[1];
+
+                        obj.key = "KEY" + '_' + theClassName + '_' + theCategoryName + '_' + obj.name;
+                    } else if (tempContentArr.length == 3) {
+                        obj.type = tempContentArr[0] + ' ' + tempContentArr[1];
+                        obj.name = tempContentArr[2];
+
+                        obj.key = "KEY" + '_' + theClassName + '_' + theCategoryName + '_' + obj.name;
+                    }  else if (tempContentArr.length == 4) {
+                        obj.type = tempContentArr[0] + ' ' + tempContentArr[1] + ' ' + tempContentArr[2];
+                        obj.name = tempContentArr[3];
+
+                        obj.key = "KEY" + '_' + theClassName + '_' + theCategoryName + '_' + obj.name;
+                    } 
+
+
+                    propertyArray.push(obj);
+                    
+
+                    continue;
+                }
+            }
+
+            // console.log('=========propertyArray=========');
+            // console.log(propertyArray);
+
+
+
+
+            let outStr = "";
+            outStr += "#import <objc/message.h>" + '\n';
+            outStr += '\n';
+            
+            for (const item of propertyArray) {
+                outStr += 'static NSString *' + item.key + ' = @"' + item.key + '";' + '\n';
+            }
+            outStr += '\n';
+            outStr += '@implementation ' + theClassName + ' (' + theCategoryName + ')' + '\n';
+            outStr += '\n';
+
+            for (const item of propertyArray) {
+                let policy = 'OBJC_ASSOCIATION_RETAIN_NONATOMIC';
+                if (item.hasNonatomic === true) {
+                    policy = 'OBJC_ASSOCIATION_RETAIN_NONATOMIC';
+                } else {
+                    policy = 'OBJC_ASSOCIATION_RETAIN';
+                }
+                if (item.hasCopy) {
+                    if (item.hasNonatomic === true) {
+                        policy = 'OBJC_ASSOCIATION_COPY_NONATOMIC';
+                    } else {
+                        policy = 'OBJC_ASSOCIATION_COPY';
+                    }
+                }
+
+
+                let name2 = item.name .charAt(0).toUpperCase() + item.name .slice(1);
+
+                outStr += '#pragma mark - ' + item.name + '\n';
+                if (item.isClass === true) {
+                    outStr += '- (void) set' + name2 + ':(' + item.type + ' *) ' + item.name + ' {' + '\n';
+                } else {
+                    outStr += '- (void) set' + name2 + ':(' + item.type + ') ' + item.name + ' {' + '\n';
+                }
+                
+
+                if (item.type == 'BOOL') {
+                    outStr += '    NSNumber *temp = [NSNumber numberWithBool:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'CGFloat' || item.type == 'double') {
+                    outStr += '    NSNumber *temp = [NSNumber numberWithDouble:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'float') {
+                    outStr += '    NSNumber *temp = [NSNumber numberWithFloat:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'NSInteger') {
+                    outStr += '    NSNumber *temp = [NSNumber numberWithInteger:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'NSUInteger') {
+                    outStr += '    NSNumber *temp = [NSNumber numberWithUnsignedInteger:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'char') {
+                    outStr += '    NSNumber *temp = [NSNumber numberWithChar:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'short') {
+                    outStr += '    NSNumber *temp = [NSNumber numberWithShort:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'int') {
+                    outStr += '    NSNumber *temp = [NSNumber numberWithInt:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'long') {
+                    outStr += '    NSNumber *temp = [NSNumber numberWithLong:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'long long') {
+                    outStr += '    NSNumber *temp = [NSNumber numberWithLongLong:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'unsigned char') {
+                    outStr += '    NSNumber *temp = [NSNumber numberWithUnsignedChar:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'unsigned short') {
+                    outStr += '    NSNumber *temp = [NSNumber numberWithUnsignedShort:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'unsigned int') {
+                    outStr += '    NSNumber *temp = [NSNumber numberWithUnsignedInt:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'unsigned long') {
+                    outStr += '    NSNumber *temp = [NSNumber numberWithUnsignedLong:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'unsigned long long') {
+                    outStr += '    NSNumber *temp = [NSNumber numberWithUnsignedLongLong:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                }
+                
+                else if (item.type == 'CGSize') {
+                    outStr += '    NSValue *temp = [NSValue valueWithCGSize:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'CGPoint') {
+                    outStr += '    NSValue *temp = [NSValue valueWithCGPoint:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'CGRect') {
+                    outStr += '    NSValue *temp = [NSValue valueWithCGRect:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'CGVector') {
+                    outStr += '    NSValue *temp = [NSValue valueWithCGVector:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'UIEdgeInsets') {
+                    outStr += '    NSValue *temp = [NSValue valueWithUIEdgeInsets:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'CGAffineTransform') {
+                    outStr += '    NSValue *temp = [NSValue valueWithCGAffineTransform:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'NSRange') {
+                    outStr += '    NSValue *temp = [NSValue valueWithRange:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                } else if (item.type == 'UIOffset') {
+                    outStr += '    NSValue *temp = [NSValue valueWithUIOffset:' + item.name + '];' + '\n';
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + 'temp, ' + policy + ');' + '\n';
+                }
+
+                if (item.isClass === true) {
+                    outStr += '    objc_setAssociatedObject(self, &' + item.key + ', ' + item.name +', ' + policy + ');' + '\n';
+                }
+
+
+                outStr += '}' + '\n';
+                // outStr += '\n';
+
+                if (item.isClass === true) {
+                    outStr += '- (' + item.type + ' *) ' + item.name + ' {' + '\n';
+                } else {
+                    outStr += '- (' + item.type + ') ' + item.name + ' {' + '\n';
+                }
+
+                if (item.type == 'BOOL') {
+                    outStr += '    NSNumber *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSNumber class]]) {' + '\n';
+                    outStr += '        return [temp boolValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return NO;' + '\n';
+                } else if (item.type == 'CGFloat' || item.type == 'double') {
+                    outStr += '    NSNumber *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSNumber class]]) {' + '\n';
+                    outStr += '        return [temp doubleValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return 0.0;' + '\n';
+                } else if (item.type == 'float') {
+                    outStr += '    NSNumber *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSNumber class]]) {' + '\n';
+                    outStr += '        return [temp floatValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return 0.0f;' + '\n';
+                } else if (item.type == 'NSInteger') {
+                    outStr += '    NSNumber *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSNumber class]]) {' + '\n';
+                    outStr += '        return [temp integerValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return 0;' + '\n';
+                } else if (item.type == 'NSUInteger') {
+                    outStr += '    NSNumber *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSNumber class]]) {' + '\n';
+                    outStr += '        return [temp unsignedIntegerValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return 0;' + '\n';
+                } else if (item.type == 'char') {
+                    outStr += '    NSNumber *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSNumber class]]) {' + '\n';
+                    outStr += '        return [temp charValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return 0;' + '\n';
+                } else if (item.type == 'short') {
+                    outStr += '    NSNumber *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSNumber class]]) {' + '\n';
+                    outStr += '        return [temp shortValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return 0;' + '\n';
+                } else if (item.type == 'int') {
+                    outStr += '    NSNumber *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSNumber class]]) {' + '\n';
+                    outStr += '        return [temp intValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return 0;' + '\n';
+                } else if (item.type == 'long') {
+                    outStr += '    NSNumber *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSNumber class]]) {' + '\n';
+                    outStr += '        return [temp longValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return 0;' + '\n';
+                } else if (item.type == 'long long') {
+                    outStr += '    NSNumber *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSNumber class]]) {' + '\n';
+                    outStr += '        return [temp longLongValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return 0;' + '\n';
+                } else if (item.type == 'unsigned char') {
+                    outStr += '    NSNumber *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSNumber class]]) {' + '\n';
+                    outStr += '        return [temp unsignedCharValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return 0;' + '\n';
+                } else if (item.type == 'unsigned short') {
+                    outStr += '    NSNumber *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSNumber class]]) {' + '\n';
+                    outStr += '        return [temp unsignedShortValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return 0;' + '\n';
+                } else if (item.type == 'unsigned int') {
+                    outStr += '    NSNumber *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSNumber class]]) {' + '\n';
+                    outStr += '        return [temp unsignedIntValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return 0;' + '\n';
+                } else if (item.type == 'unsigned long') {
+                    outStr += '    NSNumber *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSNumber class]]) {' + '\n';
+                    outStr += '        return [temp unsignedLongValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return 0;' + '\n';
+                } else if (item.type == 'unsigned long long') {
+                    outStr += '    NSNumber *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSNumber class]]) {' + '\n';
+                    outStr += '        return [temp unsignedLongLongValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return 0;' + '\n';
+                }
+
+                else if (item.type == 'CGSize') {
+                    outStr += '    NSValue *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSValue class]]) {' + '\n';
+                    outStr += '        return [temp CGSizeValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return CGSizeZero;' + '\n';
+                } else if (item.type == 'CGPoint') {
+                    outStr += '    NSValue *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSValue class]]) {' + '\n';
+                    outStr += '        return [temp CGPointValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return CGPointZero;' + '\n';
+                } else if (item.type == 'CGRect') {
+                    outStr += '    NSValue *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSValue class]]) {' + '\n';
+                    outStr += '        return [temp CGRectValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return CGRectZero;' + '\n';
+                } else if (item.type == 'CGVector') {
+                    outStr += '    NSValue *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSValue class]]) {' + '\n';
+                    outStr += '        return [temp CGVectorValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return CGVectorMake(0, 0);' + '\n';
+                } else if (item.type == 'UIEdgeInsets') {
+                    outStr += '    NSValue *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSValue class]]) {' + '\n';
+                    outStr += '        return [temp UIEdgeInsetsValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return UIEdgeInsetsZero;' + '\n';
+                } else if (item.type == 'CGAffineTransform') {
+                    outStr += '    NSValue *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSValue class]]) {' + '\n';
+                    outStr += '        return [temp CGAffineTransformValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return CGAffineTransformIdentity;' + '\n';
+                } else if (item.type == 'UIOffset') {
+                    outStr += '    NSValue *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSValue class]]) {' + '\n';
+                    outStr += '        return [temp UIOffsetValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return UIOffsetZero;' + '\n';
+                } else if (item.type == 'NSRange') {
+                    outStr += '    NSValue *temp = objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                    outStr += '    if ([temp isKindOfClass:[NSValue class]]) {' + '\n';
+                    outStr += '        return [temp rangeValue];' + '\n';
+                    outStr += '    }' + '\n';
+                    outStr += '    return NSMakeRange(0, 0);' + '\n';
+                }
+
+
+                if (item.isClass === true) {
+                    outStr += '    return objc_getAssociatedObject(self, &' + item.key + ');' + '\n';
+                }
+                
+                outStr += '}' + '\n';
+                outStr += '\n';
+            }
+
+            outStr += '@end' + '\n';
+
+
+            // console.log('=========最终输出=========');
+            // console.log(outStr);
+
+            const textarea2 = document.getElementById("output-area");
+            textarea2.value = outStr;
+
+        }
+    </script>
+</body>
+</html>

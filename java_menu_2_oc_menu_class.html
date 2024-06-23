@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>Document</title>
+    <style>
+        body, div {
+            margin: 0;
+            padding: 0;
+        }
+        .main-view {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        textarea {
+            resize: none;
+        }
+        .content-view {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .content-view {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .content-view-v {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #input-area {
+            height: calc(100% - 10px);
+            width: 40%;
+        }
+
+        #output-area {
+            height: calc(100% - 10px);
+            width: 60%;
+        }
+
+        #output-area-H {
+            height: 38%;
+            width: calc(100% - 10px);
+        }
+
+        #output-area-M {
+            height: 60%;
+            width: calc(100% - 10px);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-view">
+        <div>Java枚举值转OC枚举类 by muzico.2024/06/22</div>
+        <div class="content-view">
+            <textarea id="input-area"></textarea>
+            <!-- <textarea id="output-area"></textarea> -->
+            <div class="content-view-v">
+                <textarea id="output-area-H"></textarea>
+                <textarea id="output-area-M"></textarea>
+            </div>
+        </div>
+        <div>
+            <button onclick="demo()">demo</button>
+            <input type="checkbox" id="isOnlyRead" checked />值只读
+            <button onclick="action()">转换</button>
+            <button onclick="copyHContent()">复制 H文件内容</button>
+            <button onclick="copyMContent()">复制 M文件内容</button>
+            <button onclick="downloadHContent()">下载 H文件</button>
+            <button onclick="downloadMContent()">下载 M文件</button>
+        </div>
+    </div>
+    <script>
+        var outStrH = '';
+        var outStrM = '';
+        var menuName = '';
+
+        function copyHContent() {
+            const input = document.querySelector('#output-area-H');
+            input.select();
+            if (document.execCommand('copy')) {
+                document.execCommand('copy');
+                // console.log('复制成功');
+            }
+        }
+        function copyMContent() {
+            const input = document.querySelector('#output-area-M');
+            input.select();
+            if (document.execCommand('copy')) {
+                document.execCommand('copy');
+                // console.log('复制成功');
+            }
+        }
+        function downloadHContent() {
+            if (outStrH.length > 0) {
+                exportRaw(menuName + 'MenuObject.h', outStrH)
+            }
+        }
+        function downloadMContent() {
+            if (outStrH.length > 0) {
+                exportRaw(menuName + 'MenuObject.m', outStrM)
+            }
+        }
+        function demo() {
+            let str = "";
+            str += "public enum KEYWORD {" + '\n';
+            str += "  ERROR(-1)," + '\n';
+            str += "  ORDER(0)," + '\n';
+            str += "  STATUS(1)," + '\n';
+            str += "  TIME(2)," + '\n';
+            str += "  DISPLAY(3)," + '\n';
+            str += "  DSP_DATA(4)," + '\n';
+            str += "  SWC(5);" + '\n';
+            str += '\n';
+
+            const textarea = document.getElementById("input-area");
+            textarea.value = str;
+        }
+        function action() {
+            const textarea = document.getElementById("input-area");
+            const content = textarea.value;
+
+            let arr = content.split('\n');
+
+            let hasMenuName = false;
+            menuName = '';
+            let contentObjects = [];
+
+            for (const item of arr) {
+                if (item.length == 0) {
+                    continue;
+                }
+                let tempStr = item.trim();
+                if (tempStr.length == 0) {
+                    continue;
+                }
+
+                let tempArr = tempStr.split('{');
+                if (tempArr.length == 2) {
+                    //有 menu 名字
+                    tempStr = tempArr[0];
+                    tempStr = tempStr.trim();
+                    tempArr = tempStr.split(' ');
+
+                    if (tempArr.length >= 2) {
+                        hasMenuName = true;
+                        menuName = tempArr[tempArr.length - 1];
+                    }
+                } else if (tempArr.length == 1) {
+                    //没有 menu 名字，可能是内容值
+
+                    let obj = {};
+
+                    tempStr = tempArr[0];
+
+                    tempArr = tempStr.split(',');
+
+                    if (tempArr.length == 2) {
+                        //逗号结尾的内容
+                        tempStr = tempArr[0];
+                        tempArr = tempStr.split('(');
+                        if (tempArr.length == 2) {
+                            //存在值的内容
+                            let name = tempArr[0];
+                            name = name.trim();
+                            obj.name = name;
+
+                            let value = tempArr[1];
+                            value = value.trim();
+                            let tempValueArr = value.split(')');
+                            if (tempValueArr.length == 2) {
+                                //成功按照预想解析到值
+                                value = tempValueArr[0];
+                                value = value.trim();
+                                obj.value = value;
+                            }
+
+                            contentObjects.push(obj);
+                        } else if (tempArr.length == 1) {
+                            //不存在值的内容
+                            let name = tempArr[0];
+                            name = name.trim();
+                            obj.name = name;
+
+                            contentObjects.push(obj);
+                        }
+                    } else {
+                        tempArr = tempStr.split(';');
+                        if (tempArr.length == 2) {
+                            //分号符号结尾的内容
+                            tempStr = tempArr[0];
+                            tempArr = tempStr.split('(');
+                            if (tempArr.length == 2) {
+                                //存在值的内容
+                                let name = tempArr[0];
+                                name = name.trim();
+                                obj.name = name;
+
+                                let value = tempArr[1];
+                                value = value.trim();
+                                let tempValueArr = value.split(')');
+                                if (tempValueArr.length == 2) {
+                                    //成功按照预想解析到值
+                                    value = tempValueArr[0];
+                                    value = value.trim();
+                                    obj.value = value;
+                                }
+
+                                contentObjects.push(obj);
+                            } else if (tempArr.length == 1) {
+                                //不存在值的内容
+                                let name = tempArr[0];
+                                name = name.trim();
+                                obj.name = name;
+
+                                contentObjects.push(obj);
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            let isOnlyRead = document.getElementById("isOnlyRead").checked;
+
+            outStrH = "";
+            outStrM = "";
+
+            let outStr = "";
+            /************   H   **********/
+            outStr += '//' +'\n';
+            outStr += '//  ' + menuName + 'MenuObject.h' +'\n';
+            outStr += '//  自动生成' +'\n';
+            outStr += '//' +'\n';
+            outStr += '//  Created by Muzico on ' + getDateString() + '.' +'\n';
+            outStr += '//' +'\n';
+            outStr += '\n';
+            outStr += '#import <Foundation/Foundation.h>' + '\n';
+            outStr += '\n';
+            outStr += '#define ' + menuName + ' ([' + menuName + 'MenuObject new])' +'\n';
+            outStr += '\n';
+            outStr += '@interface ' + menuName + 'MenuObject : NSObject'+'\n';
+
+            let currentValue = 0;
+            for (const item of contentObjects) {
+                let value = item.value;
+                if (value == undefined) {
+                    value = currentValue;
+                }
+                outStr += '\n';
+                outStr += '/** '+ item.name + '的值为' + value +'。 */' + '\n';
+                if (isOnlyRead) {
+                    outStr += '@property(nonatomic,assign,readonly) int ' + item.name + ';' + '\n';
+                } else {
+                    outStr += '@property(nonatomic,assign) int ' + item.name + ';' + '\n';
+                }
+                
+                currentValue = parseInt(value) + 1;
+            }
+            outStr += '\n';
+            outStr += '@end' + '\n';
+            outStr += '\n';
+
+            outStrH = outStr;
+            outStr = "";
+
+
+            /************   M   **********/
+            outStr += '//' +'\n';
+            outStr += '//  ' + menuName + 'MenuObject.m' +'\n';
+            outStr += '//  自动生成' +'\n';
+            outStr += '//' +'\n';
+            outStr += '//  Created by Muzico on ' + getDateString() + '.' +'\n';
+            outStr += '//' +'\n';
+            outStr += '\n';
+            outStr += '#import "'+menuName + 'MenuObject.h' + '"' + '\n';
+            outStr += '\n';
+
+            if (isOnlyRead) {
+                outStr += '@interface ' + menuName + 'MenuObject ()' + '\n';
+                outStr += '\n';
+
+                currentValue = 0;
+                for (const item of contentObjects) {
+                    let value = item.value;
+                    if (value == undefined) {
+                        value = currentValue;
+                    }
+                    outStr += '@property(nonatomic,assign,readwrite) int ' + item.name + ';//'+ value + '\n';
+                    currentValue = parseInt(value) + 1;
+                }
+
+                outStr += '\n';
+                outStr += '@end' + '\n';
+                outStr += '\n';
+            }
+
+            outStr += '@implementation ' + menuName + 'MenuObject' + '\n';
+            outStr += '\n';
+            outStr += '- (instancetype) init {' + '\n';
+            outStr += '    if (self = [super init]) {' + '\n';
+
+            currentValue = 0;
+            for (const item of contentObjects) {
+                let value = item.value;
+                if (value == undefined) {
+                    value = currentValue;
+                }
+                outStr += '        _' + item.name + ' = '+ value + ';' + '\n';
+                currentValue = parseInt(value) + 1;
+            }
+
+            outStr += '    }' + '\n';
+            outStr += '    return self;' + '\n';
+            outStr += '}' + '\n';
+            outStr += '\n';
+            outStr += '@end' + '\n';
+            outStr += '\n';
+
+            outStrM = outStr;
+            outStr = "";
+
+
+            outStr = outStrH;
+            outStr += '\n';
+            outStr += outStrM;
+            outStr += '\n';
+
+            // console.log('=========最终输出=========');
+            // console.log(outStr);
+
+            // const textarea2 = document.getElementById("output-area");
+            // textarea2.value = outStr;
+
+            const textareaH = document.getElementById("output-area-H");
+            textareaH.value = outStrH;
+            const textareaM = document.getElementById("output-area-M");
+            textareaM.value = outStrM;
+        }
+
+        function fakeClick(obj) {
+            var ev = document.createEvent("MouseEvents");
+            ev.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            obj.dispatchEvent(ev);
+        }
+
+        function exportRaw(name, data) {
+            var urlObject = window.URL || window.webkitURL || window;
+            var export_blob = new Blob([data]);
+            var save_link = document.createElementNS("http://www.w3.org/1999/xhtml", "a")
+            save_link.href = urlObject.createObjectURL(export_blob);
+            save_link.download = name;
+            fakeClick(save_link);
+        }
+        function getDateString() {
+            const date = new Date();
+            const year = date.getFullYear();
+            // const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            // const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString();
+            const day = date.getDate().toString();
+            const formattedDate = `${year}/${month}/${day}`;
+            return formattedDate;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <title>木子才的歌曲集</title>
+    <style>
+        body,div,p {
+            margin: 0;
+            padding: 0;
+        }
+        #music {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        button {
+            margin-top: 20px;
+        }
+        #tips {
+            margin-top: 20px;
+        }
+        #other-label {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+     <!--音乐播放控制按钮-->
+     <div id="music">
+        <div id="musicName"></div>
+        <button id="playButton">播放音乐</button>
+        <button id="playOther">切歌</button>
+        <p id="tips">点击屏幕开始播放音乐吧！</p>
+        <p id="other-label">这里的所有歌曲</p>
+        <p>由 木子才 ( muzico ) 填词</p>
+        <p>由 SUNO AI 创作。</p>
+    </div>
+    <script type="text/javascript">
+        //音乐名称列表
+        var music_name = [
+            "四月的谎言.mp3",
+            "天空的颜色.mp3",
+            "一辈子爱的人.mp3"
+        ];
+    
+        //音乐地址
+        var arr = music_name.map(function(name) {
+            //网址路径例子：return "https://xxx.com/typecho/mp3/" + name;
+            //本地路径例子：return "/xxx/xxx/" + name;
+            return "./music/" + name;
+        });
+    
+        // 创建音频元素
+        var myAudio = new Audio();
+        myAudio.loop = false;
+        myAudio.preload = "none";
+        myAudio.controls = false;
+        myAudio.controlsList = "nodownload";
+    
+        // 打随机乱音乐数组顺序
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+    
+        // 按列表顺序的音乐列表
+        //var playlist = arr.slice();
+ 
+        // 随机打乱顺序后的音乐列表
+        var playlist = shuffle(arr.slice());
+ 
+        var currentTrack = 0;
+ 
+        //监听页面第一次鼠标点击，自动播放歌曲
+        //var firstMouseClickDetected = false;
+        /*document.addEventListener('mousedown', function firstMouseClickHandler() {
+            if (!firstMouseClickDetected) {
+                if (myAudio.src === '') {
+                    myAudio.src = playlist[currentTrack];
+                }
+                myAudio.play();
+                playButton.innerHTML = '暂停音乐';
+                firstMouseClickDetected = true;
+            }
+            document.removeEventListener('mousedown', firstMouseClickHandler);
+         });*/
+
+         var tips = document.getElementById("tips");
+         var musicName = document.getElementById("musicName");
+ 
+        // 播放按钮点击事件
+        var playButton = document.getElementById("playButton");
+        playButton.addEventListener('click', function() {
+            if (myAudio.paused) {
+                if (myAudio.src === '') {
+                    myAudio.src = playlist[currentTrack];
+
+                    musicName.innerText = music_name[currentTrack];
+                    tips.hidden = true;
+                }
+                myAudio.play();
+                playButton.innerHTML = '暂停音乐';
+            } else {
+                myAudio.pause();
+                playButton.innerHTML = '播放音乐';
+            }
+        });
+
+        var playOther = document.getElementById("playOther");
+        playOther.addEventListener('click', function() {
+            if (myAudio.paused) {
+                if (myAudio.src === '') {
+                    myAudio.src = playlist[currentTrack];
+                    
+                    musicName.innerText = music_name[currentTrack];
+                    tips.hidden = true;
+                }
+                myAudio.play();
+                playButton.innerHTML = '暂停音乐';
+            } else {
+                myAudio.pause();
+                currentTrack++;
+                if (currentTrack < playlist.length) {
+                    myAudio.src = playlist[currentTrack];
+                    myAudio.play();
+
+                    musicName.innerText = music_name[currentTrack];
+                } else {
+                    currentTrack = 0;
+                    myAudio.src = playlist[currentTrack];
+                    myAudio.play();
+
+                    musicName.innerText = music_name[currentTrack];
+                }
+            }
+        });
+    
+        // 音频播放结束事件
+        myAudio.addEventListener('ended', playEndedHandler);
+        function playEndedHandler() {
+            currentTrack++;
+            if (currentTrack < playlist.length) {
+                myAudio.src = playlist[currentTrack];
+                myAudio.play();
+
+                musicName.innerText = music_name[currentTrack];
+            } else {
+                currentTrack = 0;
+                myAudio.src = playlist[currentTrack];
+                myAudio.play();
+
+                musicName.innerText = music_name[currentTrack];
+            }
+        };
+    
+        // 鼠标点击事件，自动播放音乐
+        var hasClickedOnce = false; // 标记是否已经点击过
+        document.addEventListener('click', function() {
+            if (!hasClickedOnce) {
+                if (myAudio.paused && myAudio.src === '') {
+                    myAudio.src = playlist[currentTrack];
+                    myAudio.play();
+                    playButton.innerHTML = '暂停音乐';
+                    hasClickedOnce = true; // 设置标记以防止进一步点击
+                
+                    musicName.innerText = music_name[currentTrack];
+                    tips.hidden = true;
+                }
+            }
+        });
+    
+        // 将音频元素添加到页面中
+        document.getElementById("music").appendChild(myAudio);
+    </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MP3 Player Demo</title>
+    
+</head>
+<body>
+    <h1>MP3 Player Demo</h1>
+    <audio controls autoplay onended="playNext()">
+        <source src="./music/一辈子爱的人_20240502_d4.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <audio controls onended="playNext()">
+        <source src="./music/二人的物语_20240531_f5.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <audio controls onended="playNext()">
+        <source src="./music/会いたかった_20240510_90.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <!-- Add more audio elements for additional MP3 files -->
+    <script>
+        function playNext() {
+            var audios = document.getElementsByTagName('audio');
+            for (var i = 0; i < audios.length; i++) {
+                if (audios[i].paused) {
+                    audios[i].play();
+                    break;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

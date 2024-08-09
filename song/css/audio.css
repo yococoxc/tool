@@ -332,7 +332,7 @@ body {
 .all-list {
     overflow:scroll;
     
-    height:calc(100vh - 60px - 1px);
+    height:calc(100vh - 60px - 1px - 20px);
     display: flex;
     flex-direction: column;
 }

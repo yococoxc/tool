@@ -16,3 +16,26 @@ for (let i = 0; i < musicData.length; i++) {
 }
 
 
+function preloadImages(sources) {
+    for (var i = 0; i < sources.length; i++) {
+        var img = new Image();
+        img.src = 'img/'+sources[i];
+        // 可选：监听图片加载完成事件
+        img.onload = function() {
+            console.log('图片预加载完成：', this.src);
+        };
+        // 可选：监听图片加载失败事件
+        img.onerror = function() {
+            console.error('图片预加载失败：', this.src);
+        };
+    }
+}
+
+// 使用示例
+var images = [
+    'bg0.png', 'bg1.png', 'bg2.png', 'bg3.png',
+    'record0.jpg','record1.jpg','record2.jpg','record3.jpg',
+    'mode1.png','mode2.png','mode3.png',
+    '继续播放.png', '静音.png', '列表.png', '上一首.png', '下一首.png', '音量.png', '暂停.png'
+];
+preloadImages(images);

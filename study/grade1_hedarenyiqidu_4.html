@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一年级，和大人一起读（四）</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        .main-body {
+            width: 100%;
+            height: 100vh;
+        }
+        .head-body {
+            width: 100%;
+            height: 40px;
+            background-color: aqua;
+            line-height: 40px;
+            padding-left: 20px;
+        }
+        .list-body {
+            width: 100%;
+            height: calc(100vh - 80px - 40px);
+            background-color: rgb(235, 253, 181);
+            overflow: scroll;
+        }
+        .control-body {
+            width: 100%;
+            height: 80px;
+            background-color: rgb(243, 243, 243);
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .list-item {
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+        }
+
+
+        .control-body button {
+            background: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .control-body button:hover {
+            background: #0056b3;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 10px 0;
+            position: relative;
+        }
+        .progress-bar .progress {
+            height: 100%;
+            background: #007BFF;
+            width: 0;
+            border-radius: 2px;
+        }
+        .volume-control {
+            display: flex;
+            align-items: center;
+        }
+        .volume-control input {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-body">
+        <div class="head-body" onclick="goHomeTap()">回到主页</div>
+        <audio id="audio" src=""></audio>
+        <div class="list-body">
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_4/5ffadc3b3c3b42b3aff5a9800f480e18.mp3">01颠倒歌.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_4/ba19abaed09a4c619567bf6643adadb2.mp3">02自己去吧.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_4/afc1f4adc62d4d89adce951f61ee5c66.mp3">03骆驼和羊.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_4/0220f6e8e5ac42d5be30ad0122474f6a.mp3">04狐狸和白鹤.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_4/bdf86e4d0755482695411f4465e0ceb9.mp3">05我不是最弱小的.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_4/5a8ad2f9e6f849958594940c9984585d.mp3">06上学校.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_4/f2fa17ad44f64a51946279daf65ce789.mp3">07雨来了.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_4/7829a04fb18e4323b3ac5e8a3592a9d0.mp3">08小红帽（一）.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_4/db3a88741c1048a2a31c3483732398ec.mp3">09小红帽（二）.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_4/1032461c6816409388b223302f9df819.mp3">10小红帽（三）.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_4/c9dae93c21b040cc874f62b4ed7328af.mp3">11火狐狸.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_4/e2708227cbd34b6fb4e392a9d66e31e7.mp3">12问银河.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_4/bf7f9174a64c4e61bebed793000a3e7a.mp3">13小兔乖乖.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_4/9f6c8d538d0a4d5b8da93946a46f4567.mp3">14画蛇添足.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_4/6c87ca2ba5624a598e46da82aa14c942.mp3">15惊弓之鸟.mp3</div>
+
+
+        </div>
+        <div class="control-body">
+            <button id="playPauseBtn">播放</button>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <div class="volume-control">
+                <span>音量:</span>
+                <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="0.5">
+            </div>
+        </div>
+    </div>
+    <script>
+        function goHomeTap() {
+            window.location.href='./index.html'
+        }
+        const audio = document.getElementById('audio');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progress = document.getElementById('progress');
+        const volumeControl = document.getElementById('volumeControl');
+        const playlist = document.querySelector('.list-body');
+        let isPlaying = false;
+
+        function playAudio(src) {
+            audio.src = src;
+            audio.play();
+            playPauseBtn.textContent = '暂停';
+            isPlaying = true;
+        }
+
+        function updateProgress() {
+            const percentage = (audio.currentTime / audio.duration) * 100;
+            progress.style.width = percentage + '%';
+        }
+
+        function togglePlayPause() {
+            if (isPlaying) {
+                audio.pause();
+                playPauseBtn.textContent = '播放';
+            } else {
+                audio.play();
+                playPauseBtn.textContent = '暂停';
+            }
+            isPlaying = !isPlaying;
+        }
+
+        function updateVolume() {
+            audio.volume = volumeControl.value;
+        }
+
+        playlist.addEventListener('click', (event) => {
+            if (event.target.tagName === 'DIV') {
+                const src = event.target.getAttribute('data-src');
+                playAudio(src);
+            }
+        });
+
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        volumeControl.addEventListener('input', updateVolume);
+        audio.addEventListener('timeupdate', updateProgress);
+    </script>
+</body>
+</html>

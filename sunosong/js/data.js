@@ -1,6 +1,14 @@
 
 // 后台音乐列表
 var musicData = [
+  {
+    "mp3": "https://cdn1.suno.ai/6e00ae5b-2c0f-4c14-a3e4-ecf7640b6f9f.mp3",
+    "name": "漫溢的心，永远为你",
+    "name2": "漫溢的心，永远为你_20241024_00",
+    "name3": "漫溢的心，永远为你_20241024_00.mp3",
+    "id": "6e00ae5b-2c0f-4c14-a3e4-ecf7640b6f9f",
+    "created_at": "2024-10-24T00:54:40.389Z"
+  },
     {
       "mp3": "https://cdn1.suno.ai/6814556c-c2f8-4e6c-9935-c7d9a0c9e49f.mp3",
       "name": "四月的谎言",

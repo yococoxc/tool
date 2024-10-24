@@ -10,6 +10,7 @@ body {
     background-size: cover;
     backdrop-filter: blur(50px);
     overflow: hidden;
+    background-color: dimgrey;
 }
 
 .upper-container {

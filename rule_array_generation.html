@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>规则数组生成</title>
+</head>
+<body>
+    <center>
+        <div>
+            <br/>
+            <div>规则数组生成</div>
+            <br/>
+            <div>
+                开始的数值: <input type="text" id="num" value="1">
+                个数长度：<input type="text" id="numLen" value="8">
+                <button onclick="pressedButtonToDo()">创建</button>
+            </div>
+            <br/>
+            <div >
+                <textarea name="" id="content-text" rows="10" cols="50"></textarea>
+            </div>
+            <div>
+                <textarea name="" id="content-text2" rows="10" cols="50"></textarea>
+            </div>
+            <div>
+                <textarea name="" id="content-text3" rows="10" cols="50"></textarea>
+            </div>
+            <div>
+                <textarea name="" id="content-text4" rows="10" cols="50"></textarea>
+            </div>
+        </div>
+    </center>
+    <script>
+        function pressedButtonToDo(){
+            var num = parseInt(document.getElementById('num').value);
+            var numLen = parseInt(document.getElementById('numLen').value);
+
+            console.log('num:',num,'numLen:',numLen);
+            var content = document.getElementById('content-text');
+            var content2 = document.getElementById('content-text2');
+            var content3 = document.getElementById('content-text3');
+            var content4 = document.getElementById('content-text4');
+            var contentText = '';
+            var contentText2 = '';
+            for(var i = 0; i < numLen; i++){
+                contentText += (num + i + '');
+                contentText2 += ('@('+ (num + i) +')' + '');
+                if (i != numLen - 1) {
+                    contentText += ','
+                    contentText2 += ','
+                }
+            }
+            content.value = contentText;
+            content2.value = '{' + contentText + '}';
+            content3.value = contentText2;
+            content4.value = '@[' + contentText2 + ']';
+        }
+    </script>
+</body>
+</html>

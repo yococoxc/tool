@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>不规则数组的加减</title>
+    <style>
+        body {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        .content-main{
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
+        .content-button{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
+        button{
+            margin: 10px;
+        }
+        .content-left{
+            width: 50%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .content-right{
+            width: 50%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .content-left textarea{
+            width: 96%;
+            height: 96%;
+            resize: none;
+        }
+        .content-right textarea{
+            width: 96%;
+            /* height: 96%; */
+            resize: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-main">
+        <div class="content-left">
+            <textarea name="" id="input-text" rows="10" cols="50"></textarea>
+        </div >
+        <div class="content-right">
+            <br>
+            <center><div>不规则数组的加减</div></center>
+            <br>
+            <center>会处理花括号数组内的数值</center>
+            <br>
+            <div class="content-button">
+                偏移：
+                <button onclick="pressedButtonToSubtract()">-</button>
+                 <div id="numOffset">0</div>
+                <button onclick="pressedButtonToAdd()">+</button>
+                <button onclick="pressedButtonToDo()">创建</button>
+            </div>
+    
+            原始数据：<br>
+            <div >
+                <textarea name="" id="content-text" rows="5" cols="50"></textarea>
+            </div>
+            改变数据：<br>
+            <div>
+                <textarea name="" id="content-text2" rows="5" cols="50"></textarea>
+            </div>
+            <div>
+                <textarea name="" id="content-text3" rows="5" cols="50"></textarea>
+            </div>
+            <div>
+                <textarea name="" id="content-text4" rows="5" cols="50"></textarea>
+            </div>
+            <div>
+                <textarea name="" id="content-text5" rows="5" cols="50"></textarea>
+            </div>
+        </div>
+    </div>
+    <script>
+        function pressedButtonToSubtract() {
+            var numOffset = parseInt(document.getElementById('numOffset').innerHTML);
+            numOffset -= 1;
+            document.getElementById('numOffset').innerHTML = numOffset;
+
+
+            pressedButtonToDo();
+        }
+        function pressedButtonToAdd() {
+            var numOffset = parseInt(document.getElementById('numOffset').innerHTML);
+            numOffset += 1;
+            document.getElementById('numOffset').innerHTML = numOffset;
+
+            pressedButtonToDo();
+        }
+        function pressedButtonToDo(){
+
+            var inputContent = document.getElementById('input-text').value;
+            if (inputContent.length == 0) {
+                return;
+            }
+            // console.log(inputContent);
+
+            inputContent = inputContent.split('{').pop().split('}')[0];
+            // console.log(inputContent);
+            inputContent = inputContent.replace(/ /g, '');
+            // console.log(inputContent);
+            inputContent = inputContent.replace(/[\r\n]/g, '');
+            // console.log(inputContent);
+            let inputContentArr = inputContent.split(',');
+            // console.log(inputContentArr);
+
+            
+            var numOffset = parseInt(document.getElementById('numOffset').innerHTML);
+
+            var content = document.getElementById('content-text');
+            var content2 = document.getElementById('content-text2');
+            var content3 = document.getElementById('content-text3');
+            var content4 = document.getElementById('content-text4');
+            var content5 = document.getElementById('content-text5');
+            var contentText = '';
+            var contentText2 = '';
+            var contentText3 = '';
+            
+
+            var keep = [];
+            var keepArr = [];
+            var keepArr2 = [];
+            for (var i = 0; i < inputContentArr.length; i++) {
+                var item = inputContentArr[i];
+                if (item.length > 0) {
+                    keep.push(item);
+
+                    // console.log(item);
+                    let temp = parseInt(item) + numOffset;
+                    keepArr.push(temp);
+                    keepArr2.push('@(' + temp + ')');
+                }
+            }
+            contentText = keep.join(',');
+            contentText2 = keepArr.join(',');
+            contentText3 = keepArr2.join(',');
+
+            content.value = contentText;
+            content2.value = contentText2;
+            content3.value = '{' + contentText2 + '}';
+            content4.value = contentText3;
+            content5.value = '@[' + contentText3 + ']';
+        }
+
+        let str = 'public enum test {' + '\n';
+        str += '    1, 3, 5, 7, 9, 11,' + '\n';
+        str += '}\n';
+        document.getElementById('input-text').value = str;
+
+    </script>
+</body>
+</html>

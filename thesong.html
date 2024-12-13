@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>木子才歌曲精选</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .bgColor {
+            background-color: #fcfcfc;
+        }
+        .textColor {
+            color: #333333;
+        }
+    </style>
+</head>
+<body onclick="bodyAction()" class="bgColor">
+    <p id="songInfo"  class="textColor" ></p>
+    <h1 id="title"  class="textColor" ></h1>
+    <audio id="player" onended="handleEnded()" controls>
+        Your browser does not support the audio element.
+    </audio>
+    <br/>
+    <button class="textColor" id="playOrPauseButton">播放</button><br/>
+    <button class="textColor" onclick="playNextTrack()">随机播放下一首歌</button>
+
+    <script src="./data/sunodata.js"></script>
+    <script type="text/javascript">
+        // 定义一个包含所有音频文件URL的数组
+
+        var isFrist = true;
+        var isPlaying = false;
+        
+        var player = document.getElementById('player');
+        var currentTitle = null;
+        var currentIndex = -1;
+        var currentUrl = null;
+
+        // console.log(tracks,tracks.length );
+
+
+        document.getElementById('songInfo').innerHTML = '精选歌曲 ' + tracks.length + ' 首';
+        
+
+        function playNextTrack() {
+
+            if (isFrist) {
+                document.getElementById('playOrPauseButton').innerHTML = '播放';
+            } else {
+                document.getElementById('playOrPauseButton').innerHTML = '暂停';
+            }
+            
+            isFrist = false;
+
+            // 选择一个新的随机索引
+            do {
+                var newIndex = Math.floor(Math.random() * tracks.length);
+            } while (newIndex === currentIndex); // 确保不会连续播放同一首歌
+
+            currentIndex = newIndex;
+            currentTitle = tracks[currentIndex].name2;
+            currentUrl = tracks[currentIndex].mp3;
+
+            player.src = currentUrl;
+            player.play();
+            isPlaying = true;
+
+            document.getElementById('title').innerHTML = currentTitle;
+
+
+            document.getElementById('songInfo').innerHTML = '精选歌曲 ' + tracks.length + ' 首，第 ' + (currentIndex + 1) + ' 首。';
+        }
+
+        function handleEnded() {
+            // 当当前歌曲结束时，调用此函数以播放下一首歌曲
+            playNextTrack();
+            
+        }
+
+        document.getElementById('playOrPauseButton').addEventListener('click', function() {
+            isFrist = false;
+
+            if (isPlaying) {
+                player.pause();
+                isPlaying = false;
+                document.getElementById('playOrPauseButton').innerHTML = '播放';
+            } else {
+                if (!player.src || player.ended) {
+                    playNextTrack();
+                } else {
+                    player.play();
+                    isPlaying = true;
+                }
+                document.getElementById('playOrPauseButton').innerHTML = '暂停';
+            }
+
+        });
+
+        window.onload = function() {
+            // 页面加载完成后开始播放第一首随机歌曲
+            playNextTrack();
+            isFrist = true;
+        }
+        function bodyAction() {
+            console.log("bodyAction",isFrist);
+            if (isFrist == false) {
+                return;
+            }
+            isFrist = false;
+
+            player.play();
+            isPlaying = true;
+            document.getElementById('playOrPauseButton').innerHTML = '暂停';
+        }
+    </script>
+</body>
+</html>

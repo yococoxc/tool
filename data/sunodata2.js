@@ -386,4 +386,37 @@ var tracks = [
             }
         ]
     },
+    {
+        title: "圣诞节",
+        array: [
+            {
+                "mp3": "https://cdn1.suno.ai/99521abd-f5c8-468f-8bba-9c0b2fe6b672.mp3",
+                "name2": "圣诞节_20241225_72"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/b42c9a66-461e-4467-9c7c-9508d4d815cf.mp3",
+                "name2": "圣诞节_20241225_cf"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/9cc5b1f2-e6b2-4873-8d61-96cae580368f.mp3",
+                "name2": "圣诞节_20241225_8f"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/7d6110a4-05c9-4ef4-9494-43119faea9e4.mp3",
+                "name2": "圣诞节_20241225_e4"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/cc076826-002d-48e4-8da2-706d2ccf45d5.mp3",
+                "name2": "圣诞节_20241225_d5"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/95967474-73d3-4685-87a8-f899f03b230b.mp3",
+                "name2": "圣诞节_20241225_0b"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/48144880-15ec-4073-8102-0705fcd08b02.mp3",
+                "name2": "圣诞节_20241225_02"
+              }
+        ]
+    }
 ];

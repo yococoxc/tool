@@ -389,34 +389,100 @@ var tracks = [
     {
         title: "圣诞节",
         array: [
-            {
-                "mp3": "https://cdn1.suno.ai/99521abd-f5c8-468f-8bba-9c0b2fe6b672.mp3",
-                "name2": "圣诞节_20241225_72"
-              },
-              {
-                "mp3": "https://cdn1.suno.ai/b42c9a66-461e-4467-9c7c-9508d4d815cf.mp3",
-                "name2": "圣诞节_20241225_cf"
-              },
-              {
-                "mp3": "https://cdn1.suno.ai/9cc5b1f2-e6b2-4873-8d61-96cae580368f.mp3",
-                "name2": "圣诞节_20241225_8f"
-              },
-              {
-                "mp3": "https://cdn1.suno.ai/7d6110a4-05c9-4ef4-9494-43119faea9e4.mp3",
-                "name2": "圣诞节_20241225_e4"
-              },
-              {
-                "mp3": "https://cdn1.suno.ai/cc076826-002d-48e4-8da2-706d2ccf45d5.mp3",
-                "name2": "圣诞节_20241225_d5"
-              },
-              {
-                "mp3": "https://cdn1.suno.ai/95967474-73d3-4685-87a8-f899f03b230b.mp3",
-                "name2": "圣诞节_20241225_0b"
-              },
-              {
-                "mp3": "https://cdn1.suno.ai/48144880-15ec-4073-8102-0705fcd08b02.mp3",
-                "name2": "圣诞节_20241225_02"
-              }
+          {
+            "mp3": "https://cdn1.suno.ai/70abc2e1-8b3c-494c-9444-694d452a6197.mp3",
+            "name2": "圣诞节_20241226_97"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/519488ce-60d4-4572-acfd-f875eecacfec.mp3",
+            "name2": "圣诞节_20241227_ec"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/ea6f151a-a68e-4bf3-87bd-955f6cc74d2e.mp3",
+            "name2": "圣诞节_20241226_2e"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/6cd08621-515a-4860-9afc-edb7f0bf0deb.mp3",
+            "name2": "圣诞节_20241226_eb"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/a61ccaf6-f017-453a-815c-ca2e2d4b69b2.mp3",
+            "name2": "圣诞节_20241226_b2"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/e5081356-6ff8-40a6-bc54-10d4bccb5cae.mp3",
+            "name2": "圣诞节_20241226_ae"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/f9ab02e4-2717-43aa-a2a6-14a9bcc6e12d.mp3",
+            "name2": "圣诞节_20241227_2d"
+          }
+        ]
+    },
+    {
+        title: "我愿意",
+        array: [
+          {
+            "mp3": "https://cdn1.suno.ai/d89a9073-2374-466c-8774-efef53a1a6eb.mp3",
+            "name2": "我愿意_20241231_eb"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/8659a14f-f86d-4bd5-bec2-990a9a9e1270.mp3",
+            "name2": "我愿意_20241231_70"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/b905ef9d-065b-4439-b5fd-6b74b0f99dca.mp3",
+            "name2": "我愿意_20241230_ca"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/3c2e3761-60c6-4073-a860-306bdd1cb5f9.mp3",
+            "name2": "我愿意_20250101_f9"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/ebbdd318-052f-4dda-96ca-a74df3f43ff2.mp3",
+            "name2": "我愿意_20250101_f2"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/38903454-6535-42a2-ae5e-a082e1449a10.mp3",
+            "name2": "我愿意_20250101_10"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/c5d7726d-cfce-4fc2-8d52-79b0477bde9f.mp3",
+            "name2": "我愿意_20241231_9f"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/0ad869e3-d231-48f0-bd6b-1532e48fdc38.mp3",
+            "name2": "我愿意_20241231_38"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/c78ecf4b-d181-4d5c-8a24-ab7fc2c4d929.mp3",
+            "name2": "我愿意_20241231_29"
+          }
+        ]
+    },
+    {
+        title: "随笔05",
+        array: [
+          {
+            "mp3": "https://cdn1.suno.ai/ad43363c-ad1b-43ec-becd-51d5eaf1816c.mp3",
+            "name2": "随笔05_20250102_6c"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/23d45e03-9067-46aa-9e1b-a63453814801.mp3",
+            "name2": "随笔05_20250102_01"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/f09f41bd-6eba-4ee3-8458-d70a2cdd0609.mp3",
+            "name2": "随笔05_20250102_09"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/ff8b03af-2fb5-4d9a-bf8d-baef49e8659b.mp3",
+            "name2": "随笔05_20250102_9b"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/a8810bbe-bcc8-49db-918f-90def35259d4.mp3",
+            "name2": "随笔05_20250102_d4"
+          }
         ]
     }
 ];

@@ -484,5 +484,18 @@ var tracks = [
             "name2": "随笔05_20250102_d4"
           }
         ]
+    },
+    {
+        title: "放下的梦",
+        array: [
+          {
+            "mp3": "https://cdn1.suno.ai/c3a785d7-ec18-4210-86f0-fd9df9adef58.mp3",
+            "name2": "放下的梦_20250103_58"
+          },
+          {
+            "mp3": "https://cdn1.suno.ai/8dd5ac55-4658-4b8a-a8f7-88e77fbdac8b.mp3",
+            "name2": "放下的梦_20250103_8b"
+          }
+        ]
     }
 ];

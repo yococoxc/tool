@@ -351,5 +351,21 @@ var tracks = [
     {
       "mp3": "https://cdn1.suno.ai/8dd5ac55-4658-4b8a-a8f7-88e77fbdac8b.mp3",
       "name2": "放下的梦_20250103_8b"
+    },
+    {
+      "mp3": "https://cdn1.suno.ai/33b4e4ba-f6b8-4d7a-9f38-b6e74a13de47.mp3",
+      "name2": "放下的梦_20250105_47"
+    },
+    {
+      "mp3": "https://cdn1.suno.ai/d6cc9cff-1010-4ade-8347-4af429ac9aba.mp3",
+      "name2": "放下的梦_20250105_ba"
+    },
+    {
+      "mp3": "https://cdn1.suno.ai/6877f41e-aae2-4af5-8ab4-da7048834037.mp3",
+      "name2": "放下的梦_20250105_37"
+    },
+    {
+      "mp3": "https://cdn1.suno.ai/0606f127-ffe0-41e4-9fe7-dd075225958f.mp3",
+      "name2": "放下的梦_20250105_8f"
     }
   ];

@@ -513,5 +513,73 @@ var tracks = [
             "name2": "放下的梦_20250105_8f"
           }
         ]
-    }
+    },
+    {
+        title: "随笔06",
+        array: [
+        ]
+    },
+    {
+        title: "我的奋斗",
+        array: [
+        ]
+    },
+    {
+        title: "随笔06 - 我的奋斗",
+        array: [
+        ]
+    },
+    {
+        title: "天空中只看见一颗星",
+        array: [
+        ]
+    },
+    {
+        title: "随笔07",
+        array: [
+        ]
+    },
+    {
+        title: "随笔08",
+        array: [
+        ]
+    },
+    {
+        title: "随笔09",
+        array: [
+        ]
+    },
+    {
+        title: "随笔10",
+        array: [
+        ]
+    },
+    {
+        title: "随笔11",
+        array: [
+          {
+            "mp3": "https://cdn1.suno.ai/79232f93-b291-45f9-89cb-2d643c816847.mp3",
+            "name2": "随笔11_47"
+          }
+        ]
+    },
+    {
+        title: "随笔12 - 白色的世界",
+        array: [
+          {
+            "mp3": "https://cdn1.suno.ai/e1cd6a82-ea00-4047-a35a-7e2b0dafdf3d.mp3",
+            "name2": "随笔12 - 白色的世界_3d"
+          }
+        ]
+    },
+    {
+        title: "随笔13",
+        array: [
+        ]
+    },
+    {
+        title: "温柔的星空",
+        array: [
+        ]
+    },
 ];

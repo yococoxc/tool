@@ -66,8 +66,10 @@
 
     <div class="div2">
         <button class="textColor" onclick="handlePreviousTrack()">上一首歌</button> 
-        <button class="textColor" id="playOrPauseButton">播放</button><br/>
-        <button class="textColor" onclick="handleEnded()">下一首歌</button> 
+        <button class="textColor" id="playOrPauseButton">播放</button>
+        <button class="textColor" onclick="handleEnded()">下一首歌</button>
+        <button class="textColor" id="loopButton" onclick="handleLoop()">全部循环</button>
+
     </div>
     <div class="buttonContent" id="buttonContent"></div>
 
@@ -78,16 +80,36 @@
 
         var isFrist = true;
         var isPlaying = false;
+        var loopDat = 0;
         
         var player = document.getElementById('player');
         var currentTitle = null;
         var currentIndex = 0;
         var currentUrl = null;
 
+        function handleLoop() {
+            loopDat++;
+            if (loopDat >= 3) {
+                loopDat = 0;
+            }
+
+            if (loopDat == 0) {
+                document.getElementById('loopButton').innerHTML = '全部循环';
+            } else if (loopDat == 1) {
+                document.getElementById('loopButton').innerHTML = '单歌循环';
+            } else if (loopDat == 2) {
+                document.getElementById('loopButton').innerHTML = '单曲循环';
+            }
+        }
 
         function trackButtonAction(e) {
             let index = e.target.getAttribute('data-index');
-            console.log(index); // 获取按钮的索引值
+            // console.log(index); // 获取按钮的索引值
+
+            let array = tracks[index].array;
+            if (array.length == 0) {
+                return
+            }
 
             currentIndex = index;
 
@@ -131,7 +153,7 @@
                 document.getElementById('playOrPauseButton').innerHTML = '暂停';
             }
             
-            isFrist = false;;
+            isFrist = false;
 
             let array = tracks[currentIndex].array;
             if (array == undefined || array.length == 0) {
@@ -155,17 +177,55 @@
         }
 
         function handlePreviousTrack() {
+            if (loopDat == 2) {
+                player.src = currentUrl;
+                player.play();
+                isPlaying = true;
+
+                document.getElementById('title').innerHTML = currentTitle;
+                return
+            }
+            if (loopDat == 1) {
+                playNextTrack();
+                return
+            }
+
             currentIndex = parseInt(currentIndex) - 1;
             if (currentIndex < 0) {
                 currentIndex = tracks.length - 1;
             }
+            //如果歌曲数组为空播放上一个
+            let array = tracks[currentIndex].array;
+            if (array.length == 0) {
+                handlePreviousTrack();
+                return
+            }
             playNextTrack();
         }
         function handleEnded() {
+            if (loopDat == 2) {
+                player.src = currentUrl;
+                player.play();
+                isPlaying = true;
+
+                document.getElementById('title').innerHTML = currentTitle;
+                return
+            }
+            if (loopDat == 1) {
+                playNextTrack();
+                return
+            }
+
             // 当当前歌曲结束时，调用此函数以播放下一首歌曲
             currentIndex = parseInt(currentIndex) + 1;
             if (currentIndex >= tracks.length) {
                 currentIndex = 0;
+            }
+            //如果歌曲数组为空播放下一个
+            let array = tracks[currentIndex].array;
+            if (array.length == 0) {
+                handleEnded();
+                return
             }
             playNextTrack();
         }

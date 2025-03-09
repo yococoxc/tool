@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>学汉字198</title>
+    <style>
+        body{ font-family:"STHeiti"}
+        * {
+            padding: 0;
+            margin: 0;
+        }
+        .area {
+            display: flex;
+            flex-direction: column;
+        }
+        .middle {
+            width: 100%;
+            background-color: #CAD2E3;
+            text-align: center;
+
+            height: 500px;
+            line-height: 500px;
+            /* font-size: 500px; */
+            -webkit-user-select: none;
+            color: #3E5C99;
+        }
+        .bottom {
+            width: 100%;
+            height: 80px;
+            line-height: 80px;
+            font-size: 30px;
+            background-color: #95A6C2;
+            text-align: center;
+            -webkit-user-select: none;
+            color: #EBEEF5;
+        }
+    </style>
+</head>
+<body>
+    <div class="area" id="area">
+        <div id="middle" class="middle"></div>
+        <div class="bottom" id="bottom" onclick="randomAction()">点击随机生成文字</div>
+    </div>
+    <script>
+        var globalText = '';
+
+        window.onload = function() {
+            //首次触发，根据界面显示内容范围
+            changedFrame();
+            //监听大小改变，触发根据界面显示内容范围
+            window.addEventListener("resize", changedFrame);
+        }
+        function changedFrame() {
+            let winWidth = 0;
+            let winHeight = 0;
+
+            // 获取窗口宽度
+            if (window.innerWidth) {
+                winWidth = window.innerWidth;
+            } else if ((document.body) && (document.body.clientWidth)) {
+                winWidth = document.body.clientWidth;
+            }
+            // 获取窗口高度
+            if (window.innerHeight) {
+                winHeight = window.innerHeight;
+            } else if ((document.body) && (document.body.clientHeight)) {
+                winHeight = document.body.clientHeight;
+            }
+            // 通过深入 Document 内部对 body 进行检测，获取窗口大小
+            if (document.documentElement && document.documentElement.clientHeight && document.documentElement.clientWidth) {
+                winHeight = document.documentElement.clientHeight;
+                winWidth = document.documentElement.clientWidth;
+            }
+
+            let area = document.getElementById('area');
+            area.style.width = winWidth + 'px';
+            area.style.height = winHeight + 'px';
+
+
+            let middle = document.getElementById('middle');
+            middle.style.height = winHeight - 80 + 'px';
+            middle.style.lineHeight = winHeight - 80 + 'px';
+
+            if (winHeight > winWidth) {
+                middle.style.fontSize = winWidth - 30 + 'px';
+            } else {
+                middle.style.fontSize = winHeight - 30 + 'px';
+            }
+
+
+        }
+    </script>
+    <script>
+        let arr = ["天","地","人","你","我","他","一","二","三","四","五","上","下","口","耳","目","手","足","站","坐","日","月","水","火","山","石","田","禾","对","云","雨","风","花","鸟","虫","六","七","八","九","十","爸","妈","马","土","不","画","打","棋","鸡","字","词","语","句","子","桌","纸","文","数","学","音","乐","妹","奶","白","皮","小","桥","台","雪","儿","草","家","是","车","路","灯","走","秋","气","了","树","叶","片","大","飞","会","个","的","船","两","头","在","里","看","见","闪","星","江","南","可","采","莲","鱼","东","西","北","尖","说","春","青","蛙","夏","弯","就","冬","男","女","开","关","正","反","远","有","色","近","听","无","声","去","还","来","多","少","黄","牛","只","猫","边","鸭","苹","果","杏","桃","书","包","尺","作","业","本","笔","刀","课","早","校","明","力","尘","从","众","双","木","林","森","条","心","升","国","旗","中","红","歌","起","么","美","丽","立","午","晚","昨","今","年","影","前","后","黑","狗","左","右","它","好","朋","友","比","尾","巴","谁","长","短",]
+        function randomAction() {
+            let index = Math.floor(Math.random()*arr.length);
+            let text = arr[index];
+            document.getElementById("middle").innerHTML = text;
+        }
+    </script>
+</body>
+</html>

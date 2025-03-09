@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        .content-area {
+            width: 100%;
+            height: 100vh;
+            background-color: aqua;
+
+            display: flex;
+            flex-direction: row;
+        }
+        .content-area2 {
+            width: 50%;
+            height: 100%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .text-area {
+            width: 90%;
+            height: 98%;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-area">
+        <div class="content-area2" id="cccccc">
+            <textarea name="" id="aaaaa" class="text-area"></textarea>
+        </div>
+        <div class="content-area2">
+            <textarea name="" id="bbbbb" class="text-area"></textarea>
+        </div>
+    </div>
+    <script>
+        window.onload = function() {
+            var fileArea = document.getElementById("aaaaa")
+            fileArea.addEventListener("dragenter", function() {
+            }, false)
+            fileArea.addEventListener("dragleave", function() {
+            }, false)
+            fileArea.addEventListener("dragover", function(ev) {
+                ev.preventDefault()
+            }, false)
+            fileArea.addEventListener("drop", function(ev) {
+                
+                ev.preventDefault()
+                let fileReader = new FileReader()
+                let file = ev.dataTransfer.files[0]
+                // fileReader.onload = function() {
+                //     console.log("成功", this.result)
+                // }
+                // fileReader.onerror = function() {
+                //     console.log("读取失败")
+                // }
+                handleFileReader(fileReader)
+                fileReader.readAsText(file)
+            }, false)
+            fileArea.addEventListener("input", function(ev) {
+                ev.preventDefault()
+
+                console.log("内容已更改: " + event.target.value);
+                let str = event.target.value;
+                setupWithString(str);
+            })
+        }
+        function handleFileReader(reader) {
+            reader.onload = function fileReadCompleted() {
+                let str = reader.result;
+
+                setupWithString(str);
+            }
+        }
+        function setupWithString(str) {
+
+            // console.log(str)
+
+            let fileArea = document.getElementById("aaaaa")
+            fileArea.innerHTML = str;
+
+
+            let json = JSON.parse(str);
+            console.log(json)
+            let clips = json['playlist_clips']
+            console.log(clips)
+
+            let newStr = '';
+            newStr += '[' + '\n';
+
+
+            let keep = [];
+            for (let i = 0; i < clips.length; i++) {
+                let obj = clips[i]["clip"];
+                // console.log('==========================');
+                // console.log(obj)
+
+                let time = obj["created_at"];
+                time = time.replace(/[^a-zA-Z0-9 ]/g, '');
+                time = time.substring(0,8);
+
+                let id = obj["id"];
+                let last2Id = id.substr(-2)
+
+
+                let abc = {};
+                abc.mp3 = obj["audio_url"];
+                // abc.mp4 = obj["video_url"];
+                // abc.name = obj["title"];
+                abc.name2 = obj["title"] + '_' + time + '_' + last2Id;
+                // abc.name3 = abc.name2 + '.mp3';
+                // abc.id = obj["id"];
+                // abc.created_at = obj["created_at"];
+                keep.push(abc);
+
+                // newStr += '    ' + '{"mp3":"'+abc.mp3+'","name3":"'+abc.name3+'","name2":"'+abc.name2+'","name":"'+abc.name+'","created_at":"'+abc.created_at+'"},' + '\n';
+            }
+            newStr += '];';
+
+            console.log(keep);
+            // console.log(JSON.stringify(keep, null, 2));
+
+            // let newStr = JSON.stringify(keep);
+
+            // console.log(newStr);
+            // document.getElementById("bbbbb").innerHTML = newStr;
+
+            document.getElementById("bbbbb").innerHTML = JSON.stringify(keep, null, 2);
+        }
+        
+    </script>
+</body>
+</html>

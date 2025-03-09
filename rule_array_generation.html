@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>规则数组生成</title>
+</head>
+<body>
+    <center>
+        <div>
+            <br/>
+            <div>规则数组生成</div>
+            <br/>
+            <div>
+                开始的数值: <input type="text" id="num" value="1"><br/>
+                个数递增：<input type="text" id="numStep" value="1"><br/>
+                个数长度：<input type="text" id="numLen" value="8"><br/>
+                <button onclick="pressedButtonToDo()">创建</button>
+
+                <button onclick="pressedButtonToDo6()">6个创建</button>
+                <button onclick="pressedButtonToDo8()">8个创建</button>
+                <button onclick="pressedButtonToDo10()">10个创建</button>
+                <button onclick="pressedButtonToDo12()">12个创建</button>
+            </div>
+            <br/>
+            <div >
+                <textarea name="" id="content-text" rows="10" cols="50"></textarea>
+            </div>
+            <div>
+                <textarea name="" id="content-text2" rows="10" cols="50"></textarea>
+            </div>
+            <div>
+                <textarea name="" id="content-text3" rows="10" cols="50"></textarea>
+            </div>
+            <div>
+                <textarea name="" id="content-text4" rows="10" cols="50"></textarea>
+            </div>
+        </div>
+    </center>
+    <script>
+        var num = 0;
+        var numLen = 0;
+        var numStep = 0;
+
+        function pressedButtonToDo(){
+            num = parseInt(document.getElementById('num').value);
+            numLen = parseInt(document.getElementById('numLen').value);
+            numStep = parseInt(document.getElementById('numStep').value);
+
+            coreToAction();
+        }
+
+        function pressedButtonToDo6(){
+            num = parseInt(document.getElementById('num').value);
+            numLen = 6;
+            numStep = parseInt(document.getElementById('numStep').value);
+            document.getElementById('numLen').value = numLen;
+
+            coreToAction();
+        }
+
+        function pressedButtonToDo8(){
+            num = parseInt(document.getElementById('num').value);
+            numLen = 8;
+            numStep = parseInt(document.getElementById('numStep').value);
+            document.getElementById('numLen').value = numLen;
+
+            coreToAction();
+        }
+
+        function pressedButtonToDo10(){
+            num = parseInt(document.getElementById('num').value);
+            numLen = 10;
+            numStep = parseInt(document.getElementById('numStep').value);
+            document.getElementById('numLen').value = numLen;
+
+            coreToAction();
+        }
+        function pressedButtonToDo12(){
+            num = parseInt(document.getElementById('num').value);
+            numLen = 12;
+            numStep = parseInt(document.getElementById('numStep').value);
+            document.getElementById('numLen').value = numLen;
+
+            coreToAction();
+        }
+
+        function coreToAction() {
+            var content = document.getElementById('content-text');
+            var content2 = document.getElementById('content-text2');
+            var content3 = document.getElementById('content-text3');
+            var content4 = document.getElementById('content-text4');
+            var contentText = '';
+            var contentText2 = '';
+
+            let step = numStep;
+            for(var i = 0; i < numLen; i++){
+                contentText += (num + i * step + '');
+                contentText2 += ('@('+ (num + i  * step) +')' + '');
+                if (i != numLen - 1) {
+                    contentText += ','
+                    contentText2 += ','
+                }
+            }
+            content.value = contentText;
+            content2.value = '{' + contentText + '}';
+            content3.value = contentText2;
+            content4.value = '@[' + contentText2 + ']';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <title>木子才的歌曲集</title>
+    <style>
+        body,div,p {
+            margin: 0;
+            padding: 0;
+        }
+        #music {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        button {
+            margin-top: 20px;
+        }
+        #tips {
+            margin-top: 20px;
+        }
+        #other-label {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+     <!--音乐播放控制按钮-->
+     <div id="music">
+        <div id="musicName"></div>
+        <audio id="myAudio" controls src=""></audio>
+        <button id="playButton">播放音乐</button>
+        <button id="playOther">切歌</button>
+        <p id="tips">点击屏幕开始播放音乐吧！</p>
+        <p id="other-label">这里的所有歌曲</p>
+        <p>由 木子才 ( muzico ) 填词</p>
+        <p>由 SUNO AI 创作。</p>
+    </div>
+    <script type="text/javascript">
+        //音乐名称列表
+        var music_name = 
+        // [
+        //     "四月的谎言.mp3",
+        //     "天空的颜色.mp3",
+        //     "一辈子爱的人.mp3"
+        // ];
+        ["天空的颜色.mp3","四月的谎言_20240628_9f.mp3", "好想你_20240628_4a.mp3", "二人的物语_20240628_00.mp3", "只能够_20240627_e9.mp3", "我们的故事_20240615_bc.mp3", "二人的物语_20240613_be.mp3", "奇迹Full_20240609_92.mp3", "她的故事Most_20240608_ea.mp3", "她的故事Lost_20240608_8e.mp3", "我和你Full_20240607_7c.mp3", "我和你Full_20240607_4a.mp3", "我和你Full_20240607_5a.mp3", "我和你Full_20240607_5e.mp3", "我和你_20240603_23.mp3", "她的故事_20240603_e1.mp3", "二人的物语_20240531_f5.mp3", "四月的谎言_20240520_1c.mp3", "只能够_20240520_20.mp3", "好想你_20240517_2b.mp3", "随笔01_20240515_af.mp3", "遥远的梦_20240514_88.mp3", "会いたかった_20240510_90.mp3", "好想你_20240510_85.mp3", "黑色的天空_20240502_ae.mp3", "一辈子爱的人_20240502_d4.mp3", "黒い空_20240428_87.mp3", "黑色的天空_20240428_77.mp3", "黑色的天空_20240428_21.mp3", "彼女の物語は （腾讯翻译）_20240419_7b.mp3", "只能够_20240418_13.mp3", "星空_20240418_9c.mp3", "奇迹_20240418_90.mp3", "奇迹_20240418_9a.mp3", "奇迹_20240418_18.mp3", "思念你_20240418_34.mp3", "思念你_20240418_cd.mp3", "朦胧里_20240418_c6.mp3", "她的故事_20240418_9d.mp3", "她的故事_20240418_50.mp3", "思念你_20240418_5b.mp3", "思念你_20240418_e7.mp3", "她的故事_20240328_36.mp3", "她的故事（中间部分1分钟）_20240327_4c.mp3", "我和你_20240326_fa.mp3", "我和你_20240326_23.mp3", "她的故事_20240326_cc.mp3"]
+
+    
+        //音乐地址
+        var arr = music_name.map(function(name) {
+            //网址路径例子：return "https://xxx.com/typecho/mp3/" + name;
+            //本地路径例子：return "/xxx/xxx/" + name;
+            return "./music/" + name;
+        });
+    
+
+        var myAudio = document.getElementById("myAudio");
+        // 创建音频元素
+        // var myAudio = new Audio();
+        myAudio.hidden = true;
+        myAudio.loop = false;
+        myAudio.preload = "none";
+        myAudio.controls = false;
+        myAudio.controlsList = "nodownload";
+    
+        // 打随机乱音乐数组顺序
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+    
+        // 按列表顺序的音乐列表
+        //var playlist = arr.slice();
+ 
+        // 随机打乱顺序后的音乐列表
+        var playlist = shuffle(arr.slice());
+ 
+        var currentTrack = 0;
+ 
+        //监听页面第一次鼠标点击，自动播放歌曲
+        //var firstMouseClickDetected = false;
+        /*document.addEventListener('mousedown', function firstMouseClickHandler() {
+            if (!firstMouseClickDetected) {
+                if (myAudio.src === '') {
+                    myAudio.src = playlist[currentTrack];
+                }
+                myAudio.play();
+                playButton.innerHTML = '暂停音乐';
+                firstMouseClickDetected = true;
+            }
+            document.removeEventListener('mousedown', firstMouseClickHandler);
+         });*/
+
+         var tips = document.getElementById("tips");
+         var musicName = document.getElementById("musicName");
+ 
+        // 播放按钮点击事件
+        var playButton = document.getElementById("playButton");
+        playButton.addEventListener('click', function() {
+            if (myAudio.paused) {
+                if (myAudio.src === '') {
+                    myAudio.src = playlist[currentTrack];
+                    myAudio.hidden = false;
+
+                    musicName.innerText = music_name[currentTrack];
+                    tips.hidden = true;
+                }
+                myAudio.play();
+                playButton.innerHTML = '暂停音乐';
+            } else {
+                myAudio.pause();
+                playButton.innerHTML = '播放音乐';
+            }
+        });
+
+        var playOther = document.getElementById("playOther");
+        playOther.addEventListener('click', function() {
+            if (myAudio.paused) {
+                if (myAudio.src === '') {
+                    myAudio.src = playlist[currentTrack];
+                    myAudio.hidden = false;
+                    
+                    musicName.innerText = music_name[currentTrack];
+                    tips.hidden = true;
+                }
+                myAudio.play();
+                playButton.innerHTML = '暂停音乐';
+            } else {
+                myAudio.pause();
+                currentTrack++;
+                if (currentTrack < playlist.length) {
+                    myAudio.src = playlist[currentTrack];
+                    myAudio.play();
+
+                    musicName.innerText = music_name[currentTrack];
+                } else {
+                    currentTrack = 0;
+                    myAudio.src = playlist[currentTrack];
+                    myAudio.play();
+
+                    musicName.innerText = music_name[currentTrack];
+                }
+            }
+        });
+    
+        // 音频播放结束事件
+        myAudio.addEventListener('ended', playEndedHandler);
+        function playEndedHandler() {
+            currentTrack++;
+            if (currentTrack < playlist.length) {
+                myAudio.src = playlist[currentTrack];
+                myAudio.play();
+
+                musicName.innerText = music_name[currentTrack];
+            } else {
+                currentTrack = 0;
+                myAudio.src = playlist[currentTrack];
+                myAudio.play();
+
+                musicName.innerText = music_name[currentTrack];
+            }
+        };
+    
+        // 鼠标点击事件，自动播放音乐
+        var hasClickedOnce = false; // 标记是否已经点击过
+        document.addEventListener('click', function() {
+            if (!hasClickedOnce) {
+                if (myAudio.paused && myAudio.src === '') {
+                    myAudio.src = playlist[currentTrack];
+                    myAudio.play();
+                    playButton.innerHTML = '暂停音乐';
+                    hasClickedOnce = true; // 设置标记以防止进一步点击
+                
+                    musicName.innerText = music_name[currentTrack];
+                    tips.hidden = true;
+                }
+            }
+        });
+    
+        // 将音频元素添加到页面中
+        document.getElementById("music").appendChild(myAudio);
+    </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一年级，和大人一起读（二）</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        .main-body {
+            width: 100%;
+            height: 100vh;
+        }
+        .head-body {
+            width: 100%;
+            height: 40px;
+            background-color: aqua;
+            line-height: 40px;
+            padding-left: 20px;
+        }
+        .list-body {
+            width: 100%;
+            height: calc(100vh - 80px - 40px);
+            background-color: rgb(235, 253, 181);
+            overflow: scroll;
+        }
+        .control-body {
+            width: 100%;
+            height: 80px;
+            background-color: rgb(243, 243, 243);
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .list-item {
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+        }
+
+
+        .control-body button {
+            background: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .control-body button:hover {
+            background: #0056b3;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 10px 0;
+            position: relative;
+        }
+        .progress-bar .progress {
+            height: 100%;
+            background: #007BFF;
+            width: 0;
+            border-radius: 2px;
+        }
+        .volume-control {
+            display: flex;
+            align-items: center;
+        }
+        .volume-control input {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-body">
+        <div class="head-body" onclick="goHomeTap()">回到主页</div>
+        <audio id="audio" src=""></audio>
+        <div class="list-body">
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_2/667cc863c58941f0b2f6606ea6848d7a.mp3">01看电视.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_2/99070fec3eef47d092948a0a693e84de.mp3">02小狐狸买手套（一）.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_2/f083dda1d6964c8d84fb6442c3857ebf.mp3">03小狐狸买手套（二）.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_2/c7542b5de82b4b3f8ab8970d2e59616a.mp3">04小狐狸买手套（三）.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_2/57c43fc01c154d918848b9d272b8e048.mp3">05学口技.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_2/187dab066b0b4a80bd37f0105c3145ed.mp3">06聪明的徐文长.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_2/5294244ca9e441bca5a6ba577bb73bef.mp3">07谁能把屋子装满.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_2/0d7bb530654548729368b198ec22c1b1.mp3">08种西瓜.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_2/425e6cd996d94381b8182fe4d35392e5.mp3">09唱歌.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_2/ae6a5232211e4971ac1fbb78ebc00cf0.mp3">10金太阳.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_2/6ee4f2d7bf554456ac5bc23df8a19973.mp3">11小苗苗.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_2/082da54047ea4e71bdcfd4d1baebc348.mp3">12向日葵和太阳.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_2/fbecc809676d426eb009e6188075415c.mp3">13拔苗助长.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_2/17d3bbede3df4a83a295be9099179fcd.mp3">14狐假虎威.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_2/f0a2f191eaeb4ce5ad69d8c3ff9ea05a.mp3">15守株待兔.mp3</div>
+
+
+        </div>
+        <div class="control-body">
+            <button id="playPauseBtn">播放</button>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <div class="volume-control">
+                <span>音量:</span>
+                <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="0.5">
+            </div>
+        </div>
+    </div>
+    <script>
+        function goHomeTap() {
+            window.location.href='./index.html'
+        }
+        const audio = document.getElementById('audio');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progress = document.getElementById('progress');
+        const volumeControl = document.getElementById('volumeControl');
+        const playlist = document.querySelector('.list-body');
+        let isPlaying = false;
+
+        function playAudio(src) {
+            audio.src = src;
+            audio.play();
+            playPauseBtn.textContent = '暂停';
+            isPlaying = true;
+        }
+
+        function updateProgress() {
+            const percentage = (audio.currentTime / audio.duration) * 100;
+            progress.style.width = percentage + '%';
+        }
+
+        function togglePlayPause() {
+            if (isPlaying) {
+                audio.pause();
+                playPauseBtn.textContent = '播放';
+            } else {
+                audio.play();
+                playPauseBtn.textContent = '暂停';
+            }
+            isPlaying = !isPlaying;
+        }
+
+        function updateVolume() {
+            audio.volume = volumeControl.value;
+        }
+
+        playlist.addEventListener('click', (event) => {
+            if (event.target.tagName === 'DIV') {
+                const src = event.target.getAttribute('data-src');
+                playAudio(src);
+            }
+        });
+
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        volumeControl.addEventListener('input', updateVolume);
+        audio.addEventListener('timeupdate', updateProgress);
+    </script>
+</body>
+</html>

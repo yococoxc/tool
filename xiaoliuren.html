@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小六壬</title>
+</head>
+<body>
+    <center>
+        <div>
+            <button onclick="randomNumber()">随机生成三个数字(小)</button>
+        </div>
+        <div>
+            <button onclick="randomNumber2()">随机生成三个数字(大)</button>
+        </div>
+        <div id="the1"></div>
+        <div id="the2"></div>
+        <div id="the3"></div>
+    </center>
+    <script>
+        function random(min, max) {
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
+        function valueToString(value) {
+            if (value == 1) {
+                return '大安';
+            } else if (value == 2) {
+                return '留连';
+            } else if (value == 3) {
+                return '速喜';
+            } else if (value == 4) {
+                return '赤口';
+            } else if (value == 5) {
+                return '小吉';
+            } else {
+                return '空亡';
+            }
+        }
+        function randomNumber() {
+            let num1 = random(1, 6);
+            let num2 = random(1, 6);
+            let num3 = random(1, 6);
+
+
+            let theNum1 = num1 % 6;
+            let theNum2 = num2 % 6 + theNum1;
+            let theNum3 = num3 % 6 + theNum2;
+            console.log('num1:',num1,'num2:',num2,'num3:',num3);
+
+            let numStr1 = valueToString(theNum1);
+            let numStr2 = valueToString(theNum2);
+            let numStr3 = valueToString(theNum3);
+            console.log(numStr1,numStr2,numStr3);
+
+            the1.innerHTML = num1 + ", " + num2 + ", " + num3;
+            the2.innerHTML = theNum1 + ", " + theNum2 + ", " + theNum3;
+            the3.innerHTML = numStr1 + ", " + numStr2 + ", " + numStr3;
+        }
+        function randomNumber2() {
+            let num1 = random(1, 600);
+            let num2 = random(1, 600);
+            let num3 = random(1, 600);
+
+
+            let theNum1 = num1 % 6;
+            let theNum2 = num2 % 6 + theNum1;
+            let theNum3 = num3 % 6 + theNum2;
+            console.log('num1:',num1,'num2:',num2,'num3:',num3);
+
+            let numStr1 = valueToString(theNum1);
+            let numStr2 = valueToString(theNum2);
+            let numStr3 = valueToString(theNum3);
+            console.log(numStr1,numStr2,numStr3);
+
+            the1.innerHTML = num1 + ", " + num2 + ", " + num3;
+            the2.innerHTML = theNum1 + ", " + theNum2 + ", " + theNum3;
+            the3.innerHTML = numStr1 + ", " + numStr2 + ", " + numStr3;
+        }
+    </script>
+</body>
+</html>

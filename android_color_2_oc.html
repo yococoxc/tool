@@ -1,0 +1,250 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .input-area {
+            display: flex;
+            flex-direction: row;
+        }
+        #file-area {
+            width: 150px;
+            height: 50px;
+            background: #ccc;
+            border: 1px solid #000;
+            text-align: center;
+            line-height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <h3>Android 颜色 XML 转 OC 颜色 宏定义</h3>
+
+    <div class="input-area">
+        <div>
+            <div id="file-area">文件拖到这里上传</div>
+        </div>
+        <div>
+            <input type="file" id="fileInput"/>
+        </div>
+    </div>
+    
+
+    <div id="show-area"></div>
+    by muzico.2022.03.24
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function selectedFileChanged(){
+            if (this.files.length === 0) {
+                console.log('请选择文件！')
+                return
+            }
+
+            const reader = new FileReader()
+            reader.onload = function fileReadCompleted() {
+                texthandleAction(reader.result)
+            }
+            reader.readAsText(this.files[0])
+        })
+
+
+
+        window.onload = function() {
+            var fileArea = document.getElementById("file-area")
+            fileArea.addEventListener("dragenter", function() {
+                fileArea.innerHTML = "请松手"
+            }, false)
+            fileArea.addEventListener("dragleave", function() {
+                fileArea.innerHTML = "文件拖到这里上传"
+            }, false)
+            fileArea.addEventListener("dragover", function(ev) {
+                ev.preventDefault()
+            }, false)
+            fileArea.addEventListener("drop", function(ev) {
+                fileArea.innerHTML = "文件处理。。。"
+                ev.preventDefault()
+                let fileReader = new FileReader()
+                let file = ev.dataTransfer.files[0]
+                fileReader.onload = function() {
+                    fileArea.innerHTML = "新文件拖到这里上传"
+                    texthandleAction(this.result)
+                }
+                fileReader.onerror = function() {
+                    fileArea.innerHTML = "重新文件拖到这里上传"
+                }
+                fileReader.readAsText(file)
+            }, false)
+        }
+
+
+
+
+        function texthandleAction(textStr) {
+            console.log('textStr',textStr)
+
+            let startIndex = textStr.indexOf("<resources>")
+            let endIndex = textStr.indexOf("</resources>")
+            // console.log('startIndex',startIndex)
+            // console.log('endIndex',endIndex)
+
+            if (startIndex >= 0 && endIndex >=0) {
+                let targetStr = textStr.substring(startIndex + "<resources>".length, endIndex)
+                // console.log('targetStr',targetStr)
+
+                let colorArray = targetStr.split('</color>')
+                // console.log('colorArray',colorArray)
+
+
+                let resultArray = []
+                let colorNameMaxLength = 0;
+
+                for (let i = 0; i < colorArray.length; i++) {
+                    let tempStr = colorArray[i]
+                    // console.log('tempStr:',tempStr)
+                    let tempArray = tempStr.split(' ')
+                    // console.log('tempArray:',tempArray)
+
+                    let isColor = false
+                    let colorValue = '';
+                    let colorName = '';
+                    let likeName = '';
+
+                    for (let j = 0; j < tempArray.length; j++) {
+                        var tempStr2 = tempArray[j]
+                        if (tempStr2 == '<color') {
+                            isColor = true
+                        } else {
+                            let hasValue = false
+                            let hasArr = tempStr2.split('>')
+                            if (hasArr.length == 2) {
+                                colorValue = hasArr[1]
+                                colorValue = colorValue.replace(/\#/g, '0x')
+                                let tempColorValueArr = colorValue.split('@color/')
+                                if (tempColorValueArr.length == 2) {
+                                    likeName = tempColorValueArr[1]
+                                }
+
+                                let tempNameStr = hasArr[0]
+                                let tempNameArr = tempNameStr.split('=')
+                                if (tempNameArr.length == 2) {
+                                    colorName = tempNameArr[1]
+                                    colorName = colorName.replace(/\"/g, '')
+                                    if (colorNameMaxLength < colorName.length) {
+                                        colorNameMaxLength = colorName.length
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (isColor) {
+                        // console.log('---------->>>>>')
+                        // console.log('likeName:',likeName)
+                        // console.log('colorName:',colorName)
+                        // console.log('colorValue:',colorValue)
+
+                        resultArray.push({
+                            colorName: colorName,
+                            colorValue: colorValue,
+                            likeName: likeName
+                        })
+                    }
+                }
+
+                let colorNameGap = '     '
+                for (let i = 0; i < colorNameMaxLength; i++) {
+                    colorNameGap += ' '
+                }
+
+                let resultStr = ''
+
+                resultStr = resultStr + '#ifndef Color_h' + '\n'
+                resultStr = resultStr + '#define Color_h' + '\n'
+                resultStr = resultStr + '\n'
+                resultStr = resultStr + '#define UIColorFromHexRGB(s) [UIColor colorWithRed:(((s & 0xFF0000) >> 16 )) / 255.0 green:((( s & 0xFF00 ) >> 8 )) / 255.0 blue:(( s & 0xFF )) / 255.0 alpha:1.0]' + '\n'
+                resultStr = resultStr + '\n'
+                resultStr = resultStr + '#define UIColorFromHexARGB(s) [UIColor colorWithRed:(((s & 0xFF0000) >> 16 )) / 255.0 green:((( s & 0xFF00 ) >> 8 )) / 255.0 blue:(( s & 0xFF )) / 255.0 alpha:(((s & 0xFF000000) >> 24 )) / 255.0 ]' + '\n'
+                resultStr = resultStr + '\n'
+
+                console.log('resultArray',resultArray)
+
+
+
+                for (let i = 0; i < resultArray.length; i++) {
+                    let tempObj = resultArray[i]
+                    
+                    resultStr = resultStr + '#define     '
+                    resultStr = resultStr + tempObj.colorName 
+
+
+                    resultStr = resultStr + '     '
+                    let moreColorNameGapNumber = colorNameMaxLength - tempObj.colorName .length
+                    for (let i = 0; i < moreColorNameGapNumber; i++) {
+                        resultStr += ' '
+                    }
+
+
+                    if (tempObj.likeName.length > 0) {
+                        for (let j = 0; j < resultArray.length; j++) {
+                            let tempObj2 = resultArray[j]
+                            if (tempObj.likeName == tempObj2.colorName) {
+                                resultStr = resultStr + 'UIColorFromHexARGB(' + tempObj2.colorValue + ')'
+                                break
+                            }
+                        }
+                    } else {
+                        resultStr = resultStr + 'UIColorFromHexARGB(' + tempObj.colorValue + ')'
+                    }
+                    
+                    resultStr = resultStr + '\n'
+                }
+
+
+                resultStr = resultStr + '\n'
+                resultStr = resultStr + '#endif /* Color_h */' + '\n'
+
+                console.log('resultStr----->>>>>')
+                console.log(resultStr)
+
+
+
+                var i = document.getElementById('text-area');
+                if (i == null) {
+                    // 获取窗口宽度
+                    if (window.innerWidth)
+                        winWidth = window.innerWidth;
+                    else if ((document.body) && (document.body.clientWidth))
+                        winWidth = document.body.clientWidth;
+                    // 获取窗口高度
+                    if (window.innerHeight)
+                        winHeight = window.innerHeight;
+                    else if ((document.body) && (document.body.clientHeight))
+                        winHeight = document.body.clientHeight;
+                    // 通过深入 Document 内部对 body 进行检测，获取窗口大小
+                    if (document.documentElement && document.documentElement.clientHeight && document.documentElement.clientWidth)
+                    {
+                        winHeight = document.documentElement.clientHeight;
+                        winWidth = document.documentElement.clientWidth;
+                    }
+
+
+
+
+                    var opinput=document.createElement('textarea');
+                    opinput.setAttribute('id', 'text-area');
+                    opinput.style.width = winWidth - 50 + 'px'
+                    opinput.style.height = winHeight - 160 + 'px'
+                    var a = document.getElementById('show-area');
+                    a.appendChild(opinput);
+                    i = document.getElementById('text-area');
+                }
+                i.innerHTML = resultStr;
+
+            }
+        }
+    </script>
+</body>
+</html>

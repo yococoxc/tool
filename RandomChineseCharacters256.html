@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>学汉字256</title>
+    <style>
+        body{ font-family:"STHeiti"}
+        * {
+            padding: 0;
+            margin: 0;
+        }
+        .area {
+            display: flex;
+            flex-direction: column;
+        }
+        .middle {
+            width: 100%;
+            text-align: center;
+            height: 500px;
+            line-height: 500px;
+            /* font-size: 500px; */
+            -webkit-user-select: none;
+            color: #3E5C99;
+            display: flex;
+            flex-direction: row;
+        }
+        .middle-left {
+            background-color: #CAD2E3;
+        }
+        .middle-right {
+            display: flex;
+            flex-direction: column;
+        }
+        .bottom {
+            width: 100%;
+            height: 80px;
+            line-height: 80px;
+            font-size: 30px;
+            background-color: #95A6C2;
+            text-align: center;
+            -webkit-user-select: none;
+            color: #EBEEF5;
+
+            display: flex;
+            flex-direction: row;
+        }
+        .bottom-item {
+            flex: 1;
+        }
+        .bottom-item2 {
+            flex: 1;
+            background-color: #5d7ca1;
+        }
+        .bottom-right-item {
+            /* flex: 1; */
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="area" id="area">
+        <div id="middle" class="middle">
+            <div id="middle-left" class="middle-left"></div>
+            <div id="middle-right" class="middle-right">
+                <div class="bottom-right-item" id="item-0" onclick="typeSelected0()">全部</div>
+                <div class="bottom-right-item" id="item-1" onclick="typeSelected1()">自然</div>
+                <div class="bottom-right-item" id="item-2" onclick="typeSelected2()">人物</div>
+                <div class="bottom-right-item" id="item-3" onclick="typeSelected3()">动物</div>
+                <div class="bottom-right-item" id="item-4" onclick="typeSelected4()">生活</div>
+                <div class="bottom-right-item" id="item-5" onclick="typeSelected5()">学校</div>
+                <div class="bottom-right-item" id="item-6" onclick="typeSelected6()">饮食</div>
+                <div class="bottom-right-item" id="item-7" onclick="typeSelected7()">植物</div>
+                <div class="bottom-right-item" id="item-8" onclick="typeSelected8()">游戏</div>
+            </div>
+        </div>
+        <div class="bottom" id="bottom">
+            <div class="bottom-item" onclick="sequenceAction()">顺序</div>
+            <div class="bottom-item2" onclick="speechAction()">读</div>
+            <div class="bottom-item" onclick="randomAction()">随机</div>
+        </div>
+    </div>
+    <script>
+        var globalText = '';
+        var globalArr = [];
+        var globalSequenceIndex = 0;
+
+        window.onload = function() {
+            typeSelected0();
+
+            //首次触发，根据界面显示内容范围
+            changedFrame();
+            //监听大小改变，触发根据界面显示内容范围
+            window.addEventListener("resize", changedFrame);
+        }
+        function changedFrame() {
+            let winWidth = 0;
+            let winHeight = 0;
+
+            // 获取窗口宽度
+            if (window.innerWidth) {
+                winWidth = window.innerWidth;
+            } else if ((document.body) && (document.body.clientWidth)) {
+                winWidth = document.body.clientWidth;
+            }
+            // 获取窗口高度
+            if (window.innerHeight) {
+                winHeight = window.innerHeight;
+            } else if ((document.body) && (document.body.clientHeight)) {
+                winHeight = document.body.clientHeight;
+            }
+            // 通过深入 Document 内部对 body 进行检测，获取窗口大小
+            if (document.documentElement && document.documentElement.clientHeight && document.documentElement.clientWidth) {
+                winHeight = document.documentElement.clientHeight;
+                winWidth = document.documentElement.clientWidth;
+            }
+
+            let area = document.getElementById('area');
+            area.style.width = winWidth + 'px';
+            area.style.height = winHeight + 'px';
+
+
+            let middleHeight = winHeight - 80;
+            let middle = document.getElementById('middle');
+            middle.style.height = middleHeight + 'px';
+            middle.style.lineHeight = middleHeight + 'px';
+            middle.style.width = winWidth + 'px';
+
+            let middleRightWidth = 60;
+            let middleRight = document.getElementById('middle-right');
+            middleRight.style.width = middleRightWidth + 'px';
+
+            let middleLeftWidth = winWidth -  middleRightWidth;
+            let middleLeft = document.getElementById('middle-left');
+            middleLeft.style.width = middleLeftWidth + 'px';
+
+            let itemHeight = middleHeight / 9;
+            for (let i = 0; i < 9; i++) {
+                let tag = 'item-'+i;
+                let cell = document.getElementById(tag);
+                cell.style.height = itemHeight + 'px';
+                cell.style.lineHeight = itemHeight + 'px';
+            }
+
+            if (middleHeight > middleLeftWidth) {
+                middleLeft.style.fontSize = middleLeftWidth - 30 + 'px';
+            } else {
+                middleLeft.style.fontSize = middleHeight - 30 + 'px';
+            }
+        }
+    </script>
+    <script>
+        let arr = [
+            {"自然篇": ["风","浪","星","田","雨","鸟","石","云","电","雪","海","山","江","日","水","冰","林","土","冬","河","沙","池","火","天","雷","夏","月","禾","春","湖","秋","虹",]},
+            {"人物篇": ["爸","妈","爷","奶","叔","姨","哥","姐","睡","妹","唇","舌","鼻","发","牙","眉","腿","影","弟","耳","目","头","手","足","婴","洗","笑","哭","坐","吃","指","背",]},
+            {"动物篇": ["鹅","鼠","鸽","蝶","蜂","牛","羊","蚁","鸭","虎","熊","狐","狗","蛇","蛙","豹","猪","马","鹿","燕","兔","鸡","象","鱼","猫","猴","虫","狮","狼","蚊","鹰","龟",]},
+            {"生活篇": ["床","篮","裙","扇","皂","刀","叉","毯","伞","锅","杯","窗","梳","衣","裤","几","镜","碗","钟","扫","鞋","袜","盆","桶","壶","灯","盘","勺","刷","筷","帽","被",]},
+            {"学校篇": ["网","旗","笔","板","纸","本","书","尺","柜","椅","车","桌","唱","室","舞","读","方","画","墨","盒","架","师","门","圆","操","胶","一","二","角","三","四","五",]},
+            {"饮食篇": ["米","面","油","肉","菜","蛋","奶","豆","糖","藕","糕","饼","谷","杏","泡","枣","虾","蜜","汁","菇","盐","酒","醋","葱","酱","姜","蒜","薯","椒","蟹","桃","梨",]},
+            {"植物篇": ["梅","竹","兰","菊","草","枝","蕉","树","笋","橙","花","果","稻","柏","柳","槐","葵","樱","麦","杨","芹","芽","茄","柚","荷","叶","木","莲","柿","核","松","瓜",]},
+            {"游戏篇": ["筝","棋","鼓","笛","锣","铃","号","箫","飞","船","绳","跑","跳","音","积","球","毽","滑","攀","荡","拼","圈","牌","环","捉","踢","拍","弹","弓","跷","布","捏",]},
+        ];
+        function beSelectedItemIndex(value) {
+            let unselectColor = '#efefef';
+            let selectedColor = '#ffffff';
+
+            for (let i = 0; i < 9; i++) {
+                let tag = 'item-'+i;
+                let cell = document.getElementById(tag);
+                if (i == value) {
+                    cell.style.backgroundColor = selectedColor;
+                } else {
+                    cell.style.backgroundColor = unselectColor;
+                }
+            }
+        }
+        function typeSelectedWithName(name) {
+            let all = [];
+            arr.forEach((value,i)=>{ //数组循环
+                for(var pl in value){ //数组对象遍历
+                    if (name === undefined) {
+                        all = all.concat(value[pl])
+                    } else {
+                        if (pl === name) {
+                            all = all.concat(value[pl])
+                        }
+                    }
+                }
+            })
+            // console.log(all)
+            globalArr = all;
+        }
+        function typeSelected0() {
+            globalSequenceIndex = 0;
+            typeSelectedWithName();
+            beSelectedItemIndex(0);
+            sequenceAction();
+        }
+        function typeSelected1() {
+            globalSequenceIndex = 0;
+            typeSelectedWithName("自然篇");
+            beSelectedItemIndex(1);
+            sequenceAction();
+        }
+        function typeSelected2() {
+            globalSequenceIndex = 0;
+            typeSelectedWithName("人物篇");
+            beSelectedItemIndex(2);
+            sequenceAction();
+        }
+        function typeSelected3() {
+            globalSequenceIndex = 0;
+            typeSelectedWithName("动物篇");
+            beSelectedItemIndex(3);
+            sequenceAction();
+        }
+        function typeSelected4() {
+            globalSequenceIndex = 0;
+            typeSelectedWithName("生活篇");
+            beSelectedItemIndex(4);
+            sequenceAction();
+        }
+        function typeSelected5() {
+            globalSequenceIndex = 0;
+            typeSelectedWithName("学校篇");
+            beSelectedItemIndex(5);
+            sequenceAction();
+        }
+        function typeSelected6() {
+            globalSequenceIndex = 0;
+            typeSelectedWithName("饮食篇");
+            beSelectedItemIndex(6);
+            sequenceAction();
+        }
+        function typeSelected7() {
+            globalSequenceIndex = 0;
+            typeSelectedWithName("植物篇");
+            beSelectedItemIndex(7);
+            sequenceAction();
+        }
+        function typeSelected8() {
+            globalSequenceIndex = 0;
+            typeSelectedWithName("游戏篇");
+            beSelectedItemIndex(8);
+            sequenceAction();
+        }
+        function randomAction() {
+            globalSequenceIndex = 0;
+
+            let index = Math.floor(Math.random()*globalArr.length);
+            let text = globalArr[index];
+            globalText = text;
+            document.getElementById("middle-left").innerHTML = text;
+
+            
+        }
+        function sequenceAction() {
+            if (globalSequenceIndex >= globalArr.length) {
+                globalSequenceIndex = 0;
+            }
+            let text = globalArr[globalSequenceIndex];
+            globalText = text;
+            document.getElementById("middle-left").innerHTML = text;
+            globalSequenceIndex++;
+        }
+        function speechAction() {
+            let utterThis = new window.SpeechSynthesisUtterance(globalText);
+            utterThis.rate = 0.75
+            window.speechSynthesis.speak(utterThis);
+        }
+    </script>
+</body>
+</html>

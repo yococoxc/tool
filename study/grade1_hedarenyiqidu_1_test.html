@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>音乐播放器</title>
+<style>
+  /* 简单的样式 */
+  .player {
+    width: 300px;
+    margin: 20px auto;
+    padding: 10px;
+    border: 1px solid #ccc;
+  }
+  audio {
+    width: 100%;
+  }
+  #playlist {
+    list-style-type: none;
+    padding: 0;
+  }
+  #playlist li {
+    margin: 5px 0;
+    cursor: pointer;
+  }
+  #playlist li.active {
+    font-weight: bold;
+  }
+  #volume-slider {
+    width: 100%;
+  }
+</style>
+</head>
+<body>
+
+<div class="player">
+  <h2>音乐播放器</h2>
+  <ul id="playlist">
+    <li data-src="./grade1_hedarenyiqidu_1/07232e01f98c4a21926093118e7a8d25.mp3">01狗熊请客</li>
+    <li data-src="./grade1_hedarenyiqidu_1/c081d6e0617f4e93b349dbd0bb7817ca.mp3">02小猫咪穿鞋子</li>
+    <li data-src="./grade1_hedarenyiqidu_1/b20e516a2fb0405dab3c54719916365e.mp3">03春天到了</li>
+    <li data-src="./grade1_hedarenyiqidu_1/af3596e5b155447dbe1a3fba5ee48cf0.mp3">04小树和小鸟</li>
+    <li data-src="./grade1_hedarenyiqidu_1/7da94382673b4e91bb7ea8f82c4e198b.mp3">05小螃蟹</li>
+    <li data-src="./grade1_hedarenyiqidu_1/6bff3b0bdee5477f83e9649cc259a0bc.mp3">06数数歌</li>
+    <li data-src="./grade1_hedarenyiqidu_1/119125481f834432870ac1a5a7d0e128.mp3">07花花衣</li>
+    <li data-src="./grade1_hedarenyiqidu_1/b13a302c5d7d401fa33a22cc3a710372.mp3">08希望</li>
+    <li data-src="./grade1_hedarenyiqidu_1/38fd45cf352d4f028ef8686182863c94.mp3">09凿壁偷光</li>
+    <li data-src="./grade1_hedarenyiqidu_1/1c0b80c01b7c458abe817eb7e55d540f.mp3">10闻鸡起舞</li>
+    <li data-src="./grade1_hedarenyiqidu_1/10c2b766b136456688d495e378d06e81.mp3">11磨刀不误砍柴工</li>
+    <li data-src="./grade1_hedarenyiqidu_1/3648ba2e42e9491ab8d164f6b45cb5bc.mp3">12春雨</li>
+    <li data-src="./grade1_hedarenyiqidu_1/39661369344f40fea54f08a0c06b5f2d.mp3">13蒲公英</li>
+    <li data-src="./grade1_hedarenyiqidu_1/ef3dd8c367e94c33b7fea68041bc0372.mp3">14包饺子</li>
+    <li data-src="./grade1_hedarenyiqidu_1/9460e2ce78ae458f8d607386a31d72e2.mp3">15手指歌</li>
+    <li data-src="./grade1_hedarenyiqidu_1/1178baa5853a4e3a912734f484d5aea1.mp3">16水果娃娃</li>
+    <li data-src="./grade1_hedarenyiqidu_1/3b682191d3ef411bbb5a0ed22cc721df.mp3">17吹泡泡</li>
+    <li data-src="./grade1_hedarenyiqidu_1/1064c1e3d3e34cef81a1c8018ffa74e9.mp3">18窄</li>
+    <li data-src="./grade1_hedarenyiqidu_1/7e9fdc16c05744b6b8cc450bafe025f0.mp3">19冬爷爷</li>
+  </ul>
+  <audio id="audioPlayer" controls></audio>
+  <!-- <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" oninput="setVolume(this.value)"> -->
+  <!-- <input type="range" id="progress-slider" min="0" oninput="seekTo(this.value)" disabled> -->
+</div>
+
+<script>
+  let currentSongIndex = 0;
+  const playlist = document.getElementById('playlist');
+  const audioPlayer = document.getElementById('audioPlayer');
+  const volumeSlider = document.getElementById('volume-slider');
+  const progressSlider = document.getElementById('progress-slider');
+
+  function setVolume(volume) {
+    audioPlayer.volume = volume;
+  }
+
+  function seekTo(time) {
+    audioPlayer.currentTime = time;
+  }
+
+  function updateProgressSlider() {
+    if (!audioPlayer.duration) return;
+    progressSlider.max = audioPlayer.duration;
+    progressSlider.value = audioPlayer.currentTime;
+  }
+
+  function playSong(index) {
+    const song = playlist.querySelectorAll('li')[index];
+    audioPlayer.src = song.getAttribute('data-src');
+    audioPlayer.play();
+    playlist.querySelectorAll('li').forEach(item => item.classList.remove('active'));
+    song.classList.add('active');
+    currentSongIndex = index;
+    updateProgressSlider();
+  }
+
+  playlist.addEventListener('click', function(e) {
+    if (e.target.tagName === 'LI') {
+      playSong(Array.from(playlist.children).indexOf(e.target));
+    }
+  });
+
+  audioPlayer.addEventListener('timeupdate', updateProgressSlider);
+  audioPlayer.addEventListener('ended', () => {
+    currentSongIndex = (currentSongIndex + 1) % playlist.children.length;
+    playSong(currentSongIndex);
+  });
+
+  // 初始化播放第一首歌
+  playSong(currentSongIndex);
+</script>
+
+</body>
+</html>

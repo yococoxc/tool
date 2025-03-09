@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI简化代码转化目标v0.1</title>
+    <style>
+        body, div {
+            padding: 0;
+            margin: 0;
+        }
+        .contaion {
+            display: flex;
+            flex-direction: column;
+            width: calc(100vw - 10px);
+            height: calc(100vh - 10px);
+        }
+        .title {
+            height: 60px;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .title-button {
+            height: 30px;
+            width: 180px;
+        }
+        .content {
+            width: 100%;
+            height: calc(100% - 60px);
+            display: flex;
+            flex-direction: row;
+        }
+        .content2 {
+            width: 50%;
+            height: 100%;
+            border: 1px solid red;
+        }
+        .content3 {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .content4 {
+            width: 100%;
+            height: 30%;
+            border: 1px solid green;
+        }
+        .content5 {
+            width: 100%;
+            height: 70%;
+            border: 1px solid blue;
+        }
+        .item {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // souece 原字符串 start 要截取的位置 newStr 要插入的字符
+        function insertStr(source, start, newStr) {
+            return source.slice(0, start) + newStr + source.slice(start)
+        }
+        window.onload = function() {
+            document.getElementById('item1').addEventListener('keydown', function (e) {
+                let event = e || window.event
+                console.log(event)
+                if (event.keyCode == 9) {
+                    console.log('tab key')
+                    let startPosition = e.target.selectionStart;
+                    let endPosition = e.target.selectionEnd;
+                    let text = document.getElementById('item1').value;
+                    let isOK = false;
+                    let newStr = '    ';
+                    if (startPosition == endPosition) {
+                        isOK = true;
+                        text = insertStr(text, startPosition, newStr);
+                    }
+                    document.getElementById('item1').value = text;
+                    event.preventDefault();
+
+                    if (isOK) {
+                        let index = startPosition + newStr.length;
+                        e.target.selectionStart = index;
+                        e.target.selectionEnd = index;
+                    }
+                }
+            })
+
+
+            let testText = 'Test: View {' + '\n' +
+            '    topView: TopView,' + '\n' +
+            '    view: View,' + '\n' +
+            '}';
+            document.getElementById('item1').value = testText;   
+        }       
+    </script>
+    <script>
+        function buttonAction() {
+            let text  = document.getElementById('item1').value;
+            // console.log('source: \n',text);
+            text = text.replace(/[\n]/g, "");//移除换行
+            // console.log('target: \n',text);
+            let arr = text.split('{');
+            // console.log(arr);
+
+            let className = '';
+            let parentClassName = '';
+
+            if (arr.length == 2) {
+                let tempText1 = arr[0];
+                tempText1 = tempText1.replace(/\ +/g, "");//移除空格
+                // console.log(tempText1)
+                let tempArr1 = tempText1.split(':');
+                if (tempArr1.length == 1) {
+                    className = tempArr1[0];
+                    parentClassName = 'UIView';
+                } else if (tempArr1.length == 2) {
+                    className = tempArr1[0];
+                    parentClassName = tempArr1[1];
+                }
+
+
+                let children = [];
+                let tempText2 = arr[1];
+                let tempArr2 = tempText2.split(',');
+                // console.log(tempArr2)
+                for (let i = 0; i < tempArr2.length - 1; i++) {
+                    let tempText3 = tempArr2[i];
+                    tempText3 = tempText3.replace(/\ +/g, "");//移除空格
+                    // console.log(tempText3)
+                    let tempArr3 = tempText3.split(':');
+                    if (tempArr3.length == 1) {
+                        let obj = {}
+                        obj.propertyName = tempArr3[0];
+                        obj.className = 'UIView';
+                        children.push(obj);
+                    } else if (tempArr3.length == 2) {
+                        let obj = {}
+                        obj.propertyName = tempArr3[0];
+                        obj.className = tempArr3[1];
+                        children.push(obj);
+                    }
+                }
+                console.log('children:',children)
+
+                console.log('className:',className)
+                console.log('parentClassName:',parentClassName)
+
+
+                if (parentClassName == 'View') {
+                    parentClassName = 'UIView'
+                }
+
+                for (let i = 0; i < children.length; i++) {
+                    let obj = children[i];
+                    if (obj.className == 'View') {
+                        obj.className = 'UIView'
+                    }
+                }
+
+                /**************************************************/
+                let theH = '';
+                theH += '\n';
+                theH += '#import <UIKit/UIKit.h>' + '\n';
+                for (let i = 0; i < children.length; i++) {
+                    let obj = children[i];
+                    if (obj.className != 'UIView') {
+                        theH += '#import "' + obj.className + '"' + '\n';
+                    }
+                }
+                theH += '\n';
+                theH += '@interface ' + className +' : ' + parentClassName  + '\n';
+                theH += '\n';
+                for (let i = 0; i < children.length; i++) {
+                    let obj = children[i];
+                    theH += '@property(nonatomic,strong) ' + obj.className + ' *' + obj.propertyName + ';' + '\n';
+                }
+                theH += '\n';
+                theH += '@end' + '\n';
+
+                document.getElementById('item2').value = theH;
+
+
+                /**************************************************/
+                let theM = '';
+                theM += '\n';
+                theM += '#import "' + className + '.h"' + '\n';
+                theM += '\n';
+                theM += '@implementation ' + className + '\n';
+                theM += '\n';
+
+                theM += '- (instancetype) initWithFrame:(CGRect)frame {' + '\n';
+                theM += '    if (self = [super initWithFrame:frame]) {' + '\n';
+                for (let i = 0; i < children.length; i++) {
+                    let obj = children[i];
+                    theM += '        [self addSubview:self.' + obj.propertyName + '];' + '\n';
+                }
+                theM += '    }' + '\n';
+                theM += '    return self;' + '\n';
+                theM += '}' + '\n';
+                theM += '\n';
+
+                theM += '#pragma mark -' + '\n';
+                theM += '- (void) layoutSubviews {' + '\n';
+                theM += '    [super layoutSubviews];' + '\n';
+                theM += '    ' + '\n';
+                theM += '    CGFloat viewWidth = self.frame.size.width;' + '\n';
+                theM += '    CGFloat viewHeight = self.frame.size.height;' + '\n';
+                theM += '    ' + '\n';
+                theM += '    ' + '\n';
+                theM += '}' + '\n';
+                theM += '\n';
+
+                theM += '#pragma mark -' + '\n';
+                for (let i = 0; i < children.length; i++) {
+                    let obj = children[i];
+                    let innerPropertyName = '_' + obj.propertyName;
+
+                    theM += '- (' + obj.className + ' *) ' + obj.propertyName + ' {' + '\n';
+                    theM += '    if (' + innerPropertyName + ' == nil) {' + '\n';
+                    theM += '        ' + innerPropertyName + ' = [' + obj.className + ' new];' + '\n';
+                    theM += '    }' + '\n';
+                    theM += '    return ' + innerPropertyName + ';' + '\n';
+                    theM += '}' + '\n';
+                }
+                theM += '\n';
+                theM += '@end' + '\n';
+
+                document.getElementById('item3').value = theM;
+                /**************************************************/
+
+            }
+
+        }
+    </script>
+    <div class="contaion">
+        <div class="title">
+            v0.1，实现了简单的效果。
+            <button class="title-button" onclick="buttonAction()">UI简化代码转化目标v0.1</button>
+        </div>
+        <div class="content">
+            <div class="content2">
+                <textarea class="item" id="item1"></textarea>
+            </div>
+            <div class="content3">
+                <div class="content4">
+                    <textarea class="item" id="item2"></textarea>
+                </div>
+                <div class="content5">
+                    <textarea class="item" id="item3"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

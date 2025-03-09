@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.bootcss.com/crypto-js/3.1.9-1/crypto-js.min.js"></script>
+    <title>加密内容生成html文件</title>
+
+    <style>
+        body { padding: 0; margin: 0; }
+        .main-view {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .title-view {
+            width: 98%;
+            margin: 6px 10px;
+        }
+        .textarea-view {
+            flex: 1;
+        }
+        textarea {
+            width: 96%;
+            height: 90%;
+            resize: none;
+        }
+        .mian-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: aquamarine;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-view">
+        <div class="mian-title">加密内容生成html文件</div>
+        <div class="title-view">HTML 文件名称（缺省默认时间戳）：<input type="text" id="theFileName"/></div>
+        <div class="title-view">标题：<input type="text" id="theTitle"/>&nbsp;&nbsp;&nbsp;&nbsp;解密前是否显示<input type="checkbox" id="showTitle0" checked>&nbsp;&nbsp;&nbsp;&nbsp;解密后是否显示<input type="checkbox" id="showTitle1" checked></div>
+        <div class="title-view">描述/提示语句（有内容会显示出来）：<input type="text" id="theMessage"/></div>
+        <div class="title-view">密码（8位或16位或32位）：<input type="text" id="password"/>&nbsp;&nbsp;&nbsp;&nbsp;<button type="button" onclick="buttonAction()">点击：加密成功后自动下载 HTML 文件</button></div>
+
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;加密前-文本/html</div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;注意：&nbsp;&nbsp;&nbsp;&nbsp;换行转 &lt;br&frasl;&gt;（内容为HTML时要取消勾选，这里仅仅适合纯文本）<input type="checkbox" id="lineWrap" checked /></div>
+        <div class="textarea-view"><textarea name="" id="ta-html"></textarea></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;加密前-JS，高阶</div>
+        <div class="textarea-view"><textarea name="" id="ta-js"></textarea></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;加密前-CSS，高阶</div>
+        <div class="textarea-view"><textarea name="" id="ta-style"></textarea></div>
+    </div>
+    <script>
+        var golbalTitle = '';
+        var golbalText = '';
+        function fileSetup(title,text) {
+            let showTitle0 = document.getElementById("showTitle0").checked;
+            let showTitle1 = document.getElementById("showTitle1").checked;
+
+            if (title.length == 0) {
+                showTitle0 = false;
+                showTitle1 = false;
+            }
+
+            let message = document.getElementById("theMessage").value;
+
+            let str = '<!DOCTYPE html><html lang=\"zh\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\"content=\"width=device-width, initial-scale=1.0\"><script src=\"https://cdn.bootcss.com/crypto-js/3.1.9-1/crypto-js.min.js\"><\/script><style>body,div{padding:0;margin:0}.main-view{width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:start}.title-view{width:100%;padding:10px 0;display:flex;flex-direction:row;align-items:center;justify-content:center;background:#DCDCDC;}.content-view-pre{width:100%;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;white-space:normal;word-break:break-all;overflow:hidden}.content-view{width:100%;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:start;white-space:normal;word-break:break-all;overflow:hidden}.btn{margin-top:10px}<\/style><title>'+title+'<\/title><\/head><body>';
+
+                
+            if (showTitle0 && showTitle1) {
+                str += '<div class=\"main-view\"><div class=\"title-view\">'+title+'<\/div><div class=\"content-view\"id=\"show-area\">';
+            } else if (!showTitle0 && showTitle1) {
+                str += '<div class=\"main-view\"id=\"show-area\"><div class=\"content-view\">';
+            } else if (showTitle0 && !showTitle1) {
+                str += '<div class=\"main-view\"id=\"show-area\"><div class=\"title-view\">'+title+'<\/div><div class=\"content-view\">';
+            } else {
+                str += '<div class=\"main-view\"><div class=\"content-view\"id=\"show-area\">';
+            }
+
+            str += '<div class=\"content-view-pre\">';
+            if (message.length > 0) {
+                str += '<div>'+message+'</div>';
+            }
+                
+            str += '<div>密码 <input id=\"password\" type=\"password\"\/><\/div><button class=\"btn\"type=\"button\"onclick=\"buttonAction()\">解锁<\/button><\/div><\/div><\/div><script>function buttonAction(){let password=document.getElementById(\"password\").value;if(password.length==0){return}let message=\"'+text+'\";if(message.length==0){return}let decrypt=CryptoJS.AES.decrypt(message,CryptoJS.enc.Utf8.parse(password),{mode:CryptoJS.mode.ECB,padding:CryptoJS.pad.Pkcs7}).toString(CryptoJS.enc.Utf8);if(decrypt==undefined){return}if(decrypt.length==0){return}let obj=JSON.parse(decrypt);if(obj==undefined){return}if(obj.style!=undefined){if(obj.style.length>0){let style=document.createElement(\"style\");style.type=\"text/css\";style.innerHTML=obj.style;document.head.appendChild(style)}}if(obj.js!=undefined){if(obj.js.length>0){let script=document.createElement(\"script\");script.text=obj.js;document.body.appendChild(script)}}';
+
+            if (showTitle0 && showTitle1) {
+                str += 'document.getElementById(\"show-area\").innerHTML=obj.content}<\/script><\/body><\/html>';
+            } else if (!showTitle0 && showTitle1) {
+                str += 'let newDiv=document.createElement(\"div\");newDiv.className=\"title-view\";newDiv.textContent=\"'+title+'\";let newDiv2=document.createElement(\"div\");newDiv2.className=\"main-view\";newDiv2.innerHTML=obj.content;let container=document.getElementById(\"show-area\");container.appendChild(newDiv);container.appendChild(newDiv2)}<\/script><\/body><\/html>';
+            } else if (showTitle0 && !showTitle1) {
+                str += 'document.getElementById(\"show-area\").innerHTML=obj.content}<\/script><\/body><\/html>';
+            } else {
+                str += 'document.getElementById(\"show-area\").innerHTML=obj.content}<\/script><\/body><\/html>';
+            }
+            
+            golbalText = str;
+            golbalTitle = title;
+
+            downloadAction();
+        }
+        function buttonAction() {
+            golbalText = '';
+            golbalTitle = '';
+
+            let title = document.getElementById("theTitle").value;
+            // if (title.length == 0) { return; }
+
+            let password = document.getElementById("password").value;
+            if (password.length == 0) {
+                return
+            }
+            if (password.length != 8 && password.length != 16 && password.length != 32) {
+                return;
+            }
+
+            let htmlValue = document.getElementById("ta-html").value;
+            if (htmlValue.length == 0) { return; }
+
+            let lineWrap = document.getElementById("lineWrap").checked;
+            if (lineWrap) {
+                const formattedText = htmlValue.replace(/\n/g, '<br/>');
+                htmlValue = formattedText;
+            }
+            
+
+
+            let jsValue = document.getElementById("ta-js").value;
+            let styleValue = document.getElementById("ta-style").value;
+
+            let obj = { title: title, content: htmlValue, js: jsValue, style: styleValue };
+            let objStr = JSON.stringify(obj);
+        
+            //加密
+            let encryptHTML = CryptoJS.AES.encrypt(objStr, CryptoJS.enc.Utf8.parse(password), {
+                mode: CryptoJS.mode.ECB,
+                padding: CryptoJS.pad.Pkcs7
+            }).toString();
+            
+            fileSetup(title,encryptHTML);
+        }
+
+
+        function download(filename, text) {
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+
+            element.style.display = 'none';
+            document.body.appendChild(element);
+
+            element.click();
+
+            document.body.removeChild(element);
+        }
+        function downloadAction() {
+            // if (golbalTitle.length == 0) { return; }
+            if (golbalText.length == 0) { return; }
+
+            let tempFileName = '';
+
+            let filename = document.getElementById("theFileName").value;
+            if (filename.length == 0) {
+                if (golbalTitle.length == 0) {
+                    const timestamp = Date.now();
+                    tempFileName = timestamp;
+                } else {
+                    tempFileName = golbalTitle;
+                }
+            } else {
+                tempFileName = filename;
+            }
+
+            download(tempFileName + '.html', golbalText);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>读取本地文件文件并显示</title>
+        <style>
+        </style>
+    </head>
+<body>
+<script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+<script>
+    var theXXX = '';
+</script>
+<script>
+function show() {
+    var reader = new FileReader();
+    reader.onload = function() {
+        let text = this.result;
+        wx.miniProgram.postMessage({ data: {b: text} });
+        story.value = text;
+        theXXX = text;
+    }
+    var f = document.getElementById("filePicker").files[0];
+    reader.readAsText(f);
+}
+function show2() {
+    var reader = new FileReader();
+    reader.onload = function() {
+        let text = this.result;
+        let url = `/pages/shared/shared?text=${text}`;
+        wx.miniProgram.redirectTo({ url });
+        story.value = text;
+        theXXX = text;
+    }
+}
+</script>
+ 
+微信小程序与网页交互。<br>
+微信小程序通过网页获取文本文件的内容。<br>
+<br>
+
+ <input type="file" name="file" id="filePicker" onchange="show2()"  />
+    <br>
+<input type="file" name="file" id="filePicker" onchange="show()"  />
+<br>
+ 
+<textarea id="story" name="story" rows="15" cols="60">
+</textarea>
+
+<br>
+<button onclick="handleClick()">跳转detail页面</button><br>
+<button onclick="handleClick2()">redirectTo测试携带数据返回当前页面</button><br>
+<button onclick="handleClick3()">reLaunch测试携带数据返回当前页面</button><br>
+<button onclick="handleClick4()">navigateTo测试携带数据返回当前页面</button><br>
+<br>
+ 
+<script>
+    function handleClick(){
+        let text = theXXX;
+        console.log('the text :', text);
+        let url = `/pages/detail/detail?text=${text}`;
+        wx.miniProgram.navigateTo({
+            url,
+        });
+    }
+    function handleClick2() {
+        let text = theXXX;
+        console.log('the text :', text);
+        let url = `/pages/shared/shared?text=${text}`;
+        wx.miniProgram.redirectTo({
+            url,
+        });
+    }
+    function handleClick3() {
+        let text = theXXX;
+        console.log('the text :', text);
+        let url = `/pages/shared/shared?text=${text}`;
+        wx.miniProgram.reLaunch({
+            url,
+        });
+    }
+    function handleClick4() {
+        let text = theXXX;
+        console.log('the text :', text);
+        let url = `/pages/shared/shared?text=${text}`;
+        wx.miniProgram.navigateTo({
+            url,
+        });
+    }
+</script>
+
+</body>
+</html>

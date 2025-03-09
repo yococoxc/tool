@@ -1,0 +1,746 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OC 便携式界面简语</title>
+    <style>
+        .input-area {
+            display: flex;
+            flex-direction: row;
+        }
+        #file-area {
+            width: 150px;
+            height: 50px;
+            background: #ccc;
+            border: 1px solid #000;
+            text-align: center;
+            line-height: 50px;
+        }
+        .loadView0 {
+            width: 100%;
+            height: calc(100vh - 150px);
+            display: flex;
+            flex-direction: row;
+        }
+        .loadView1 {
+            width: 25%;
+            height: 100%;
+        }
+
+        .loadView2 {
+            width: 75%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .loadView3 {
+            width: 100%;
+            height: 20%;
+        }
+
+        .loadView4 {
+            width: 100%;
+            height: 80%;
+        }
+        .item {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h3>OC 便携式界面简语 / OC UI Simple Code 1.0</h3>
+    
+    <div class="input-area">
+        <div>
+            <div id="file-area">文件拖到这里上传</div>
+        </div>
+
+        <button onclick="showshowhsohw()">生成 / 转换</button>
+        <div>
+            <input type="button" onClick="copyContentH()" value="复制 H 代码" />
+            <input type="button" onClick="copyContentM()" value="复制 M 代码" />
+            <br/>
+            <input type="button" onClick="downloadActionH()" value="下载 H 代码" />
+            <input type="button" onClick="downloadActionM()" value="下载 M 代码" />
+            <br/>
+            <input type="button" onClick="downloadAllAction()" value="下载 全部 文件" />
+
+        </div>
+        <div>
+            <input type="button" onClick="showDemo1()" value="DEMO 1" />
+            <br/>
+            <input type="button" onClick="showDemo2()" value="DEMO 2" />
+        </div>
+        <div>
+            <input type="button" onClick="showQuick1x1()" value="view1x1" />
+            <br/>
+            <input type="button" onClick="showQuick2x1()" value="view2x1" />
+            <br/>
+            <input type="button" onClick="showQuick3x1()" value="view3x1" />
+        </div>
+        <div>
+            <input type="button" onClick="showQuick1x2()" value="view1x2" />
+            <br/>
+            <input type="button" onClick="showQuick1x3()" value="view1x3" />
+            <br/>
+            <input type="button" onClick="showQuick1x4()" value="view1x4" />
+        </div>
+    </div>
+    
+    
+    <div class="loadView0">
+        <div class="loadView1">
+            <textarea class="item" id="item1"></textarea>
+        </div>
+        <div class="loadView2">
+            <div class="loadView3"><textarea class="item" id="item2"></textarea></div>
+            <div class="loadView4"><textarea class="item" id="item3"></textarea></div>
+        </div>
+        <textarea id="itemHidden" hidden></textarea>
+    </div>
+
+    <script>
+        var globalTextH = ''
+        var globalTextM = ''
+        var theFileName = '';
+
+        var globalTextHArray = [];
+        var globalTextMArray = [];
+        var globalObjectArray = [];
+    </script>
+
+    <script>
+        let textStr = ""
+        document.getElementById('item1').value = textStr;
+    </script>
+
+
+    <script>
+        function showDemo1() {
+
+            let textStr = 
+        
+
+
+        "MyView: VLayout"+ "\n" +
+        '.padding: 8,8,8,8'+ "\n" +
+        ".gap: 8"+ "\n" +
+        ".bgColor: #fff"+ "\n" +
+        ".borderWidth: 2"+ "\n" +
+        "\n" +
+        
+        "-aView:UIView"+ "\n" +
+        ".height: 100"+ "\n" +
+        ".borderColor: 30"+ "\n" +
+        ".borderWidth: 1"+ "\n" +
+        "\n" +
+        
+        
+        "-cView"+ "\n" +
+        ".bgColor: 190,190,190"+ "\n" +
+        ".flex: 1" + '\n' +
+        "\n" +
+        
+        "-bView"+ "\n" +
+        ".bgColor: 90,90,90"+ "\n" +
+        ".height: 200" + '\n' +
+        ".cornerRadius: 16"
+        
+                
+                document.getElementById('item1').value = textStr;
+        }
+        function showDemo2() {
+
+            let textStr = 
+        
+
+
+        "A: VLayout"+ "\n" +
+        '.padding: 8,8,8,8'+ "\n" +
+        ".gap: 8"+ "\n" +
+        ".bgColor: #fff"+ "\n" +
+        ".borderWidth: 2"+ "\n" +
+        "\n" +
+        
+        "- a: UIView"+ "\n" +
+        ".height: 100"+ "\n" +
+        ".borderColor: 30"+ "\n" +
+        ".borderWidth: 1"+ "\n" +
+        "\n" +
+        
+        
+        "- b"+ "\n" +
+        ".bgColor: 190,190,190"+ "\n" +
+        ".flex: 1" + '\n' +
+        "\n" +
+        
+        "- c"+ "\n" +
+        ".bgColor: 90,90,90"+ "\n" +
+        ".height: 200" + '\n' +
+        ".cornerRadius: 16"
+        
+                
+                document.getElementById('item1').value = textStr;
+        }
+        function showQuick1x1() {
+            let textStr = 
+                "MyView: VLayout"+ "\n" +
+                "\n" +
+                "\n" +
+                
+                "-aView:UIView"+ "\n" +
+                "\n" +
+                "\n"
+            document.getElementById('item1').value = textStr;
+        }
+
+        function showQuick2x1() {
+            let textStr = 
+                "AAView: VLayout"+ "\n" +
+                "\n" +
+                "\n" +
+                
+                "-aView:UIView"+ "\n" +
+                "\n" +
+                "\n" +
+
+                "BBView: VLayout"+ "\n" +
+                "\n" +
+                "\n" +
+                
+                "-aView:UIView"+ "\n" +
+                "\n"
+                "\n"
+            document.getElementById('item1').value = textStr;
+        }
+        function showQuick3x1() {
+            let textStr = 
+                "AAView: VLayout"+ "\n" +
+                "\n" +
+                "\n" +
+                
+                "-aView:UIView"+ "\n" +
+                "\n" +
+                "\n" +
+
+                "BBView: VLayout"+ "\n" +
+                "\n" +
+                "\n" +
+                
+                "-aView:UIView"+ "\n" +
+                "\n" +
+                "\n" +
+                
+                "CCView: VLayout"+ "\n" +
+                "\n" +
+                "\n" +
+                
+                "-aView:UIView"+ "\n" +
+                "\n" +
+                "\n"
+            document.getElementById('item1').value = textStr;
+        }
+        function showQuick1x2() {
+            let textStr = 
+                "MyView: VLayout"+ "\n" +
+                "\n" +
+                "\n" +
+                
+                "-aView:UIView"+ "\n" +
+                "\n" +
+                "\n" + 
+
+                "-bView:UIView"+ "\n" +
+                "\n" +
+                "\n"
+            document.getElementById('item1').value = textStr;
+        }
+
+        function showQuick1x3() {
+            let textStr = 
+                "MyView: VLayout"+ "\n" +
+                "\n" +
+                "\n" +
+                
+                "-aView:UIView"+ "\n" +
+                "\n" +
+                "\n" +
+
+                "-bView:UIView"+ "\n" +
+                "\n" +
+                "\n" +
+
+                "-cView:UIView"+ "\n" +
+                "\n" +
+                "\n"
+            document.getElementById('item1').value = textStr;
+        }
+        function showQuick1x4() {
+            let textStr = 
+                "MyView: VLayout"+ "\n" +
+                "\n" +
+                "\n" +
+                
+                "-aView:UIView"+ "\n" +
+                "\n" +
+                "\n" +
+
+                "-bView:UIView"+ "\n" +
+                "\n" +
+                "\n" +
+
+                "-cView:UIView"+ "\n" +
+                "\n" +
+                "\n"
+
+                "-dView:UIView"+ "\n" +
+                "\n" +
+                "\n"
+            document.getElementById('item1').value = textStr;
+        }
+    </script>
+
+    <script>
+
+        function handleInputString(newStr) {
+            console.log("-----------------")
+            console.log(newStr)
+            let arr = newStr.split("\n")
+            console.log("-------处理一下字符串-----")
+            console.log(arr)
+
+            let keep = [];
+            for (let str of arr) {
+                let temp = str.replace(/\s/g, "");
+                if (temp.length > 0) {
+                    keep.push(temp)
+                }
+            }
+
+            console.log("-------处理一下数组-----")
+            console.log(keep)
+
+            let defaultSuperView = 'BasicView'
+
+            let keepObject = []
+            let currentMainObject = null
+            let currentObject = null
+            for (let str of keep) {
+                // console.log('----处理字符串:',str)
+
+                let fristChar = str.charAt(0)
+                if (fristChar === ".") {
+                    // console.log('这个字符串是一个 点开头的内容，代表属性')
+                    if (currentObject !== null) {
+                        // console.log('处理。。。。。')
+                        let tempArr = str.split('.')
+                        if (tempArr.length > 0) {
+                            let tempStr = tempArr[1]
+                            tempArr = tempStr.split(':')
+                            if (tempArr.length > 1) {
+                                currentObject.proprts[tempArr[0]] = tempArr[1]
+                            } else {
+                                currentObject.proprts[tempArr[0]] = tempArr[0]
+                            }
+                        }
+                    }
+                } else if (fristChar === "-") {
+                    // console.log('这个字符串是一个 横线开头的内容，代表子视图')
+                    if (currentObject !== null) {
+                        // console.log('处理。。。。。')
+                        let tempArr = str.split('-')
+                        if (tempArr.length > 0) {
+                            let object = {}
+                            object.proprts = []
+                            object.views = []
+
+                            let tempStr = tempArr[1]
+                            tempArr = tempStr.split(':')
+                            object.name = tempArr[0]
+                            if (tempArr.length > 1) {
+                                object.class = tempArr[1]
+                            } else {
+                                object.class = defaultSuperView
+                            }
+
+                            currentMainObject.views.push(object)
+                            currentObject = object
+                        }
+                    }
+                } else {
+                    // console.log('其他情况')
+
+                    let tempArr = str.split(':')
+
+                    let object = {}
+                    object.proprts = {}
+                    object.views = []
+
+                    object.class = tempArr[0]
+                    if (tempArr.length > 1) {
+                        let tempStr = tempArr[1]
+                        if (tempStr === 'VLayout') {
+                            object.superclass = 'BasicVerticalLayoutView'
+                        } else {
+                            object.superclass = tempStr
+                        }
+                        
+                    } else {
+                        object.superclass = defaultSuperView
+                    }
+                    keepObject.push(object)
+                    currentObject = object
+                    currentMainObject = object
+
+                }
+
+            }
+
+
+            console.log("-------最终结果-----")
+            console.log(keepObject)
+
+
+
+
+            globalTextHArray = [];
+            globalTextMArray = [];
+            globalObjectArray = keepObject;
+
+            console.log("-------最终结果--内容---")
+            for (let object of keepObject) {
+                let strH = '';
+                if (object.superclass === 'UIView') {
+                    strH += "#import <UIKit/UIKit.h>" + '\n';
+                } else {
+                    strH += "#import " + '"' + object.superclass + '.h' + '"' + '\n';
+                }
+                
+                strH += '\n';
+                strH += "@interface " + object.class + " : " + object.superclass + '\n';
+                
+                strH += '\n';
+                if (object.views.length > 0) {
+                    strH += '#pragma mark -' + '\n';
+                }
+                for (let viewObject of object.views) {
+                    strH += '@property(nonatomic,strong) ' + viewObject.class + ' *' + viewObject.name + ';' + '\n';
+                }
+                strH += '\n';
+                strH += '@end' + '\n';
+                strH += '\n';
+                console.log(strH)
+
+
+                let strM = '';
+                strM += '@implementation ' + object.class + '\n';
+                strM += '\n';
+
+                if (object.superclass === 'UIView') {
+                    strM +=  '- (instancetype) initWithFrame:(CGRect)frame {' + '\n';
+                    strM +=  '    if (self = [super initWithFrame:frame]) {' + '\n';
+                    strM +=  '        self.backgroundColor = [UIColor clearColor];' + '\n';
+                    strM +=  '        [self setupInit];' + '\n';
+                    strM += '    }' + '\n';
+                    strM += '    return self;' + '\n';
+                    strM += '}' + '\n';
+                    strM += '\n';
+                }
+
+
+                strM +=  '- (void) setupInit {' + '\n';
+                if (object.superclass !== 'UIView') {
+                    strM +=  '    [super setupInit];' + '\n';
+                    strM += '    ' + '\n';
+                }
+
+                
+                
+                for (let key in object.proprts) {
+                    if (key === 'bgColor') {
+                        let tempValue = object.proprts[key];
+                        let fristChar = tempValue.charAt(0)
+                        if (fristChar === "#") {
+                            //这个是16进制的
+                            strM += '    ' + 'self' + '.' + 'backgroundColor' + ' = ' + '[UIColor mzc_mzc_colorWithHexString:' + '@"' + tempValue + '"' +']' + ';' + '\n';
+                        } else {
+                            //假设是RGB
+                            let temparr = tempValue.split(',');
+                            if (temparr.length == 3) {
+                                strM += '    ' + 'self' + '.' + 'backgroundColor' + ' = ' + '[UIColor mzc_colorWithRed:' + temparr[0] + ' green:' + temparr[1] + ' blue:' + temparr[2] +']' + ';' + '\n';
+                            } else if (temparr.length == 2) {
+                                strM += '    ' + 'self' + '.' + 'backgroundColor' + ' = ' + '[UIColor mzc_colorWithRed:' + temparr[0] + ' green:' + temparr[1] + ' blue:' + '0' +']' + ';' + '\n';
+                            } else if (temparr.length == 1) {
+                                strM += '    ' + 'self' + '.' + 'backgroundColor' + ' = ' + '[UIColor mzc_colorWithRed:' + temparr[0] + ' green:' + temparr[0] + ' blue:' + temparr[0] +']' + ';' + '\n';
+                            }
+                        }
+                    } else if (key === 'borderWidth') {
+                        strM += '    ' + 'self.layer.borderWidth' + ' = ' + object.proprts[key] + ';' + '\n';
+                    } else if (key === 'cornerRadius') {
+                        strM += '    ' + 'self.layer.cornerRadius' + ' = ' + object.proprts[key] + ';' + '\n';
+                    } else if (key === 'padding') {
+                        let tempValue = object.proprts[key];
+                        let temparr = tempValue.split(',')
+                        if (temparr.length === 4) {
+                            strM += '    ' + 'self.padding' + ' = ' + 'UIEdgeInsetsMake('+temparr[0]+', '+temparr[1]+', '+temparr[2]+', '+temparr[3]+')' + ';' + '\n';
+                        } else if (temparr.length === 3) {
+                            //有空再实现
+                            // strM += '    ' + 'self.padding' + ' = ' + 'UIEdgeInsetsMake('+temparr[0]+', '+temparr[1]+', '+temparr[2]+', '+temparr[3]+')' + ';' + '\n';
+                        } else if (temparr.length === 2) {
+                            //有空再实现
+                            // strM += '    ' + 'self.padding' + ' = ' + 'UIEdgeInsetsMake('+temparr[0]+', '+temparr[1]+', '+temparr[2]+', '+temparr[3]+')' + ';' + '\n';
+                        } else if (temparr.length === 1) {
+                            strM += '    ' + 'self.padding' + ' = ' + 'UIEdgeInsetsMake('+temparr[0]+', '+temparr[0]+', '+temparr[0]+', '+temparr[0]+')' + ';' + '\n';
+                        }
+                    } else {
+                        strM += '    ' + 'self.' + key + ' = ' + object.proprts[key] + ';' + '\n';
+                    }
+                }
+
+                if (object.views.length > 0) {
+                    strM += '    ' + '\n';
+                    strM += '    ' + 'self.layoutItems = @[' + '\n'
+                    for (let viewObject of object.views) {
+                        let _height = viewObject.proprts['height']
+                        let _flex = viewObject.proprts['flex']
+                        if (_flex != null) {
+                            strM += '    ' + '    ' + '[ObjectItem itemWithView:'+ 'self.' + viewObject.name +' flex:' + viewObject.proprts['flex'] + ']' + ',' + '\n'
+                        }
+                        if (_height != null) {
+                            strM += '    ' + '    ' + '[ObjectItem itemWithView:'+ 'self.' + viewObject.name +' height:' + viewObject.proprts['height'] + ']' + ',' + '\n'
+                        }
+                        
+                    }
+                    strM += '    ' + '];' + '\n';
+                }
+                strM += '}' + '\n'
+                strM += '\n';
+
+                if (object.superclass === 'UIView') {
+                    strM +=  '- (void) layoutSubviews {' + '\n';
+                    strM +=  '    [super layoutSubviews];' + '\n';
+                    strM += '    ' + '\n';
+                    strM += '}' + '\n'
+                strM += '\n';
+                }
+
+
+                if (object.views.length > 0) {
+                    strM += '#pragma mark -' + '\n';
+                }
+                for (let viewObject of object.views) {
+                    strM += '- (' + viewObject.class + ' *' + ')' + ' ' + viewObject.name + ' ' + '{' + '\n'
+                    strM += '    if (_' + viewObject.name + ' ' + '!= nil' +') {' + '\n'
+                    strM += '    ' + '    ' + '_' + viewObject.name + ' = ' + '['+ viewObject.class +' new]' + ';' + '\n'
+                    for (let key in viewObject.proprts) {
+                        // console.log('key : ' ,key)
+                        if (key !== 'height' &&
+                            key !== 'width') {
+                            // console.log('value : ', viewObject.proprts[key]);
+                            if (key === 'bgColor') {
+                                let tempValue = viewObject.proprts[key];
+                                let fristChar = tempValue.charAt(0)
+                                if (fristChar === "#") {
+                                    //这个是16进制的
+                                    strM += '    ' + '    ' + '_' + viewObject.name + '.' + 'backgroundColor' + ' = ' + '[UIColor mzc_mzc_colorWithHexString:' + '@"' + tempValue + '"' +']' + ';' + '\n';
+                                } else {
+                                    //假设是RGB
+                                    let temparr = tempValue.split(',');
+                                    if (temparr.length == 3) {
+                                        strM += '    ' + '    ' + '_' + viewObject.name + '.' + 'backgroundColor' + ' = ' + '[UIColor mzc_colorWithRed:' + temparr[0] + ' green:' + temparr[1] + ' blue:' + temparr[2] +']' + ';' + '\n';
+                                    } else if (temparr.length == 2) {
+                                        strM += '    ' + '    ' + '_' + viewObject.name + '.' + 'backgroundColor' + ' = ' + '[UIColor mzc_colorWithRed:' + temparr[0] + ' green:' + temparr[1] + ' blue:' + '0' +']' + ';' + '\n';
+                                    } else if (temparr.length == 1) {
+                                        strM += '    ' + '    ' + '_' + viewObject.name + '.' + 'backgroundColor' + ' = ' + '[UIColor mzc_colorWithRed:' + temparr[0] + ' green:' + temparr[0] + ' blue:' + temparr[0] +']' + ';' + '\n';
+                                    }
+                                }
+                            } else if (key === 'borderColor') {
+                                let tempValue = viewObject.proprts[key];
+                                let fristChar = tempValue.charAt(0)
+                                if (fristChar === "#") {
+                                    //这个是16进制的
+                                    strM += '    ' + '    ' + '_' + viewObject.name + '.' + 'layer.borderColor' + ' = ' + '[[UIColor mzc_mzc_colorWithHexString:' + '@"' + tempValue + '"' +'] CGColor]' + ';' + '\n';
+                                } else {
+                                    //假设是RGB
+                                    let temparr = tempValue.split(',');
+                                    if (temparr.length == 3) {
+                                        strM += '    ' + '    ' + '_' + viewObject.name + '.' + 'layer.borderColor' + ' = ' + '[[UIColor mzc_colorWithRed:' + temparr[0] + ' green:' + temparr[1] + ' blue:' + temparr[2] +'] CGColor]' + ';' + '\n';
+                                    } else if (temparr.length == 2) {
+                                        strM += '    ' + '    ' + '_' + viewObject.name + '.' + 'layer.borderColor' + ' = ' + '[[UIColor mzc_colorWithRed:' + temparr[0] + ' green:' + temparr[1] + ' blue:' + '0' +'] CGColor]' + ';' + '\n';
+                                    } else if (temparr.length == 1) {
+                                        strM += '    ' + '    ' + '_' + viewObject.name + '.' + 'layer.borderColor' + ' = ' + '[[UIColor mzc_colorWithRed:' + temparr[0] + ' green:' + temparr[0] + ' blue:' + temparr[0] +'] CGColor]' + ';' + '\n';
+                                    }
+                                }
+                            } else if (key === 'borderWidth') {
+                                strM += '    ' + '    ' + '_' + viewObject.name + '.' + 'layer.borderWidth' + ' = ' + viewObject.proprts[key] + ';' + '\n';
+                            } else if (key === 'cornerRadius') {
+                                strM += '    ' + '    ' + '_' + viewObject.name + '.' + 'layer.cornerRadius' + ' = ' + viewObject.proprts[key] + ';' + '\n';
+                            } else if (key === 'padding') {
+                                let tempValue = viewObject.proprts[key];
+                                let temparr = tempValue.split(',')
+                                if (temparr.length === 4) {
+                                    strM += '    ' + '    ' + '_' + viewObject.name  +'.padding' + ' = ' + 'UIEdgeInsetsMake('+temparr[0]+', '+temparr[1]+', '+temparr[2]+', '+temparr[3]+')' + ';' + '\n';
+                                } else if (temparr.length === 3) {
+                                    //有空再实现
+                                    // strM += '    ' + '    ' + '_' + viewObject.name  +'.padding' + ' = ' + 'UIEdgeInsetsMake('+temparr[0]+', '+temparr[1]+', '+temparr[2]+', '+temparr[3]+')' + ';' + '\n';
+                                } else if (temparr.length === 2) {
+                                    //有空再实现
+                                    // strM += '    ' + '    ' + '_' + viewObject.name  +'.padding' + ' = ' + 'UIEdgeInsetsMake('+temparr[0]+', '+temparr[1]+', '+temparr[2]+', '+temparr[3]+')' + ';' + '\n';
+                                } else if (temparr.length === 1) {
+                                    strM += '    ' + '    ' + '_' + viewObject.name  +'.padding' + ' = ' + 'UIEdgeInsetsMake('+temparr[0]+', '+temparr[0]+', '+temparr[0]+', '+temparr[0]+')' + ';' + '\n';
+                                }
+                            }
+                        }
+                    }
+                    strM += '    ' + '}' + '\n'
+                    strM += '    ' + 'return' + ' ' + '_' + viewObject.name + ';' + '\n'
+                    strM += '}' + '\n'
+                }
+                if (object.views.length > 0) {
+                    strM += '\n';
+                }
+
+                strM += '@end' + '\n';
+                strM += '\n';
+                console.log(strM)
+
+
+                document.getElementById('item2').value = strH;
+                document.getElementById('item3').value = strM;
+
+                globalTextH = strH;
+                globalTextM = strM;
+
+
+                globalTextHArray.push(strH);
+                globalTextMArray.push(strM);
+            }
+        }
+        function handleFileReader(reader) {
+            console.log('file reader',reader);
+            reader.onload = function fileReadCompleted() {
+                
+
+                let textStr = reader.result;
+
+                document.getElementById('item1').value = textStr;
+
+                handleInputString(textStr);
+            }
+        }
+        function showshowhsohw() {
+            handleInputString(document.getElementById('item1').value);
+        }
+    </script>
+
+    <script>
+        window.onload = function() {
+            console.log('hello，本工具是为个人简单布局而设计，是基于自己的封装组件之上，可能不适合任何人，但是看看实现自己搞一个也是挺好玩的。');
+            console.log('本设计主打一个简化代码，用简短的代码构建代码。');
+            console.log('本设计中提及的BasicView是我的一个小玩意，基于这个构建了很多内容。');
+            console.log('---2023.12.4 by Muzico');
+            console.log('//------------------');
+            console.log('//------------------分割线');
+            console.log('//------------------');
+
+            var fileArea = document.getElementById("file-area")
+            fileArea.addEventListener("dragenter", function() {
+                fileArea.innerHTML = "请松手"
+            }, false)
+            fileArea.addEventListener("dragleave", function() {
+                fileArea.innerHTML = "文件拖到这里上传"
+            }, false)
+            fileArea.addEventListener("dragover", function(ev) {
+                ev.preventDefault()
+            }, false)
+            fileArea.addEventListener("drop", function(ev) {
+                fileArea.innerHTML = "文件处理。。。"
+                ev.preventDefault()
+                let fileReader = new FileReader()
+                let file = ev.dataTransfer.files[0]
+                console.log(file);
+                fileReader.onload = function() {
+                    console.log("文件成功", this.result)
+                }
+                fileReader.onerror = function() {
+                    console.log("文件读取失败")
+                }
+
+                // theFileName = file.name;
+                // console.log('theFileName:',theFileName)
+                handleFileReader(fileReader)
+                fileReader.readAsText(file)
+            }, false)
+        }
+    </script>
+
+    <script>
+    </script>
+
+    <script>
+        function copyContentH() {
+            navigator.clipboard.writeText(globalTextH);
+        }
+        function copyContentM() {
+            navigator.clipboard.writeText(globalTextM);
+        }
+    </script>
+
+    <script>
+        function downloadAllAction() {
+            downloadActionH();
+            downloadActionM();
+        }
+        function downloadActionH() {
+            if (globalObjectArray.length > 0) {
+                for (let i = 0;  i < globalObjectArray.length; i++) {
+                    let obj = globalObjectArray[i];
+                    exportRaw(obj.class + '.h', globalTextHArray[i])
+                }                
+            }
+        }
+        function downloadActionM() {
+            if (globalObjectArray.length > 0) {
+                for (let i = 0;  i < globalObjectArray.length; i++) {
+                    let obj = globalObjectArray[i];
+                    exportRaw(obj.class + '.m', globalTextMArray[i])
+                }                
+            }
+        }
+        function fakeClick(obj) {
+            var ev = document.createEvent("MouseEvents");
+            ev.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            obj.dispatchEvent(ev);
+        }
+
+        function exportRaw(name, data) {
+            var urlObject = window.URL || window.webkitURL || window;
+            var export_blob = new Blob([data]);
+            var save_link = document.createElementNS("http://www.w3.org/1999/xhtml", "a")
+            save_link.href = urlObject.createObjectURL(export_blob);
+            save_link.download = name;
+            fakeClick(save_link);
+        }
+    </script>
+
+    <script>
+        // document.getElementById('fileInput').addEventListener('change', function selectedFileChanged(){
+        //     // console.log(this.files)
+
+        //     if (this.files.length === 0) {
+        //         console.log('请选择文件！')
+        //         return
+        //     }
+
+
+        //     const reader = new FileReader()
+        //     handleFileReader(reader)
+        //     reader.readAsText(this.files[0])
+        // })
+    </script>
+</body>
+</html>

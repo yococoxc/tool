@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>加载音效文件</title>
+    </head>
+
+<body>
+<script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+<script>
+    var theText = '';
+    var theName = '';
+    var that;
+</script>
+
+<center>
+    <br>
+    <input type="button" value="从文件夹中选取音效文件" onclick="tryxx()" /><br>
+    <input type="file" name="file" id="filePicker" onchange="show()" style="display:none;"  class="thethe"/>
+    <p id="myAnchor"></p>
+    <br>
+    <button onclick="handleClick()" id="loadButton" style="display: none">加载此文件</button>
+</center>
+ 
+<script>
+    function uploadFile(file) {
+        return new Promise(function(resolve, reject) {
+        let reader = new FileReader()
+        reader.readAsText(file);
+        reader.onload = function() {
+                resolve(this.result)
+            }
+        })
+    }
+
+    function show() {
+        let file = document.getElementById("filePicker").files[0];
+        theName = file.name;
+        document.getElementById('myAnchor').innerHTML="您当前选择的文件是"+file.name;
+        document.getElementById("loadButton").style.display = '';
+
+        uploadFile(file).then(function(result){
+            //处理 result
+            // console.log('result',result);
+            theText = result;
+
+        })
+    }
+    function handleClick() {
+        let text = theText;
+        let name = theName;
+        // console.log('the text :', text);
+        let url = `/pages/shared/shared?text=${text}&name=${name}`;
+        wx.miniProgram.redirectTo({
+            url,
+        });
+    }
+    function tryxx() {
+        let xxx = document.getElementsByClassName("thethe")[0];
+        xxx.click();
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一年级，和大人一起读（三）</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        .main-body {
+            width: 100%;
+            height: 100vh;
+        }
+        .head-body {
+            width: 100%;
+            height: 40px;
+            background-color: aqua;
+            line-height: 40px;
+            padding-left: 20px;
+        }
+        .list-body {
+            width: 100%;
+            height: calc(100vh - 80px - 40px);
+            background-color: rgb(235, 253, 181);
+            overflow: scroll;
+        }
+        .control-body {
+            width: 100%;
+            height: 80px;
+            background-color: rgb(243, 243, 243);
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .list-item {
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+        }
+
+
+        .control-body button {
+            background: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .control-body button:hover {
+            background: #0056b3;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 10px 0;
+            position: relative;
+        }
+        .progress-bar .progress {
+            height: 100%;
+            background: #007BFF;
+            width: 0;
+            border-radius: 2px;
+        }
+        .volume-control {
+            display: flex;
+            align-items: center;
+        }
+        .volume-control input {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-body">
+        <div class="head-body" onclick="goHomeTap()">回到主页</div>
+        <audio id="audio" src=""></audio>
+        <div class="list-body">
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_3/486bc4ae52a6464d81988b50983d85d1.mp3">01心.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_3/c97bfa71f45c488a95fe52994589fd4b.mp3">02象鼻桥.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_3/ce64802d5fb0449cab728e0463148a54.mp3">03三个儿子.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_3/4daac174e2014bdd9f3097c50a3a9d6d.mp3">04七颗钻石.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_3/037266af3a7c4b72a280b992a9383d91.mp3">05金斧头（一）.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_3/959a3758a8c54d6384916d35364d43a4.mp3">06金斧头（二）.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_3/2134d10a5d234532a7246293922222de.mp3">07喜鹊与乌鸦.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_3/180c63c746074a3d86bc56f6f3160b80.mp3">08跳蚤跳高.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_3/c1e4bf1c479d4a779de8b96717ebe332.mp3">09运枣.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_3/ae1f9c2d03f446b9b54f284d59569282.mp3">10孟母三迁.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_3/9315514629f2420db1c1fce70a1af4ce.mp3">11狐狸打赌.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_3/7661d013f5264261abfe01d4983ac0ba.mp3">12两只小公鸡.mp3</div>
+            <div class="list-item" data-src="./grade1_hedarenyiqidu_3/a0a2e1ad734640df99608dffbaf9d05c.mp3">13小猪奴尼.mp3</div>
+
+
+        </div>
+        <div class="control-body">
+            <button id="playPauseBtn">播放</button>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <div class="volume-control">
+                <span>音量:</span>
+                <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="0.5">
+            </div>
+        </div>
+    </div>
+    <script>
+        function goHomeTap() {
+            window.location.href='./index.html'
+        }
+        const audio = document.getElementById('audio');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progress = document.getElementById('progress');
+        const volumeControl = document.getElementById('volumeControl');
+        const playlist = document.querySelector('.list-body');
+        let isPlaying = false;
+
+        function playAudio(src) {
+            audio.src = src;
+            audio.play();
+            playPauseBtn.textContent = '暂停';
+            isPlaying = true;
+        }
+
+        function updateProgress() {
+            const percentage = (audio.currentTime / audio.duration) * 100;
+            progress.style.width = percentage + '%';
+        }
+
+        function togglePlayPause() {
+            if (isPlaying) {
+                audio.pause();
+                playPauseBtn.textContent = '播放';
+            } else {
+                audio.play();
+                playPauseBtn.textContent = '暂停';
+            }
+            isPlaying = !isPlaying;
+        }
+
+        function updateVolume() {
+            audio.volume = volumeControl.value;
+        }
+
+        playlist.addEventListener('click', (event) => {
+            if (event.target.tagName === 'DIV') {
+                const src = event.target.getAttribute('data-src');
+                playAudio(src);
+            }
+        });
+
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        volumeControl.addEventListener('input', updateVolume);
+        audio.addEventListener('timeupdate', updateProgress);
+    </script>
+</body>
+</html>

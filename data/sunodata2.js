@@ -550,27 +550,27 @@ var tracks = [
       ]
     },
     {
-      title: "随笔06-我的奋斗",
+      title: "随笔06，我的奋斗",
       array: [
         {
           "mp3": "https://cdn1.suno.ai/45e4183f-977b-4cf6-8650-9b5101ca265c.mp3",
-          "name2": "随笔06-我的奋斗_5c"
+          "name2": "随笔06，我的奋斗_5c"
         },
         {
           "mp3": "https://cdn1.suno.ai/14ca70f1-4549-4c02-91d3-ed99f5213ef1.mp3",
-          "name2": "随笔06-我的奋斗_f1"
+          "name2": "随笔06，我的奋斗_f1"
         },
         {
           "mp3": "https://cdn1.suno.ai/a939888a-1d5e-44fb-8627-86ce06676ea2.mp3",
-          "name2": "随笔06-我的奋斗_a2"
+          "name2": "随笔06，我的奋斗_a2"
         },
         {
           "mp3": "https://cdn1.suno.ai/00e1a1af-261d-4207-89c0-78722d59abc3.mp3",
-          "name2": "随笔06-我的奋斗_c3"
+          "name2": "随笔06，我的奋斗_c3"
         },
         {
           "mp3": "https://cdn1.suno.ai/a245b6c4-b11a-45c1-bdc7-40c718ea1547.mp3",
-          "name2": "随笔06-我的奋斗_47"
+          "name2": "随笔06，我的奋斗_47"
         }
       ]
     },
@@ -596,31 +596,31 @@ var tracks = [
       ]
     },
     {
-      title: "随笔07-伽罗 敏",
+      title: "随笔07:伽罗爱敏",
       array: [
         {
           "mp3": "https://cdn1.suno.ai/2296ef5e-680d-489f-9d80-3ec8095e05b2.mp3",
-          "name2": "随笔07-伽罗 敏_b2"
+          "name2": "随笔07:伽罗爱敏_b2"
         },
         {
           "mp3": "https://cdn1.suno.ai/91c96b53-878b-457a-b955-d46063a12a48.mp3",
-          "name2": "随笔07-伽罗 敏_48"
+          "name2": "随笔07:伽罗爱敏_48"
         },
         {
           "mp3": "https://cdn1.suno.ai/2658dfc2-546f-493e-86eb-5460bd639dea.mp3",
-          "name2": "随笔07-伽罗 敏_ea"
+          "name2": "随笔07:伽罗爱敏_ea"
         },
         {
           "mp3": "https://cdn1.suno.ai/44d98415-f92e-46be-87c9-f96af38be91f.mp3",
-          "name2": "随笔07-伽罗 敏_1f"
+          "name2": "随笔07:伽罗爱敏_1f"
         },
         {
           "mp3": "https://cdn1.suno.ai/5b39943f-0d6e-43ff-9c36-1e6224628922.mp3",
-          "name2": "随笔07-伽罗 敏_22"
+          "name2": "随笔07:伽罗爱敏_22"
         },
         {
           "mp3": "https://cdn1.suno.ai/a64da931-798e-4fe1-8358-e6ab5e1024ef.mp3",
-          "name2": "随笔07-伽罗 敏_ef"
+          "name2": "随笔07:伽罗爱敏_ef"
         }
       ]
     },
@@ -631,9 +631,12 @@ var tracks = [
       ]
     },
     {
-      title: "随笔09",
+      title: "随笔09-江郎才尽",
       array: [
-
+        {
+          "mp3": "https://cdn1.suno.ai/5849f251-62a4-4580-a479-b0c8b9743126.mp3",
+          "name2": "随笔09-江郎才尽_26"
+        }
       ]
     },
     {
@@ -664,6 +667,21 @@ var tracks = [
       title: "随笔13",
       array: [
 
+      ]
+    },
+    {
+      title: "随笔14",
+      array: [
+
+      ]
+    },
+    {
+      title: "随笔15",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/cdd0f88b-392a-47f8-a07f-b9db73ec04da.mp3",
+          "name2": "随笔15_da"
+        }
       ]
     }
 ];

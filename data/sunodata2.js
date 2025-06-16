@@ -683,5 +683,212 @@ var tracks = [
           "name2": "随笔15_da"
         }
       ]
-    }
+    },
+    {
+      title: "随笔16",
+      array: [
+
+      ]
+    },
+    {
+      title: "随笔17-爱的告白",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/be86a69d-aa20-468f-b83c-140c0ec99c65.mp3",
+          "name2": "随笔17-爱的告白_65"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/18638c96-ab00-42e0-bfd1-f1896f12fedb.mp3",
+          "name2": "随笔17-爱的告白_db"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/e5030da5-d971-4cae-8adb-f06c75ee02d4.mp3",
+          "name2": "随笔17-爱的告白_d4"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/b577ce1b-67fb-4aff-853a-aaa8c64f79ab.mp3",
+          "name2": "随笔17-爱的告白_ab"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/f23d2843-d2ae-4157-bc2e-9019fea95e41.mp3",
+          "name2": "随笔17-爱的告白_41"
+        }
+      ]
+    },
+    {
+      title: "随笔18-我的全部",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/23674a6b-c8ae-4224-923f-83b4c77fc5a6.mp3",
+          "name2": "随笔18-我的全部_a6"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/9c263698-1b3a-4295-a5f0-1d320fef272a.mp3",
+          "name2": "随笔18-我的全部_2a"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/197614bf-c591-4fb9-b604-50f5bba9d477.mp3",
+          "name2": "随笔18-我的全部_77"
+        },
+      ]
+    },
+    {
+      title: "随笔19-四月的思念",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/c3396553-d65b-4812-a055-38e7a862a444.mp3",
+          "name2": "随笔19-四月的思念_44"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/118e9b41-3f84-4c9d-836b-5af51c4d3406.mp3",
+          "name2": "随笔19-四月的思念_06"
+        }
+      ]
+    },
+    {
+      title: "随笔20",
+      array: [
+
+      ]
+    },
+    {
+      title: "随笔21",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/9f4a7728-3871-4615-b2dc-44b828041100.mp3",
+          "name2": "随笔21_00"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/0cad64e7-9f06-4de7-9e62-45e56b593c26.mp3",
+          "name2": "随笔21_26"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/9dc03ee9-e19a-4315-838d-6e1cba1a9de1.mp3",
+          "name2": "随笔21_e1"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/5626e966-6f18-46d6-b542-50499243f21d.mp3",
+          "name2": "随笔21_1d"
+        }
+      ]
+    },
+    {
+      title: "随笔22-哦润吉",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/752cb0e2-5c64-402c-8b3c-f6765094373a.mp3",
+          "name2": "随笔22_3a"
+        },
+      ]
+    },
+    {
+      title: "随笔23-四月的梦",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/4b1ee941-dd24-49d0-ba4d-3442b35687f9.mp3",
+          "name2": "随笔23_f9"
+        },
+      ]
+    },
+    {
+      title: "随笔24",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/ed469ac3-91c3-4588-8bc6-13dca8ca985d.mp3",
+          "name2": "随笔24_5d"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/04a27349-98b5-4a1f-b02c-72d9aae3b7e2.mp3",
+          "name2": "随笔24_e2"
+        }
+      ]
+    },
+    {
+      title: "随笔25",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/2045e0f1-8504-43a7-9673-a1b12cb17dcf.mp3",
+          "name2": "随笔25_cf"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/f3dfde21-65e2-4ea6-8eba-26c86a92bfce.mp3",
+          "name2": "随笔25_ce"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/35f73b7d-a1c2-414a-b6c8-067178d67384.mp3",
+          "name2": "随笔25_84"
+        },
+      ]
+    },
+    {
+      title: "随笔26",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/fdfb1b3e-ebd8-4582-a4dc-122990d3e4b5.mp3",
+          "name2": "随笔26_b5"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/d8483d99-a1ec-4fc3-860d-83d6be546a6a.mp3",
+          "name2": "随笔26_6a"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/eb9a6748-be47-440e-8b91-f37525727b35.mp3",
+          "name2": "随笔26_35"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/14b6b1ca-5ff2-47f8-9715-014bb6645f1a.mp3",
+          "name2": "随笔26_1a"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/01e16bca-8b7f-4922-951e-a7021b1be0b1.mp3",
+          "name2": "随笔26_b1"
+        },
+      ]
+    },
+    {
+      title: "随笔27",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/0606382a-c40d-4087-a4ae-22fd3997b1b7.mp3",
+          "name2": "随笔27_b7"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/5fab21f8-96a3-4c4b-9192-e40b4186ac71.mp3",
+          "name2": "随笔27_71"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/12dea11a-caf2-4daa-a246-8238e862d76a.mp3",
+          "name2": "随笔27_6a"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/71b3c537-b777-4ee7-a58e-6620dd9e391e.mp3",
+          "name2": "随笔27_1e"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/d6be0a56-8878-4e83-aaf3-08009b68ea52.mp3",
+          "name2": "随笔27_52"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/bd818a7d-338c-4f4e-9739-cbf554bc7dd1.mp3",
+          "name2": "随笔27_d1"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/73fcea2e-e7b1-4e79-8aa8-53633e95a702.mp3",
+          "name2": "随笔27_02"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/bf12579d-af71-47db-af36-0894c2baf12e.mp3",
+          "name2": "随笔27_2e"
+        }
+      ]
+    },
+    {
+      title: "随笔28",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/0e60351b-10a1-4820-8039-c1e459a02225.mp3",
+          "name2": "随笔28_25"
+        }
+      ]
+    },
 ];

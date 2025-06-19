@@ -777,7 +777,7 @@ var tracks = [
       array: [
         {
           "mp3": "https://cdn1.suno.ai/752cb0e2-5c64-402c-8b3c-f6765094373a.mp3",
-          "name2": "随笔22_3a"
+          "name2": "随笔22-哦润吉_3a"
         },
       ]
     },
@@ -786,7 +786,7 @@ var tracks = [
       array: [
         {
           "mp3": "https://cdn1.suno.ai/4b1ee941-dd24-49d0-ba4d-3442b35687f9.mp3",
-          "name2": "随笔23_f9"
+          "name2": "随笔23-四月的梦_f9"
         },
       ]
     },

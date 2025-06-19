@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title id="titleMessage">木子才演唱会</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            touch-action: manipulation; /* 防止双击缩放 */
+        }
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        button {
+            padding: 8px 8px;
+            cursor: pointer;
+        }
+        .bgColor {
+            background-color: #fcfcfc;
+        }
+        .textColor {
+            color: #333333;
+            text-align: center;
+        }
+        .buttonContentLoad {
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .buttonContent {
+            top: 0;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: auto;
+        }
+        .div1 {
+            height: auto;
+        }
+        .div2 {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            height: auto;
+        }
+        .songInfo {
+            margin-bottom: 10px;
+            padding: 0;
+            margin: 0;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body onclick="bodyAction()" class="bgColor">
+    <div class="container">
+        <p id="songInfo"  class="textColor songInfo" >木子才演唱会</p>
+
+        <div class="div1">
+            <h3 id="title"  class="textColor" ></h3>
+            <audio id="player" onended="handleEnded()" controls>
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+
+        <div class="div2">
+            <button class="textColor" onclick="handlePreviousTrack()">上一首</button>
+            <button class="textColor" id="playOrPauseButton">播放</button>
+            <button class="textColor" onclick="handleNextTrack()">下一首</button>
+            <button class="textColor" id="loopButton" onclick="handleLoop()">模式全部</button>
+            <button class="textColor" onclick="playRandomTrack()">抽歌</button>
+            <button class="textColor" id="listButton" onclick="listShowOrHidden()">列表隐藏</button>
+        </div>
+        <div class="buttonContentLoad" id="songList" style="display: none;">
+            <div class="buttonContent" id="buttonContent"></div>
+        </div>
+    </div>
+
+    <script src="。/data/sunodata2.js"></script>
+    <script type="text/javascript">
+        // 定义一个包含所有音频文件URL的数组
+
+        var loopValue = 0;
+        var isFrist = true;
+        var isPlaying = false;
+        
+        var player = document.getElementById('player');
+        var currentTitle = null;
+        var currentIndex = 0;
+        var currentUrl = null;
+
+        function handleLoop() {
+            loopValue++;
+            if (loopValue >= 4) {
+                loopValue = 0;
+            }
+
+            if (loopValue == 0) {
+                document.getElementById('loopButton').innerHTML = '模式全部';
+            } else if (loopValue == 1) {
+                document.getElementById('loopButton').innerHTML = '模式歌组';
+            } else if (loopValue == 2) {
+                document.getElementById('loopButton').innerHTML = '模式单曲';
+            } else if (loopValue == 3) {
+                document.getElementById('loopButton').innerHTML = '模式随机';
+            }
+        }
+
+        function listShowOrHidden() {
+            var list = document.getElementById('songList');
+            if (list.style.display == 'none') {
+                list.style.display = 'flex';
+                document.getElementById('listButton').innerHTML = '列表隐藏';
+            } else {
+                list.style.display = 'none';
+                document.getElementById('listButton').innerHTML = '列表显示';
+            }
+        }
+
+        function trackButtonAction(e) {
+            let index = e.target.getAttribute('data-index');
+            let array = tracks[index].array;
+            if (array.length == 0) {
+                e.stopPropagation();
+                return;
+            }
+
+            currentIndex = index;
+            playNextTrack();
+        }
+
+        player.addEventListener('play', function () {
+            isPlaying = true;
+            document.getElementById('playOrPauseButton').innerHTML = '暂停';
+        });
+
+        player.addEventListener('pause', function () {
+            isPlaying = false;
+            document.getElementById('playOrPauseButton').innerHTML = '播放';
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            var buttonContent = document.getElementById('buttonContent');
+            let sumTrackNum = 0;
+            
+            for (var i = 0; i < tracks.length; i++) {
+                let tempTrack = tracks[i];
+
+                var button = document.createElement('button');
+                button.innerHTML = i + 1 + '. ' + tempTrack.title + ' (' +  tempTrack.array.length + ')';
+                button.className = "textColor";
+                button.setAttribute('data-index', i);
+                button.onclick = trackButtonAction;
+                buttonContent.appendChild(button);
+
+                sumTrackNum += tempTrack.array.length;
+            }
+
+            // 使用 requestAnimationFrame 确保在浏览器重绘前执行
+            requestAnimationFrame(() => {
+                buttonContent.scrollTop = 0;
+            });
+
+            document.getElementById('songInfo').innerHTML = '木子才演唱会，共 ' + sumTrackNum + ' 首';
+        });
+        function playRandomTrack() {
+            currentIndex = Math.floor(Math.random() * tracks.length);
+            let array = tracks[currentIndex].array;
+            if (array.length == 0) {
+                playRandomTrack();
+                return;
+            }
+
+            playNextTrack();
+        }
+        function playNextTrack() {
+            if (isFrist) {
+                document.getElementById('playOrPauseButton').innerHTML = '播放';
+            } else {
+                document.getElementById('playOrPauseButton').innerHTML = '暂停';
+            }
+            
+            isFrist = false;
+
+            let array = tracks[currentIndex].array;
+            if (array == undefined || array.length == 0) {
+                return;
+            }
+
+            var newIndex = Math.floor(Math.random() * array.length);
+            let tempTrack = array[newIndex];
+
+            currentTitle = tempTrack.name2;
+            currentUrl = tempTrack.mp3;
+
+            player.src = currentUrl;
+            player.play();
+            isPlaying = true;
+
+
+            document.getElementById('titleMessage').innerHTML = "木子才演唱会 《" + currentTitle + "》";
+            document.getElementById('title').innerHTML = currentTitle;
+            event.stopPropagation();
+        }
+
+        function handlePreviousTrack() {
+            if (loopValue == 3) {
+                playRandomTrack();
+                return;
+            }
+            currentIndex = parseInt(currentIndex) - 1;
+            if (currentIndex < 0) {
+                currentIndex = tracks.length - 1;
+            }
+
+            let array = tracks[currentIndex].array;
+            if (array.length == 0) {
+                handlePreviousTrack();
+                return;
+            }
+
+            playNextTrack();
+        }
+        
+        function handleNextTrack() {
+            if (loopValue == 3) {
+                playRandomTrack();
+                return;
+            }
+            currentIndex = parseInt(currentIndex) + 1;
+            if (currentIndex >= tracks.length) {
+                currentIndex = 0;
+            }
+
+            let array = tracks[currentIndex].array;
+            if (array.length == 0) {
+                handleNextTrack();
+                return;
+            }
+
+            playNextTrack();
+        }
+        
+        function handleEnded() {
+            if (loopValue == 3) {
+                playRandomTrack();
+                return;
+            }
+            if (loopValue == 1) {
+                playNextTrack();
+                return;
+            }
+            if (loopValue == 2) {
+                player.src = currentUrl;
+                player.play();
+                isPlaying = true;
+                return;
+            }
+
+            currentIndex = parseInt(currentIndex) + 1;
+            if (currentIndex >= tracks.length) {
+                currentIndex = 0;
+            }
+
+            let array = tracks[currentIndex].array;
+            if (array.length == 0) {
+                handleEnded();
+                return;
+            }
+
+            playNextTrack();
+        }
+
+        document.getElementById('playOrPauseButton').addEventListener('click', function() {
+            isFrist = false;
+
+            if (isPlaying) {
+                player.pause();
+                isPlaying = false;
+                document.getElementById('playOrPauseButton').innerHTML = '播放';
+            } else {
+                if (!player.src || player.ended) {
+                    playNextTrack();
+                } else {
+                    player.play();
+                    isPlaying = true;
+                }
+                document.getElementById('playOrPauseButton').innerHTML = '暂停';
+            }
+        });
+
+        window.onload = function() {
+            playNextTrack();
+            isFrist = true;
+        }
+        
+        function bodyAction() {
+            if (isFrist == false) {
+                return;
+            }
+            isFrist = false;
+
+            player.play();
+            isPlaying = true;
+            document.getElementById('playOrPauseButton').innerHTML = '暂停';
+        }
+    </script>
+</body>
+</html>

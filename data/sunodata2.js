@@ -891,4 +891,123 @@ var tracks = [
         }
       ]
     },
+    {
+      title: "随笔29-再见",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/af314a58-3cfc-440b-a58a-8a47d279ae2a.mp3",
+          "name2": "随笔29-再见_2a"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/90a33432-5aea-40c5-b655-7a34c873cb30.mp3",
+          "name2": "随笔29-再见_30"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/5c2801bb-dba8-468c-a3e1-da21f7866035.mp3",
+          "name2": "随笔29-再见_35"
+        }
+      ]
+    },
+    {
+      title: "随笔30-伪物",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/0460de83-88fd-4f9e-8311-13c2ccebf27b.mp3",
+          "name2": "随笔30-伪物_52"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/acb7f2a8-81f7-45d8-bcc9-ff5b30e3510f.mp3",
+          "name2": "随笔30-伪物_0f"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/c7d05f11-e6ce-41ba-987c-fd922d101c36.mp3",
+          "name2": "随笔30-伪物_36"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/5cc0e649-b9ea-4c3e-9e8c-dc02f1764dba.mp3",
+          "name2": "随笔30-伪物_ba"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/0a1f377d-b4cc-4622-b89e-cdaad4046457.mp3",
+          "name2": "随笔30-伪物_57"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/f99c9be5-dae5-49d7-a187-0682945cc9c8.mp3",
+          "name2": "随笔30-伪物_c8"
+        }
+      ]
+    },
+    {
+      title: "随笔30-真物",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/51e6caa9-8a02-4d9d-8056-50f8b76ce252.mp3",
+          "name2": "随笔30-真物_52"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/1e2bf480-1a6c-4119-a627-7d92942b550c.mp3",
+          "name2": "随笔30-真物_0c"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/48831a91-64ca-4bd5-b3da-8ec86e332b42.mp3",
+          "name2": "随笔30-真物_42"
+        }
+      ]
+    },
+    {
+      title: "随笔31-碎片",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/dafdce80-8f64-4b0c-8ac1-fbcf19cbdbe1.mp3",
+          "name2": "随笔31-碎片_e1"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/238784c5-6c7a-43d8-b9f8-738e3e2d2306.mp3",
+          "name2": "随笔31-碎片_06"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/b1fd5b91-f0c1-43ae-9b71-3a15ed587b4b.mp3",
+          "name2": "随笔31-碎片_4b"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/a29be176-2e4b-40c6-a9c9-a300d8ac1662.mp3",
+          "name2": "随笔31-碎片_62"
+        }
+      ]
+    },
+    {
+      title: "随笔32-天气",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/5ebb89cb-d9d9-4afc-9cfd-c9bffe8240b3.mp3",
+          "name2": "随笔32-天气_b3"
+        }
+      ]
+    },
+    {
+      title: "随笔33",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/3ce8fa62-a1b1-4c05-9d7f-03d1eebb3598.mp3",
+          "name2": "随笔33_98"
+        }
+      ]
+    },
+    {
+      title: "随笔34-回到过去",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/37c310d6-a946-442a-9676-a52cacd17ec6.mp3",
+          "name2": "随笔34-回到过去_c6"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/8e4b0189-6d5b-4b36-8862-3caf6e46f4e2.mp3",
+          "name2": "随笔34-回到过去_e2"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/ef083f5d-4c2e-416d-aff3-e4ee4403d36e.mp3",
+          "name2": "随笔34-回到过去_6e"
+        }
+      ]
+    }
 ];

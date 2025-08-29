@@ -791,57 +791,57 @@ var tracks = [
       ]
     },
     {
-      title: "随笔24",
+      title: "随笔24-五月的歌",
       array: [
         {
           "mp3": "https://cdn1.suno.ai/ed469ac3-91c3-4588-8bc6-13dca8ca985d.mp3",
-          "name2": "随笔24_5d"
+          "name2": "随笔24-五月的歌_5d"
         },
         {
           "mp3": "https://cdn1.suno.ai/04a27349-98b5-4a1f-b02c-72d9aae3b7e2.mp3",
-          "name2": "随笔24_e2"
+          "name2": "随笔24-五月的歌_e2"
         }
       ]
     },
     {
-      title: "随笔25",
+      title: "随笔25-咖啡",
       array: [
         {
           "mp3": "https://cdn1.suno.ai/2045e0f1-8504-43a7-9673-a1b12cb17dcf.mp3",
-          "name2": "随笔25_cf"
+          "name2": "随笔25-咖啡_cf"
         },
         {
           "mp3": "https://cdn1.suno.ai/f3dfde21-65e2-4ea6-8eba-26c86a92bfce.mp3",
-          "name2": "随笔25_ce"
+          "name2": "随笔25-咖啡_ce"
         },
         {
           "mp3": "https://cdn1.suno.ai/35f73b7d-a1c2-414a-b6c8-067178d67384.mp3",
-          "name2": "随笔25_84"
+          "name2": "随笔25-咖啡_84"
         },
       ]
     },
     {
-      title: "随笔26",
+      title: "随笔26-和你",
       array: [
         {
           "mp3": "https://cdn1.suno.ai/fdfb1b3e-ebd8-4582-a4dc-122990d3e4b5.mp3",
-          "name2": "随笔26_b5"
+          "name2": "随笔26-和你_b5"
         },
         {
           "mp3": "https://cdn1.suno.ai/d8483d99-a1ec-4fc3-860d-83d6be546a6a.mp3",
-          "name2": "随笔26_6a"
+          "name2": "随笔26-和你_6a"
         },
         {
           "mp3": "https://cdn1.suno.ai/eb9a6748-be47-440e-8b91-f37525727b35.mp3",
-          "name2": "随笔26_35"
+          "name2": "随笔26-和你_35"
         },
         {
           "mp3": "https://cdn1.suno.ai/14b6b1ca-5ff2-47f8-9715-014bb6645f1a.mp3",
-          "name2": "随笔26_1a"
+          "name2": "随笔26-和你_1a"
         },
         {
           "mp3": "https://cdn1.suno.ai/01e16bca-8b7f-4922-951e-a7021b1be0b1.mp3",
-          "name2": "随笔26_b1"
+          "name2": "随笔26-和你_b1"
         },
       ]
     },
@@ -976,11 +976,11 @@ var tracks = [
       ]
     },
     {
-      title: "随笔32-天气",
+      title: "随笔32-雨",
       array: [
         {
           "mp3": "https://cdn1.suno.ai/5ebb89cb-d9d9-4afc-9cfd-c9bffe8240b3.mp3",
-          "name2": "随笔32-天气_b3"
+          "name2": "随笔32-雨_b3"
         }
       ]
     },

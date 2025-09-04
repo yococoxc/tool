@@ -338,51 +338,51 @@ var tracks = [
         ]
     },
     {
-        title: "随笔01",
+        title: "随笔01-枯燥的歌曲",
         array: [
             {
                 "mp3": "https://cdn1.suno.ai/915c46fd-b36b-4aff-984f-0517e33286af.mp3",
-                "name2": "随笔01_20240515_af"
+                "name2": "随笔01-枯燥的歌曲_20240515_af"
             }
         ]
     },
     {
-        title: "随笔02",
+        title: "随笔02-爱你",
         array: [
             {
                 "mp3": "https://cdn1.suno.ai/4cac6d17-6f45-4cb5-be41-8347de92d37f.mp3",
-                "name2": "随笔02_20241102_7f"
+                "name2": "随笔02-爱你_20241102_7f"
             }
         ]
     },
     {
-        title: "随笔03",
+        title: "随笔03-努力",
         array: [
             {
                 "mp3": "https://cdn1.suno.ai/01ffb014-c959-48d7-9918-be5b5a470094.mp3",
-                "name2": "随笔03_20241118_94"
+                "name2": "随笔03-努力_20241118_94"
             },
 
             {
                 "mp3": "https://cdn1.suno.ai/6d2f9b20-013c-45ac-aa1e-a0594ce2a1af.mp3",
-                "name2": "随笔03_20241118_af"
+                "name2": "随笔03-努力_20241118_af"
             },
             {
                 "mp3": "https://cdn1.suno.ai/bfb0a5d2-4903-40a6-91c0-288edb54329a.mp3",
-                "name2": "随笔03_20241118_9a"
+                "name2": "随笔03-努力_20241118_9a"
             }
         ]
     },
     {
-        title: "随笔04",
+        title: "随笔04-眼泪的味道",
         array: [
             {
                 "mp3": "https://cdn1.suno.ai/bc58b48a-9cf4-4bf9-9d12-e80d5bcdd046.mp3",
-                "name2": "随笔04_20241210_46"
+                "name2": "随笔04-眼泪的味道_20241210_46"
             },
             {
                 "mp3": "https://cdn1.suno.ai/f2fe8627-b375-4746-b4dd-6ee667e6c0e6.mp3",
-                "name2": "随笔04_20241210_e6"
+                "name2": "随笔04-眼泪的味道_20241210_e6"
             }
         ]
     },
@@ -461,27 +461,27 @@ var tracks = [
         ]
     },
     {
-        title: "随笔05",
+        title: "随笔05-过去",
         array: [
           {
             "mp3": "https://cdn1.suno.ai/ad43363c-ad1b-43ec-becd-51d5eaf1816c.mp3",
-            "name2": "随笔05_20250102_6c"
+            "name2": "随笔05-过去_20250102_6c"
           },
           {
             "mp3": "https://cdn1.suno.ai/23d45e03-9067-46aa-9e1b-a63453814801.mp3",
-            "name2": "随笔05_20250102_01"
+            "name2": "随笔05-过去_20250102_01"
           },
           {
             "mp3": "https://cdn1.suno.ai/f09f41bd-6eba-4ee3-8458-d70a2cdd0609.mp3",
-            "name2": "随笔05_20250102_09"
+            "name2": "随笔05-过去_20250102_09"
           },
           {
             "mp3": "https://cdn1.suno.ai/ff8b03af-2fb5-4d9a-bf8d-baef49e8659b.mp3",
-            "name2": "随笔05_20250102_9b"
+            "name2": "随笔05-过去_20250102_9b"
           },
           {
             "mp3": "https://cdn1.suno.ai/a8810bbe-bcc8-49db-918f-90def35259d4.mp3",
-            "name2": "随笔05_20250102_d4"
+            "name2": "随笔05-过去_20250102_d4"
           }
         ]
     },
@@ -515,19 +515,19 @@ var tracks = [
         ]
     },
     {
-      title: "随笔06",
+      title: "随笔06-黑暗时刻",
       array: [
         {
           "mp3": "https://cdn1.suno.ai/faffa5c2-cfe0-4983-a584-04d9b4cb11ae.mp3",
-          "name2": "随笔06_ae"
+          "name2": "随笔06-黑暗时刻_ae"
         },
         {
           "mp3": "https://cdn1.suno.ai/c2bf5ecb-d4e2-4bf5-8d37-659677691eb0.mp3",
-          "name2": "随笔06_b0"
+          "name2": "随笔06-黑暗时刻_b0"
         },
         {
           "mp3": "https://cdn1.suno.ai/14824a54-6426-447b-a16e-fa75ebe63d04.mp3",
-          "name2": "随笔06_04"
+          "name2": "随笔06-黑暗时刻_04"
         },
       ]
     },
@@ -550,27 +550,27 @@ var tracks = [
       ]
     },
     {
-      title: "随笔06，我的奋斗",
+      title: "随笔06-黑暗时刻，我的奋斗",
       array: [
         {
           "mp3": "https://cdn1.suno.ai/45e4183f-977b-4cf6-8650-9b5101ca265c.mp3",
-          "name2": "随笔06，我的奋斗_5c"
+          "name2": "随笔06-黑暗时刻，我的奋斗_5c"
         },
         {
           "mp3": "https://cdn1.suno.ai/14ca70f1-4549-4c02-91d3-ed99f5213ef1.mp3",
-          "name2": "随笔06，我的奋斗_f1"
+          "name2": "随笔06-黑暗时刻，我的奋斗_f1"
         },
         {
           "mp3": "https://cdn1.suno.ai/a939888a-1d5e-44fb-8627-86ce06676ea2.mp3",
-          "name2": "随笔06，我的奋斗_a2"
+          "name2": "随笔06-黑暗时刻，我的奋斗_a2"
         },
         {
           "mp3": "https://cdn1.suno.ai/00e1a1af-261d-4207-89c0-78722d59abc3.mp3",
-          "name2": "随笔06，我的奋斗_c3"
+          "name2": "随笔06-黑暗时刻，我的奋斗_c3"
         },
         {
           "mp3": "https://cdn1.suno.ai/a245b6c4-b11a-45c1-bdc7-40c718ea1547.mp3",
-          "name2": "随笔06，我的奋斗_47"
+          "name2": "随笔06-黑暗时刻，我的奋斗_47"
         }
       ]
     },
@@ -646,11 +646,11 @@ var tracks = [
       ]
     },
     {
-      title: "随笔11",
+      title: "随笔11-坦诚",
       array: [
         {
           "mp3": "https://cdn1.suno.ai/79232f93-b291-45f9-89cb-2d643c816847.mp3",
-          "name2": "随笔11_47"
+          "name2": "随笔11-坦诚_47"
         }
       ]
     },
@@ -676,11 +676,11 @@ var tracks = [
       ]
     },
     {
-      title: "随笔15",
+      title: "随笔15-踏出第一步",
       array: [
         {
           "mp3": "https://cdn1.suno.ai/cdd0f88b-392a-47f8-a07f-b9db73ec04da.mp3",
-          "name2": "随笔15_da"
+          "name2": "随笔15-踏出第一步_da"
         }
       ]
     },
@@ -846,48 +846,48 @@ var tracks = [
       ]
     },
     {
-      title: "随笔27",
+      title: "随笔27-如果我还爱你",
       array: [
         {
           "mp3": "https://cdn1.suno.ai/0606382a-c40d-4087-a4ae-22fd3997b1b7.mp3",
-          "name2": "随笔27_b7"
+          "name2": "随笔27-如果我还爱你_b7"
         },
         {
           "mp3": "https://cdn1.suno.ai/5fab21f8-96a3-4c4b-9192-e40b4186ac71.mp3",
-          "name2": "随笔27_71"
+          "name2": "随笔27-如果我还爱你_71"
         },
         {
           "mp3": "https://cdn1.suno.ai/12dea11a-caf2-4daa-a246-8238e862d76a.mp3",
-          "name2": "随笔27_6a"
+          "name2": "随笔27-如果我还爱你_6a"
         },
         {
           "mp3": "https://cdn1.suno.ai/71b3c537-b777-4ee7-a58e-6620dd9e391e.mp3",
-          "name2": "随笔27_1e"
+          "name2": "随笔27-如果我还爱你_1e"
         },
         {
           "mp3": "https://cdn1.suno.ai/d6be0a56-8878-4e83-aaf3-08009b68ea52.mp3",
-          "name2": "随笔27_52"
+          "name2": "随笔27-如果我还爱你_52"
         },
         {
           "mp3": "https://cdn1.suno.ai/bd818a7d-338c-4f4e-9739-cbf554bc7dd1.mp3",
-          "name2": "随笔27_d1"
+          "name2": "随笔27-如果我还爱你_d1"
         },
         {
           "mp3": "https://cdn1.suno.ai/73fcea2e-e7b1-4e79-8aa8-53633e95a702.mp3",
-          "name2": "随笔27_02"
+          "name2": "随笔27-如果我还爱你_02"
         },
         {
           "mp3": "https://cdn1.suno.ai/bf12579d-af71-47db-af36-0894c2baf12e.mp3",
-          "name2": "随笔27_2e"
+          "name2": "随笔27-如果我还爱你_2e"
         }
       ]
     },
     {
-      title: "随笔28",
+      title: "随笔28-受伤的总是我",
       array: [
         {
           "mp3": "https://cdn1.suno.ai/0e60351b-10a1-4820-8039-c1e459a02225.mp3",
-          "name2": "随笔28_25"
+          "name2": "随笔28-受伤的总是我_25"
         }
       ]
     },
@@ -985,11 +985,19 @@ var tracks = [
       ]
     },
     {
-      title: "随笔33",
+      title: "随笔33-无法细说",
       array: [
         {
           "mp3": "https://cdn1.suno.ai/3ce8fa62-a1b1-4c05-9d7f-03d1eebb3598.mp3",
-          "name2": "随笔33_98"
+          "name2": "随笔33-无法细说_98"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/c8f6fafe-46fb-4b9d-8902-5ac15871d551.mp3",
+          "name2": "随笔33-无法细说_51"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/84936df1-f657-4700-9e95-ea27a00bbec3.mp3",
+          "name2": "随笔33-无法细说_c3"
         }
       ]
     },

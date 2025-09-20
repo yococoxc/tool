@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渐变色背景生成器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#7B61FF',
+                        accent: '#00D4FF',
+                        neutral: '#F5F7FA',
+                        dark: '#1D2129'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .shadow-soft {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+            .transition-all-300 {
+                transition: all 300ms ease-in-out;
+            }
+            .drag-over {
+                border: 2px dashed #165DFF;
+                background-color: rgba(22, 93, 255, 0.05);
+            }
+            .dragging {
+                opacity: 0.7;
+                transform: scale(1.02);
+                background-color: rgba(22, 93, 255, 0.05);
+            }
+            .gradient-card {
+                transition: all 0.3s ease;
+            }
+            .gradient-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+                cursor: pointer;
+            }
+            .gradient-card.active {
+                border-color: #165DFF;
+                box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.2);
+            }
+            .custom-scrollbar::-webkit-scrollbar {
+                width: 4px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: #c1c1c1;
+                border-radius: 10px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                background: #a1a1a1;
+            }
+            .modal-backdrop {
+                backdrop-filter: blur(4px);
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-neutral min-h-screen flex flex-col">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-paint-brush text-primary text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold text-dark">muzico 渐变背景生成器</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- 渐变方案按钮 -->
+                <button id="presets-btn" class="flex items-center space-x-1 px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-all-300">
+                    <i class="fa fa-th"></i>
+                    <span class="hidden sm:inline">渐变方案</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 渐变方案弹出窗口 -->
+    <div id="presets-modal" class="fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all-300">
+        <div class="absolute inset-0 bg-black/50 modal-backdrop"></div>
+        <div class="relative bg-white rounded-xl shadow-xl max-w-5xl w-full max-h-[90vh] flex flex-col transform scale-95 transition-all-300">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-xl font-semibold flex items-center">
+                    <i class="fa fa-th text-primary mr-2"></i>渐变参考方案 
+                    <span class="text-xs text-gray-500 ml-2">(点击选择)</span>
+                </h2>
+                <button id="close-modal" class="text-gray-400 hover:text-gray-600 transition-all-300">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- 方案卡片容器 - 内容将通过JS动态生成 -->
+            <div id="presets-container" class="flex-grow overflow-y-auto p-6 custom-scrollbar">
+                <!-- 渐变方案将在这里动态加载 -->
+                <div class="flex justify-center items-center h-32 text-gray-500">
+                    <i class="fa fa-circle-o-notch fa-spin mr-2"></i> 加载渐变方案中...
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-gray-200 bg-gray-50 rounded-b-xl text-center text-sm text-gray-500">
+                点击任意方案应用到当前编辑
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容区 -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- 左侧控制面板 -->
+            <div class="lg:col-span-1 xl:col-span-1.5 space-y-6">
+                <!-- 颜色选择面板 - 右上角添加倒序按钮 -->
+                <div class="bg-white rounded-xl p-6 shadow-soft">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold flex items-center">
+                            <i class="fa fa-palette text-primary mr-2"></i>颜色设置
+                            <span class="text-xs text-gray-500 ml-2">(拖动调整顺序)</span>
+                        </h2>
+                        <!-- 颜色倒序按钮 -->
+                        <button id="reverse-colors" class="p-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-all-300" title="颜色倒序">
+                            <i class="fa fa-exchange"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="color-container" class="space-y-4 min-h-[200px]">
+                        <div class="color-item flex items-center space-x-3 p-2 rounded-lg draggable" draggable="true">
+                            <i class="fa fa-bars text-gray-400 cursor-move"></i>
+                            <input type="color" value="#165DFF" class="w-10 h-10 rounded-full cursor-pointer border-2 border-gray-200">
+                            <input type="text" value="#165DFF" class="flex-grow px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <button class="remove-color text-gray-400 hover:text-red-500 transition-all-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="color-item flex items-center space-x-3 p-2 rounded-lg draggable" draggable="true">
+                            <i class="fa fa-bars text-gray-400 cursor-move"></i>
+                            <input type="color" value="#7B61FF" class="w-10 h-10 rounded-full cursor-pointer border-2 border-gray-200">
+                            <input type="text" value="#7B61FF" class="flex-grow px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <button class="remove-color text-gray-400 hover:text-red-500 transition-all-300">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button id="add-color" class="mt-4 w-full py-2 px-4 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-all-300 flex items-center justify-center">
+                        <i class="fa fa-plus mr-2"></i>添加颜色
+                    </button>
+                </div>
+                
+                <!-- 渐变方向设置 -->
+                <div class="bg-white rounded-xl p-6 shadow-soft">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fa fa-arrows text-primary mr-2"></i>渐变方向
+                    </h2>
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <button class="direction-btn p-3 rounded-lg border-2 border-primary bg-primary/10 text-dark flex flex-col items-center transition-all-300" data-direction="linear" data-angle="0deg">
+                            <i class="fa fa-arrows-h text-lg mb-1"></i>
+                            <span class="text-xs">水平</span>
+                        </button>
+                        
+                        <button class="direction-btn p-3 rounded-lg border-2 border-transparent hover:border-primary/30 hover:bg-primary/5 text-dark flex flex-col items-center transition-all-300" data-direction="linear" data-angle="90deg">
+                            <i class="fa fa-arrows-v text-lg mb-1"></i>
+                            <span class="text-xs">垂直</span>
+                        </button>
+                        
+                        <button class="direction-btn p-3 rounded-lg border-2 border-transparent hover:border-primary/30 hover:bg-primary/5 text-dark flex flex-col items-center transition-all-300" data-direction="linear" data-angle="45deg">
+                            <i class="fa fa-arrows-diagonal text-lg mb-1"></i>
+                            <span class="text-xs">斜上</span>
+                        </button>
+                        
+                        <button class="direction-btn p-3 rounded-lg border-2 border-transparent hover:border-primary/30 hover:bg-primary/5 text-dark flex flex-col items-center transition-all-300" data-direction="linear" data-angle="135deg">
+                            <i class="fa fa-arrows-alt text-lg mb-1"></i>
+                            <span class="text-xs">斜下</span>
+                        </button>
+                        
+                        <button class="direction-btn p-3 rounded-lg border-2 border-transparent hover:border-primary/30 hover:bg-primary/5 text-dark flex flex-col items-center transition-all-300" data-direction="radial" data-angle="circle">
+                            <i class="fa fa-circle-o text-lg mb-1"></i>
+                            <span class="text-xs">径向</span>
+                        </button>
+                        
+                        <button class="direction-btn p-3 rounded-lg border-2 border-transparent hover:border-primary/30 hover:bg-primary/5 text-dark flex flex-col items-center transition-all-300" data-direction="wave" data-angle="45deg">
+                            <i class="fa fa-water text-lg mb-1"></i>
+                            <span class="text-xs">波浪</span>
+                        </button>
+                    </div>
+                    
+                    <!-- 角度调整滑块（仅线性渐变） -->
+                    <div id="angle-control" class="mt-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">角度: <span id="angle-value">0</span>°</label>
+                        <input type="range" min="0" max="360" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary" id="angle-slider">
+                    </div>
+                    
+                    <!-- 波浪参数控制（仅波浪渐变） -->
+                    <div id="wave-controls" class="mt-6 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">波浪频率: <span id="wave-frequency-value">5</span></label>
+                        <input type="range" min="1" max="20" value="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary" id="wave-frequency">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2 mt-4">波浪振幅: <span id="wave-amplitude-value">50</span>%</label>
+                        <input type="range" min="10" max="100" value="50" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary" id="wave-amplitude">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧区域 - 只保留图片实时预览 -->
+            <div class="lg:col-span-2 xl:col-span-1.5">
+                <div class="bg-white rounded-xl p-6 shadow-soft h-full flex flex-col">
+                    <!-- 图片实时预览（主要预览区域） -->
+                    <div>
+                        <h2 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fa fa-image text-primary mr-2"></i>图片实时预览
+                        </h2>
+                        
+                        <div class="border border-gray-200 rounded-lg overflow-hidden bg-white p-6 flex justify-center items-center shadow-inner">
+                            <div id="image-preview-container" class="relative bg-gray-100 rounded overflow-hidden shadow-sm" style="width: 300px; height: 200px;">
+                                <canvas id="image-preview" width="300" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 导出选项 -->
+                    <div class="mt-6 flex-grow">
+                        <h2 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fa fa-download text-primary mr-2"></i>导出选项
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <!-- 图片尺寸 -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">图片尺寸</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <input type="number" value="300" id="image-width" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="宽度">
+                                    <input type="number" value="200" id="image-height" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="高度">
+                                </div>
+                            </div>
+                            
+                            <!-- 下载背景图片 -->
+                            <button id="download-image" class="w-full py-3 px-4 bg-secondary hover:bg-secondary/90 text-white rounded-lg transition-all-300 flex items-center justify-center">
+                                <i class="fa fa-image mr-2"></i>下载背景图片
+                            </button>
+                            
+                            <!-- 复制CSS代码 -->
+                            <button id="copy-css" class="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all-300 flex items-center justify-center">
+                                <i class="fa fa-copy mr-2"></i>复制CSS代码
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- CSS代码显示 -->
+                    <div class="mt-6 bg-gray-50 p-4 rounded-lg text-sm font-mono text-gray-700 overflow-x-auto">
+                        <pre id="css-output">background: linear-gradient(0deg, #165DFF, #7B61FF);</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 通知提示 -->
+    <div id="notification" class="fixed bottom-6 right-6 bg-dark text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all-300 flex items-center">
+        <i class="fa fa-check-circle mr-2"></i>
+        <span id="notification-text">操作成功</span>
+    </div>
+
+    <!-- 引入外部渐变方案数据 -->
+    <script src="gradient-presets.js"></script>
+    
+    <script>
+        // 全局变量存储当前渐变设置
+        const gradientSettings = {
+            colors: ['#165DFF', '#7B61FF'],
+            direction: 'linear',
+            angle: '0deg',
+            waveFrequency: 5,
+            waveAmplitude: 50
+        };
+        
+        // DOM元素
+        const colorContainer = document.getElementById('color-container');
+        const addColorBtn = document.getElementById('add-color');
+        const reverseColorsBtn = document.getElementById('reverse-colors'); // 颜色倒序按钮
+        const directionBtns = document.querySelectorAll('.direction-btn');
+        const angleSlider = document.getElementById('angle-slider');
+        const angleValue = document.getElementById('angle-value');
+        const angleControl = document.getElementById('angle-control');
+        const waveControls = document.getElementById('wave-controls');
+        const waveFrequency = document.getElementById('wave-frequency');
+        const waveFrequencyValue = document.getElementById('wave-frequency-value');
+        const waveAmplitude = document.getElementById('wave-amplitude');
+        const waveAmplitudeValue = document.getElementById('wave-amplitude-value');
+        const cssOutput = document.getElementById('css-output');
+        const copyCssBtn = document.getElementById('copy-css');
+        const downloadImageBtn = document.getElementById('download-image');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notification-text');
+        const imageWidthInput = document.getElementById('image-width');
+        const imageHeightInput = document.getElementById('image-height');
+        const imagePreview = document.getElementById('image-preview');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const presetsContainer = document.getElementById('presets-container');
+        const presetsBtn = document.getElementById('presets-btn');
+        const presetsModal = document.getElementById('presets-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        
+        // 拖动相关变量
+        let draggedItem = null;
+        
+        // 初始化
+        function init() {
+            // 加载外部渐变方案
+            loadGradientPresets();
+            
+            // 绑定事件监听
+            bindEvents();
+            
+            // 更新预览
+            updateImagePreview();
+        }
+        
+        // 从外部JS文件加载渐变方案
+        function loadGradientPresets() {
+            try {
+                // 检查外部数据是否加载成功
+                if (typeof gradientPresets === 'undefined') {
+                    throw new Error('渐变方案数据未找到');
+                }
+                
+                // 清空加载提示
+                presetsContainer.innerHTML = '';
+                
+                // 创建网格容器
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4';
+                presetsContainer.appendChild(grid);
+                
+                // 动态生成渐变方案卡片
+                gradientPresets.forEach(preset => {
+                    const card = document.createElement('div');
+                    card.className = 'gradient-card rounded-lg border border-gray-200 overflow-hidden';
+                    card.dataset.colors = JSON.stringify(preset.colors);
+                    
+                    // 构建渐变背景样式
+                    let gradientStyle = '';
+                    if (preset.colors.length === 1) {
+                        gradientStyle = `background-color: ${preset.colors[0]}`;
+                    } else if (preset.colors.length === 2) {
+                        gradientStyle = `background: linear-gradient(to right, ${preset.colors[0]}, ${preset.colors[1]})`;
+                    } else {
+                        gradientStyle = `background: linear-gradient(to right, ${preset.colors.join(', ')})`;
+                    }
+                    
+                    card.innerHTML = `
+                        <div class="h-12" style="${gradientStyle}"></div>
+                        <div class="p-2 text-center text-xs font-medium text-gray-700">${preset.name}</div>
+                    `;
+                    
+                    // 添加点击事件
+                    card.addEventListener('click', () => {
+                        // 移除所有方案的active状态
+                        document.querySelectorAll('.gradient-card').forEach(p => p.classList.remove('active'));
+                        // 添加当前方案的active状态
+                        card.classList.add('active');
+                        
+                        // 应用选中的渐变方案
+                        applyGradientPreset(preset);
+                    });
+                    
+                    grid.appendChild(card);
+                });
+                
+            } catch (error) {
+                presetsContainer.innerHTML = `
+                    <div class="flex justify-center items-center h-32 text-red-500">
+                        <i class="fa fa-exclamation-triangle mr-2"></i> 加载失败: ${error.message}
+                    </div>
+                `;
+                console.error('加载渐变方案失败:', error);
+            }
+        }
+        
+        // 应用选中的渐变方案
+        function applyGradientPreset(preset) {
+            if (preset && preset.colors && preset.colors.length >= 1) {
+                // 更新全局颜色设置
+                gradientSettings.colors = preset.colors;
+                // 清空现有颜色项
+                clearColorItems();
+                // 添加新的颜色项
+                preset.colors.forEach(color => addColorItem(color));
+                // 更新删除按钮状态
+                updateRemoveButtons();
+                // 更新预览
+                updateImagePreview();
+                // 显示通知
+                showNotification(`已应用"${preset.name}"方案`);
+            }
+        }
+        
+        // 绑定事件监听
+        function bindEvents() {
+            // 颜色倒序按钮点击事件
+            reverseColorsBtn.addEventListener('click', reverseColors);
+            
+            // 模态框控制
+            presetsBtn.addEventListener('click', openModal);
+            closeModalBtn.addEventListener('click', closeModal);
+            presetsModal.addEventListener('click', (e) => {
+                if (e.target === presetsModal) {
+                    closeModal();
+                }
+            });
+            
+            // 点击ESC键关闭模态框
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !presetsModal.classList.contains('opacity-0')) {
+                    closeModal();
+                }
+            });
+            
+            // 添加颜色
+            addColorBtn.addEventListener('click', () => {
+                // 生成随机颜色
+                const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+                addColorItem(randomColor);
+                // 更新颜色列表
+                updateColorList();
+                // 更新预览
+                updateImagePreview();
+            });
+            
+            // 方向选择
+            directionBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // 更新选中状态
+                    directionBtns.forEach(b => {
+                        b.classList.remove('border-primary', 'bg-primary/10');
+                        b.classList.add('border-transparent', 'hover:border-primary/30', 'hover:bg-primary/5');
+                    });
+                    btn.classList.remove('border-transparent', 'hover:border-primary/30', 'hover:bg-primary/5');
+                    btn.classList.add('border-primary', 'bg-primary/10');
+                    
+                    // 更新设置
+                    gradientSettings.direction = btn.dataset.direction;
+                    gradientSettings.angle = btn.dataset.angle;
+                    
+                    // 显示/隐藏相关控制
+                    if (gradientSettings.direction === 'linear') {
+                        angleControl.classList.remove('hidden');
+                        waveControls.classList.add('hidden');
+                        angleSlider.value = parseInt(gradientSettings.angle);
+                        angleValue.textContent = parseInt(gradientSettings.angle);
+                    } else if (gradientSettings.direction === 'wave') {
+                        angleControl.classList.remove('hidden');
+                        waveControls.classList.remove('hidden');
+                        angleSlider.value = parseInt(gradientSettings.angle);
+                        angleValue.textContent = parseInt(gradientSettings.angle);
+                    } else {
+                        angleControl.classList.add('hidden');
+                        waveControls.classList.add('hidden');
+                    }
+                    
+                    // 更新预览
+                    updateImagePreview();
+                });
+            });
+            
+            // 角度调整
+            angleSlider.addEventListener('input', () => {
+                const angle = angleSlider.value;
+                angleValue.textContent = angle;
+                gradientSettings.angle = `${angle}deg`;
+                updateImagePreview();
+            });
+            
+            // 波浪频率调整
+            waveFrequency.addEventListener('input', () => {
+                const frequency = waveFrequency.value;
+                waveFrequencyValue.textContent = frequency;
+                gradientSettings.waveFrequency = parseInt(frequency);
+                if (gradientSettings.direction === 'wave') {
+                    updateImagePreview();
+                }
+            });
+            
+            // 波浪振幅调整
+            waveAmplitude.addEventListener('input', () => {
+                const amplitude = waveAmplitude.value;
+                waveAmplitudeValue.textContent = amplitude;
+                gradientSettings.waveAmplitude = parseInt(amplitude);
+                if (gradientSettings.direction === 'wave') {
+                    updateImagePreview();
+                }
+            });
+            
+            // 图片尺寸调整
+            imageWidthInput.addEventListener('input', updateImageDimensions);
+            imageHeightInput.addEventListener('input', updateImageDimensions);
+            
+            // 复制CSS按钮
+            copyCssBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(cssOutput.textContent)
+                    .then(() => showNotification('CSS代码已复制到剪贴板'))
+                    .catch(err => showNotification('复制失败，请手动复制', false));
+            });
+            
+            // 下载图片按钮
+            downloadImageBtn.addEventListener('click', downloadGradientImage);
+            
+            // 初始化拖放事件
+            initDragAndDrop();
+        }
+        
+        // 颜色倒序功能
+        function reverseColors() {
+            // 至少需要两种颜色才可以倒序
+            if (gradientSettings.colors.length <= 1) {
+                showNotification('至少需要两种颜色才能倒序', false);
+                return;
+            }
+            
+            // 反转颜色数组
+            gradientSettings.colors.reverse();
+            
+            // 清空现有颜色项
+            clearColorItems();
+            
+            // 添加反转后的颜色项
+            gradientSettings.colors.forEach(color => addColorItem(color));
+            
+            // 更新删除按钮状态
+            updateRemoveButtons();
+            
+            // 更新预览
+            updateImagePreview();
+            
+            // 显示通知
+            showNotification('颜色已倒序排列');
+        }
+        
+        // 打开模态框
+        function openModal() {
+            presetsModal.classList.remove('opacity-0', 'pointer-events-none');
+            presetsModal.querySelector('div:nth-child(2)').classList.remove('scale-95');
+            presetsModal.querySelector('div:nth-child(2)').classList.add('scale-100');
+            document.body.style.overflow = 'hidden'; // 防止背景滚动
+        }
+        
+        // 关闭模态框
+        function closeModal() {
+            presetsModal.classList.add('opacity-0', 'pointer-events-none');
+            presetsModal.querySelector('div:nth-child(2)').classList.remove('scale-100');
+            presetsModal.querySelector('div:nth-child(2)').classList.add('scale-95');
+            document.body.style.overflow = ''; // 恢复背景滚动
+        }
+        
+        // 初始化拖放功能
+        function initDragAndDrop() {
+            // 为所有颜色项添加拖放事件
+            document.querySelectorAll('.color-item').forEach(item => {
+                setupDragAndDropEvents(item);
+            });
+            
+            // 容器的拖放事件
+            colorContainer.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(colorContainer, e.clientY);
+                const draggable = document.querySelector('.dragging');
+                
+                if (afterElement == null) {
+                    colorContainer.appendChild(draggable);
+                } else {
+                    colorContainer.insertBefore(draggable, afterElement);
+                }
+            });
+            
+            colorContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                // 更新颜色顺序
+                updateColorList();
+                updateImagePreview();
+            });
+        }
+        
+        // 为颜色项设置拖放事件
+        function setupDragAndDropEvents(item) {
+            item.addEventListener('dragstart', () => {
+                item.classList.add('dragging');
+                draggedItem = item;
+                // 延迟设置不透明度，确保拖动时能正确显示拖动图像
+                setTimeout(() => {
+                    item.classList.add('opacity-50');
+                }, 0);
+            });
+            
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging', 'opacity-50');
+                draggedItem = null;
+                
+                // 移除所有拖放提示样式
+                document.querySelectorAll('.color-item').forEach(i => {
+                    i.classList.remove('drag-over');
+                });
+            });
+            
+            item.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+            
+            item.addEventListener('dragenter', (e) => {
+                e.preventDefault();
+                if (item !== draggedItem) {
+                    item.classList.add('drag-over');
+                }
+            });
+            
+            item.addEventListener('dragleave', () => {
+                item.classList.remove('drag-over');
+            });
+        }
+        
+        // 确定拖动后放置的位置
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.color-item:not(.dragging)')];
+            
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+        
+        // 清空颜色项
+        function clearColorItems() {
+            colorContainer.innerHTML = '';
+        }
+        
+        // 添加单个颜色项
+        function addColorItem(color) {
+            // 创建新的颜色项
+            const colorItem = document.createElement('div');
+            colorItem.className = 'color-item flex items-center space-x-3 p-2 rounded-lg draggable';
+            colorItem.draggable = true;
+            colorItem.innerHTML = `
+                <i class="fa fa-bars text-gray-400 cursor-move"></i>
+                <input type="color" value="${color}" class="w-10 h-10 rounded-full cursor-pointer border-2 border-gray-200">
+                <input type="text" value="${color}" class="flex-grow px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                <button class="remove-color text-gray-400 hover:text-red-500 transition-all-300">
+                    <i class="fa fa-times"></i>
+                </button>
+            `;
+            
+            // 添加到容器
+            colorContainer.appendChild(colorItem);
+            
+            // 设置拖放事件
+            setupDragAndDropEvents(colorItem);
+            
+            // 绑定颜色输入事件
+            const colorInput = colorItem.querySelector('input[type="color"]');
+            const textInput = colorItem.querySelector('input[type="text"]');
+            const removeBtn = colorItem.querySelector('.remove-color');
+            
+            colorInput.addEventListener('input', () => {
+                textInput.value = colorInput.value;
+                updateColorList();
+                updateImagePreview();
+            });
+            
+            textInput.addEventListener('input', () => {
+                if (/^#([0-9A-F]{3}){1,2}$/i.test(textInput.value)) {
+                    colorInput.value = textInput.value;
+                    updateColorList();
+                    updateImagePreview();
+                }
+            });
+            
+            removeBtn.addEventListener('click', () => {
+                if (document.querySelectorAll('.color-item').length > 1) {
+                    colorItem.remove();
+                    updateColorList();
+                    updateImagePreview();
+                } else {
+                    showNotification('至少需要保留一种颜色', false);
+                }
+            });
+        }
+        
+        // 更新图片尺寸
+        function updateImageDimensions() {
+            const width = parseInt(imageWidthInput.value) || 300;
+            const height = parseInt(imageHeightInput.value) || 200;
+            
+            // 更新预览画布尺寸
+            imagePreview.width = width;
+            imagePreview.height = height;
+            
+            // 更新预览容器尺寸
+            imagePreviewContainer.style.width = `${width}px`;
+            imagePreviewContainer.style.height = `${height}px`;
+            
+            // 更新预览
+            updateImagePreview();
+        }
+        
+        // 更新颜色列表
+        function updateColorList() {
+            const colorInputs = document.querySelectorAll('.color-item input[type="color"]');
+            gradientSettings.colors = Array.from(colorInputs).map(input => input.value);
+        }
+        
+        // 更新删除按钮状态
+        function updateRemoveButtons() {
+            const removeBtns = document.querySelectorAll('.remove-color');
+            removeBtns.forEach((btn) => {
+                btn.disabled = removeBtns.length <= 1;
+            });
+        }
+        
+        // 更新图片预览（主要预览功能）
+        function updateImagePreview() {
+            const ctx = imagePreview.getContext('2d');
+            const width = imagePreview.width;
+            const height = imagePreview.height;
+            
+            // 清空画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 更新CSS代码显示
+            updateCssOutput();
+            
+            // 根据当前设置绘制渐变
+            if (gradientSettings.direction === 'linear') {
+                // 线性渐变
+                const angle = parseInt(gradientSettings.angle);
+                let x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+                
+                // 根据角度计算渐变方向
+                if (angle === 0) {
+                    // 水平
+                    x1 = 0; y1 = 0;
+                    x2 = width; y2 = 0;
+                } else if (angle === 90) {
+                    // 垂直
+                    x1 = 0; y1 = 0;
+                    x2 = 0; y2 = height;
+                } else {
+                    // 任意角度
+                    const radians = angle * Math.PI / 180;
+                    const length = Math.sqrt(width * width + height * height);
+                    x1 = width / 2;
+                    y1 = height / 2;
+                    x2 = x1 + Math.cos(radians) * length / 2;
+                    y2 = y1 + Math.sin(radians) * length / 2;
+                }
+                
+                const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+                
+                gradientSettings.colors.forEach((color, index) => {
+                    const position = index / (gradientSettings.colors.length - 1);
+                    gradient.addColorStop(position, color);
+                });
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+            } 
+            else if (gradientSettings.direction === 'radial') {
+                // 径向渐变
+                const gradient = ctx.createRadialGradient(
+                    width / 2, height / 2, 0,
+                    width / 2, height / 2, Math.max(width, height) / 2
+                );
+                
+                gradientSettings.colors.forEach((color, index) => {
+                    const position = index / (gradientSettings.colors.length - 1);
+                    gradient.addColorStop(position, color);
+                });
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+            }
+            else if (gradientSettings.direction === 'wave') {
+                // 波浪渐变
+                const gradient = ctx.createLinearGradient(0, 0, width, height);
+                gradientSettings.colors.forEach((color, index) => {
+                    const position = index / (gradientSettings.colors.length - 1);
+                    gradient.addColorStop(position, color);
+                });
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                
+                const frequency = gradientSettings.waveFrequency / 100;
+                const amplitude = (height * gradientSettings.waveAmplitude) / 200;
+                const angle = parseInt(gradientSettings.angle) * Math.PI / 180;
+                
+                for (let x = 0; x <= width; x += 1) {
+                    const rotatedX = x * Math.cos(angle) - 0 * Math.sin(angle);
+                    const y = Math.sin(rotatedX * frequency) * amplitude + height / 2;
+                    const originalY = y * Math.cos(angle) + x * Math.sin(angle);
+                    
+                    if (x === 0) {
+                        ctx.moveTo(x, originalY);
+                    } else {
+                        ctx.lineTo(x, originalY);
+                    }
+                }
+                
+                ctx.lineTo(width, height);
+                ctx.lineTo(0, height);
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+        
+        // 更新CSS输出
+        function updateCssOutput() {
+            let css;
+            
+            if (gradientSettings.direction === 'linear') {
+                css = `background: linear-gradient(${gradientSettings.angle}, ${gradientSettings.colors.join(', ')});`;
+            } else if (gradientSettings.direction === 'radial') {
+                css = `background: radial-gradient(${gradientSettings.angle}, ${gradientSettings.colors.join(', ')});`;
+            } else if (gradientSettings.direction === 'wave') {
+                css = `/* 波浪渐变需要使用Canvas生成，无法直接用CSS表示 */`;
+            }
+            
+            cssOutput.textContent = css;
+        }
+        
+        // 下载渐变图片
+        function downloadGradientImage() {
+            // 使用预览画布的数据直接下载
+            imagePreview.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'gradient-background.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showNotification('图片已下载');
+            });
+        }
+        
+        // 显示通知
+        function showNotification(message, isSuccess = true) {
+            notificationText.textContent = message;
+            notification.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg transform translate-y-0 opacity-100 transition-all-300 flex items-center';
+            
+            if (isSuccess) {
+                notification.classList.add('bg-green-600', 'text-white');
+                notification.innerHTML = `<i class="fa fa-check-circle mr-2"></i><span>${message}</span>`;
+            } else {
+                notification.classList.add('bg-red-600', 'text-white');
+                notification.innerHTML = `<i class="fa fa-exclamation-circle mr-2"></i><span>${message}</span>`;
+            }
+            
+            // 3秒后隐藏
+            setTimeout(() => {
+                notification.classList.remove('translate-y-0', 'opacity-100');
+                notification.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
+    

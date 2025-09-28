@@ -6,7 +6,7 @@
     <title>XMLLayout展示</title>
     
     <style>
-        /* 保持原有样式不变 */
+        /* 基础样式重置 */
         * {
             margin: 0;
             padding: 0;
@@ -439,12 +439,13 @@
         
         #xmlContainer {
             overflow: auto;
-            background-color: white;
+            background-color: #f8f8f8;
             border-radius: 6px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            padding: 16px;
+            padding: 20px;
             font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 14px;
+            font-size: 16px; /* 增大字体 */
+            line-height: 1.5; /* 增加行高提高可读性 */
             height: 100%;
             position: relative;
         }
@@ -453,6 +454,15 @@
             white-space: pre-wrap;
             word-wrap: break-word;
         }
+        
+        /* XML语法高亮样式 */
+        .xml-declaration { color: #808080; }
+        .xml-tag { color: #0000FF; }
+        .xml-attribute { color: #FF0000; }
+        .xml-attribute-value { color: #008000; }
+        .xml-text { color: #000000; }
+        .xml-comment { color: #808080; font-style: italic; }
+        .xml-cdata { color: #800000; }
         
         /* 子菜单滚动区域 */
         .submenu-container {
@@ -626,7 +636,7 @@
                         <p>加载中...</p>
                     </div>
                     <div id="xmlError" class="error-message hidden"></div>
-                    <pre id="xmlContent"></pre>
+                    <div id="xmlContent"></div> <!-- 改为div而非pre，以便支持HTML高亮 -->
                 </div>
             </div>
         </div>
@@ -772,9 +782,9 @@
             
             xhr.onload = function() {
                 if (xhr.status >= 200 && xhr.status < 300) {
-                    // 请求成功，格式化XML并显示
-                    const formattedXml = formatXml(xhr.responseText);
-                    xmlContent.textContent = formattedXml;
+                    // 请求成功，格式化并高亮XML
+                    const highlightedXml = highlightXml(xhr.responseText);
+                    xmlContent.innerHTML = highlightedXml;
                     xmlContent.style.display = 'block';
                     xmlError.style.display = 'none';
                 } else {
@@ -797,62 +807,108 @@
             xhr.send();
         }
         
-        // 改进的XML格式化函数 - 使用4个空格作为缩进
-        function formatXml(xml) {
+        // XML语法高亮和格式化
+        function highlightXml(xml) {
             // 移除XML声明前的空白字符
             xml = xml.trim();
             
             let formatted = '';
             let indent = '';
-            const indentSize = 4; // 将缩进改为4个空格
+            const indentSize = 4; // 4个空格缩进
             let inComment = false;
             
             // 按标签分割XML，但保留标签完整性
-            const tokens = xml.match(/<[^!>]*>|<![^>]*>|<\/[^>]*>|[^<]+/g) || [];
+            const tokens = xml.match(/<\?xml.*?\?>|<![CDATA[\s\S]*?]]>|<--[\s\S]*?-->|<\/[^>]+>|<[^>]+\/>|<[^>]+>|[^<]+/g) || [];
             
             tokens.forEach(function(token) {
                 // 跳过空 token
                 if (!token.trim()) return;
                 
+                // 处理XML声明
+                if (token.startsWith('<?xml')) {
+                    formatted += token + '\n';
+                    return;
+                }
+                
                 // 处理注释
                 if (token.startsWith('<!--')) {
                     inComment = true;
-                    formatted += indent + token + '\n';
+                    formatted += indent + `<span class="xml-comment">${escapeHtml(token)}</span>\n`;
                     return;
                 }
                 if (inComment) {
-                    formatted += indent + token + '\n';
+                    formatted += indent + `<span class="xml-comment">${escapeHtml(token)}</span>\n`;
                     if (token.includes('-->')) {
                         inComment = false;
                     }
                     return;
                 }
                 
+                // 处理CDATA
+                if (token.startsWith('<![CDATA[')) {
+                    formatted += indent + `<span class="xml-cdata">${escapeHtml(token)}</span>\n`;
+                    return;
+                }
+                
                 // 处理开始标签
                 if (token.startsWith('<') && !token.startsWith('</') && !token.endsWith('/>')) {
-                    formatted += indent + token + '\n';
-                    indent += ' '.repeat(indentSize); // 使用4个空格
+                    // 高亮标签和属性
+                    const highlightedToken = highlightTag(token);
+                    formatted += indent + highlightedToken + '\n';
+                    indent += ' '.repeat(indentSize);
                 }
                 // 处理自闭合标签
                 else if (token.startsWith('<') && token.endsWith('/>')) {
-                    formatted += indent + token + '\n';
+                    const highlightedToken = highlightTag(token);
+                    formatted += indent + highlightedToken + '\n';
                 }
                 // 处理结束标签
                 else if (token.startsWith('</')) {
-                    indent = indent.substring(indentSize); // 减少4个空格
-                    formatted += indent + token + '\n';
-                }
-                // 处理CDATA
-                else if (token.startsWith('<![CDATA[')) {
-                    formatted += indent + token + '\n';
+                    indent = indent.substring(indentSize);
+                    const highlightedToken = `<span class="xml-tag">${escapeHtml(token)}</span>`;
+                    formatted += indent + highlightedToken + '\n';
                 }
                 // 处理文本内容
                 else {
-                    formatted += indent + token.trim() + '\n';
+                    formatted += indent + `<span class="xml-text">${escapeHtml(token.trim())}</span>\n`;
                 }
             });
             
             return formatted.trim();
+        }
+        
+        // 高亮单个标签中的元素
+        function highlightTag(tag) {
+            // 转义HTML特殊字符
+            tag = escapeHtml(tag);
+            
+            // 匹配标签名和属性
+            // 先匹配标签名
+            let result = tag.replace(/^<\/?([a-zA-Z0-9_-]+)/, function(match, tagName) {
+                return match.replace(tagName, `<span class="xml-tag">${tagName}</span>`);
+            });
+            
+            // 再匹配属性和属性值
+            result = result.replace(/(\s+)([a-zA-Z0-9_-]+)(=)/g, function(match, space, attr, eq) {
+                return `${space}<span class="xml-attribute">${attr}</span>${eq}`;
+            });
+            
+            // 匹配属性值
+            result = result.replace(/=(".*?"|'.*?')/g, function(match, value) {
+                return `=<span class="xml-attribute-value">${value}</span>`;
+            });
+            
+            return `<span class="xml-tag">${result}</span>`;
+        }
+        
+        // 转义HTML特殊字符
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
         
         // 选择子项

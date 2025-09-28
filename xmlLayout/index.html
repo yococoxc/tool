@@ -823,13 +823,15 @@
                     indent = indent.substring(indentSize);
                 }
                 
-                // formatted += indent + '<' + node + '>\n';
-                formatted += indent + '' + node + '\n';
+                formatted += indent + '<' + node + '>\n';
                 
                 if (node.match(/^<?\w[^>]*[^\/]$/)) {
                     indent += ' '.repeat(indentSize);
                 }
             });
+
+            //排除第一个和最后多余的字符内容
+            formatted = formatted.replace(/>>/g, '>').replace(/<</g, '<');
             
             return formatted.trim();
         }

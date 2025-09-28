@@ -823,7 +823,8 @@
                     indent = indent.substring(indentSize);
                 }
                 
-                formatted += indent + '<' + node + '>\n';
+                // formatted += indent + '<' + node + '>\n';
+                formatted += indent + '' + node + '\n';
                 
                 if (node.match(/^<?\w[^>]*[^\/]$/)) {
                     indent += ' '.repeat(indentSize);

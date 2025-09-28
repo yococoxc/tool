@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON数据展示</title>
+    <!-- 引入外部JSON数据 -->
+    <script src="./data.js"></script>
+    
+    <style>
+        /* 基础样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: #1D2129;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        /* 自定义图标样式 */
+        .icon {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            position: relative;
+            vertical-align: middle;
+        }
+        
+        .icon-folder {
+            width: 16px;
+            height: 12px;
+            border: 2px solid currentColor;
+            border-top: none;
+            border-radius: 0 0 2px 2px;
+        }
+        
+        .icon-folder::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -2px;
+            width: 8px;
+            height: 8px;
+            border: 2px solid currentColor;
+            border-right: none;
+            border-bottom: none;
+            border-radius: 2px 0 0 0;
+        }
+        
+        .icon-list {
+            width: 16px;
+            height: 16px;
+            position: relative;
+        }
+        
+        .icon-list::before,
+        .icon-list::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: currentColor;
+        }
+        
+        .icon-list::before {
+            top: 4px;
+        }
+        
+        .icon-list::after {
+            bottom: 4px;
+        }
+        
+        .icon-hand {
+            width: 16px;
+            height: 16px;
+            position: relative;
+        }
+        
+        .icon-hand::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 4px;
+            width: 8px;
+            height: 8px;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+        }
+        
+        .icon-hand::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 16px;
+            height: 8px;
+            border: 2px solid currentColor;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+        
+        .icon-chevron-up,
+        .icon-chevron-down,
+        .icon-chevron-left,
+        .icon-chevron-right {
+            width: 16px;
+            height: 16px;
+            position: relative;
+        }
+        
+        .icon-chevron-up::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 2px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid currentColor;
+            border-right: 2px solid currentColor;
+            transform: rotate(-45deg);
+        }
+        
+        .icon-chevron-down::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 12px;
+            height: 12px;
+            border-bottom: 2px solid currentColor;
+            border-right: 2px solid currentColor;
+            transform: rotate(45deg);
+        }
+        
+        .icon-chevron-left::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 6px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid currentColor;
+            border-left: 2px solid currentColor;
+            transform: rotate(-45deg);
+        }
+        
+        .icon-chevron-right::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid currentColor;
+            border-right: 2px solid currentColor;
+            transform: rotate(45deg);
+        }
+        
+        .icon-search-plus {
+            width: 16px;
+            height: 16px;
+            position: relative;
+        }
+        
+        .icon-search-plus::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 10px;
+            height: 10px;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+        }
+        
+        .icon-search-plus::after {
+            content: '';
+            position: absolute;
+            bottom: 1px;
+            left: 7px;
+            width: 2px;
+            height: 6px;
+            background-color: currentColor;
+        }
+        
+        .icon-times {
+            width: 24px;
+            height: 24px;
+            position: relative;
+        }
+        
+        .icon-times::before,
+        .icon-times::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 2px;
+            width: 20px;
+            height: 2px;
+            background-color: currentColor;
+        }
+        
+        .icon-times::before {
+            transform: rotate(45deg);
+        }
+        
+        .icon-times::after {
+            transform: rotate(-45deg);
+        }
+        
+        /* 加载状态样式 */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #6B7280;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 16px;
+            border: 4px solid #E5E7EB;
+            border-top: 4px solid #165DFF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: #EF4444;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        /* 左侧导航菜单 */
+        .left-menu {
+            width: 256px;
+            border-right: 1px solid #e5e7eb;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .menu-header {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: bold;
+            font-size: 18px;
+            color: #165DFF;
+        }
+        
+        .menu-header .icon {
+            margin-right: 8px;
+        }
+        
+        .menu-scroll-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #menuContainer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+        
+        /* 隐藏滚动条 */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* 菜单项样式 */
+        .menu-item {
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #4B5563;
+            font-size: 14px;
+        }
+        
+        .menu-item .icon {
+            margin-right: 8px;
+        }
+        
+        .menu-item:hover {
+            background-color: #F3F4F6;
+            color: #165DFF;
+        }
+        
+        .menu-item.active {
+            background-color: rgba(22, 93, 255, 0.1);
+            color: #165DFF;
+            font-weight: 500;
+        }
+        
+        /* 滚动按钮 */
+        .scroll-btn {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #165DFF;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        
+        .scroll-btn:hover {
+            opacity: 1;
+            background-color: white;
+        }
+        
+        #scrollUp {
+            top: 8px;
+        }
+        
+        #scrollDown {
+            bottom: 8px;
+        }
+        
+        .scroll-btn.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        /* 右侧内容区域 */
+        .right-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        /* 内容展示区 */
+        #contentArea {
+            flex: 1;
+            overflow: hidden;
+            background-color: #F5F7FA;
+            padding: 24px;
+            position: relative;
+        }
+        
+        #initialMessage {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+        }
+        
+        #initialMessage .icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            color: #E5E7EB;
+        }
+        
+        #displayArea {
+            height: 100%;
+            display: none;
+        }
+        
+        /* 图片和XML内容展示 */
+        #imageContainer {
+            display: none;
+            width: 50%;
+            float: left;
+            padding-right: 16px;
+            height: 100%;
+            overflow: auto;
+        }
+        
+        #imageWrapper {
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-in;
+        }
+        
+        #contentImage {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: opacity 0.3s ease;
+        }
+        
+        .image-zoom-hint {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        #xmlContainer {
+            overflow: auto;
+            background-color: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 16px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            height: 100%;
+            position: relative;
+        }
+        
+        #xmlContent {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        /* 子菜单滚动区域 */
+        .submenu-container {
+            height: 64px;
+            border-top: 1px solid #e5e7eb;
+            background-color: white;
+            position: relative;
+        }
+        
+        .submenu-scroll-btn {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #165DFF;
+            border: none;
+            width: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        
+        .submenu-scroll-btn:hover {
+            opacity: 1;
+            background-color: white;
+        }
+        
+        #scrollLeft {
+            left: 0;
+            border-radius: 0 6px 6px 0;
+        }
+        
+        #scrollRight {
+            right: 0;
+            border-radius: 6px 0 0 6px;
+        }
+        
+        .submenu-scroll-btn.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        #submenuContainer {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 40px;
+            overflow-x: auto;
+            transition: all 0.3s ease;
+        }
+        
+        .submenu-item {
+            padding: 8px 16px;
+            border-radius: 6px;
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            font-size: 14px;
+        }
+        
+        .submenu-item:hover {
+            border-color: #165DFF;
+            color: #165DFF;
+        }
+        
+        .submenu-item.active {
+            background-color: #165DFF;
+            color: white;
+            border-color: #165DFF;
+        }
+        
+        /* 图片全屏查看模态框 */
+        #imageModal {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #closeModal {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            color: white;
+            font-size: 32px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #closeModal:hover {
+            color: #E5E7EB;
+        }
+        
+        #modalImage {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+    <!-- 左侧导航菜单 -->
+    <div class="left-menu">
+        <div class="menu-header">
+            <span class="icon icon-list"></span>导航菜单
+        </div>
+        
+        <!-- 菜单滚动容器 -->
+        <div class="menu-scroll-container">
+            <div id="menuContainer" class="scrollbar-hide">
+                <!-- 菜单项将通过JS动态生成 -->
+            </div>
+            
+            <!-- 上下滚动按钮 -->
+            <button id="scrollUp" class="scroll-btn hidden">
+                <span class="icon icon-chevron-up"></span>
+            </button>
+            <button id="scrollDown" class="scroll-btn hidden">
+                <span class="icon icon-chevron-down"></span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- 右侧内容区域 -->
+    <div class="right-content">
+        <!-- 内容展示区 -->
+        <div id="contentArea">
+            <!-- 初始提示信息 -->
+            <div id="initialMessage">
+                <span class="icon icon-hand"></span>
+                <p>请从左侧菜单选择一个选项</p>
+            </div>
+            
+            <!-- 图片和XML内容展示区 -->
+            <div id="displayArea">
+                <!-- 图片区域 -->
+                <div id="imageContainer" class="scrollbar-hide">
+                    <div id="imageWrapper">
+                        <img id="contentImage" src="" alt="">
+                        <div class="image-zoom-hint">
+                            <span class="icon icon-search-plus"></span>点击放大
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- XML内容区域 -->
+                <div id="xmlContainer" class="scrollbar-hide">
+                    <div id="xmlLoading" class="loading hidden">
+                        <div class="spinner"></div>
+                        <p>加载中...</p>
+                    </div>
+                    <div id="xmlError" class="error-message hidden"></div>
+                    <pre id="xmlContent"></pre>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 子菜单滚动区域 -->
+        <div class="submenu-container">
+            <button id="scrollLeft" class="submenu-scroll-btn hidden">
+                <span class="icon icon-chevron-left"></span>
+            </button>
+            
+            <button id="scrollRight" class="submenu-scroll-btn hidden">
+                <span class="icon icon-chevron-right"></span>
+            </button>
+            
+            <div id="submenuContainer" class="scrollbar-hide">
+                <!-- 子菜单项将通过JS动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 图片全屏查看模态框 -->
+    <div id="imageModal">
+        <button id="closeModal">
+            <span class="icon icon-times"></span>
+        </button>
+        <img id="modalImage" src="" alt="">
+    </div>
+
+    <script>
+        // DOM元素
+        const menuContainer = document.getElementById('menuContainer');
+        const submenuContainer = document.getElementById('submenuContainer');
+        const contentArea = document.getElementById('contentArea');
+        const displayArea = document.getElementById('displayArea');
+        const initialMessage = document.getElementById('initialMessage');
+        const imageContainer = document.getElementById('imageContainer');
+        const xmlContainer = document.getElementById('xmlContainer');
+        const contentImage = document.getElementById('contentImage');
+        const xmlContent = document.getElementById('xmlContent');
+        const xmlLoading = document.getElementById('xmlLoading');
+        const xmlError = document.getElementById('xmlError');
+        const imageWrapper = document.getElementById('imageWrapper');
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const closeModal = document.getElementById('closeModal');
+        
+        // 滚动按钮
+        const scrollUp = document.getElementById('scrollUp');
+        const scrollDown = document.getElementById('scrollDown');
+        const scrollLeft = document.getElementById('scrollLeft');
+        const scrollRight = document.getElementById('scrollRight');
+        
+        // 当前选中项
+        let currentCategoryIndex = -1;
+        let currentItemIndex = -1;
+        let data = [];
+        
+        // 初始化数据和页面
+        function init() {
+            // 检查数据是否已加载（来自data.js）
+            if (window.categoriesData) {
+                data = window.categoriesData;
+                initMenu();
+                initEvents();
+                updateScrollButtons();
+                updateSubmenuScrollButtons();
+                
+                // 默认选择第一个分类
+                if (data.length > 0) {
+                    selectCategory(0);
+                }
+            } else {
+                // 数据加载失败
+                const errorEl = document.createElement('div');
+                errorEl.className = 'error-message';
+                errorEl.textContent = '无法加载数据，请检查data.js文件';
+                contentArea.appendChild(errorEl);
+            }
+        }
+        
+        // 初始化左侧菜单
+        function initMenu() {
+            data.forEach((category, index) => {
+                const menuItem = document.createElement('button');
+                menuItem.className = 'menu-item';
+                menuItem.innerHTML = `<span class="icon icon-folder"></span>${category.name}`;
+                menuItem.dataset.index = index;
+                
+                menuItem.addEventListener('click', () => {
+                    selectCategory(index);
+                });
+                
+                menuContainer.appendChild(menuItem);
+            });
+        }
+        
+        // 选择分类
+        function selectCategory(index) {
+            // 更新当前选中状态
+            currentCategoryIndex = index;
+            currentItemIndex = -1;
+            
+            // 更新菜单样式
+            document.querySelectorAll('.menu-item').forEach((btn, i) => {
+                if (i === index) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // 生成子菜单
+            generateSubmenu(index);
+            
+            // 显示内容区域，隐藏初始信息
+            displayArea.style.display = 'block';
+            initialMessage.style.display = 'none';
+            
+            // 默认选择第一个子项
+            if (data[index].items.length > 0) {
+                selectItem(0);
+            }
+        }
+        
+        // 生成子菜单
+        function generateSubmenu(categoryIndex) {
+            // 清空子菜单
+            submenuContainer.innerHTML = '';
+            
+            // 添加子菜单项
+            data[categoryIndex].items.forEach((item, index) => {
+                const submenuItem = document.createElement('button');
+                submenuItem.className = 'submenu-item';
+                submenuItem.textContent = item.name;
+                submenuItem.dataset.index = index;
+                
+                submenuItem.addEventListener('click', () => {
+                    selectItem(index);
+                });
+                
+                submenuContainer.appendChild(submenuItem);
+            });
+            
+            // 更新子菜单滚动按钮状态
+            updateSubmenuScrollButtons();
+        }
+        
+        // 加载并显示XML文件内容
+        function loadXmlFile(xmlPath) {
+            // 显示加载状态
+            xmlContent.style.display = 'none';
+            xmlError.style.display = 'none';
+            xmlLoading.style.display = 'block';
+            
+            // 创建AJAX请求
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', xmlPath, true);
+            
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    // 请求成功，格式化XML并显示
+                    const formattedXml = formatXml(xhr.responseText);
+                    xmlContent.textContent = formattedXml;
+                    xmlContent.style.display = 'block';
+                    xmlError.style.display = 'none';
+                } else {
+                    // 请求失败
+                    xmlError.textContent = `加载XML文件失败: 状态码 ${xhr.status}`;
+                    xmlError.style.display = 'block';
+                    xmlContent.style.display = 'none';
+                }
+                xmlLoading.style.display = 'none';
+            };
+            
+            xhr.onerror = function() {
+                // 网络错误
+                xmlError.textContent = '加载XML文件时发生网络错误';
+                xmlError.style.display = 'block';
+                xmlContent.style.display = 'none';
+                xmlLoading.style.display = 'none';
+            };
+            
+            xhr.send();
+        }
+        
+        // 格式化XML以便于阅读
+        function formatXml(xml) {
+            let formatted = '';
+            let indent = '';
+            const indentSize = 2;
+            
+            // 简单的XML格式化逻辑
+            xml.split(/>\s*</).forEach(function(node) {
+                if (node.match(/^\/\w/)) {
+                    indent = indent.substring(indentSize);
+                }
+                
+                formatted += indent + '<' + node + '>\n';
+                
+                if (node.match(/^<?\w[^>]*[^\/]$/)) {
+                    indent += ' '.repeat(indentSize);
+                }
+            });
+            
+            return formatted.trim();
+        }
+        
+        // 选择子项
+        function selectItem(index) {
+            if (currentCategoryIndex === -1) return;
+            
+            // 更新当前选中状态
+            currentItemIndex = index;
+            
+            // 更新子菜单样式
+            document.querySelectorAll('.submenu-item').forEach((btn, i) => {
+                if (i === index) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // 更新内容展示
+            const item = data[currentCategoryIndex].items[index];
+            
+            // 加载并显示XML文件
+            loadXmlFile(item.xml);
+            
+            // 更新图片
+            if (item.pic) {
+                // 有图片，平分空间
+                imageContainer.style.display = 'block';
+                imageContainer.style.width = '50%';
+                imageContainer.style.float = 'left';
+                imageContainer.style.paddingRight = '16px';
+                xmlContainer.style.width = '50%';
+                xmlContainer.style.float = 'right';
+                xmlContainer.style.paddingLeft = '16px';
+                
+                // 加载图片并添加淡入效果
+                contentImage.style.opacity = '0';
+                contentImage.src = item.pic;
+                contentImage.alt = `${data[currentCategoryIndex].name} - ${item.name}`;
+                
+                contentImage.onload = () => {
+                    contentImage.style.opacity = '1';
+                };
+                
+                contentImage.onerror = () => {
+                    contentImage.style.opacity = '1';
+                    contentImage.src = '';
+                    contentImage.alt = '图片加载失败';
+                };
+            } else {
+                // 无图片，XML占满空间
+                imageContainer.style.display = 'none';
+                xmlContainer.style.width = '100%';
+                xmlContainer.style.float = 'none';
+                xmlContainer.style.paddingLeft = '0';
+            }
+        }
+        
+        // 初始化事件监听
+        function initEvents() {
+            // 菜单滚动按钮
+            scrollUp.addEventListener('click', () => {
+                menuContainer.scrollBy({ top: -200, behavior: 'smooth' });
+            });
+            
+            scrollDown.addEventListener('click', () => {
+                menuContainer.scrollBy({ top: 200, behavior: 'smooth' });
+            });
+            
+            // 子菜单滚动按钮
+            scrollLeft.addEventListener('click', () => {
+                submenuContainer.scrollBy({ left: -200, behavior: 'smooth' });
+            });
+            
+            scrollRight.addEventListener('click', () => {
+                submenuContainer.scrollBy({ left: 200, behavior: 'smooth' });
+            });
+            
+            // 图片放大查看
+            imageWrapper.addEventListener('click', () => {
+                if (contentImage.src && contentImage.src !== '') {
+                    modalImage.src = contentImage.src;
+                    modalImage.alt = contentImage.alt;
+                    imageModal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+            
+            // 关闭图片模态框
+            closeModal.addEventListener('click', () => {
+                imageModal.style.display = 'none';
+                document.body.style.overflow = '';
+            });
+            
+            // 点击模态框背景关闭
+            imageModal.addEventListener('click', (e) => {
+                if (e.target === imageModal) {
+                    closeModal.click();
+                }
+            });
+            
+            // 键盘ESC关闭模态框
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && imageModal.style.display === 'flex') {
+                    closeModal.click();
+                }
+            });
+            
+            // 监听滚动位置，控制滚动按钮显示
+            menuContainer.addEventListener('scroll', updateScrollButtons);
+            submenuContainer.addEventListener('scroll', updateSubmenuScrollButtons);
+        }
+        
+        // 更新滚动按钮状态
+        function updateScrollButtons() {
+            if (menuContainer.scrollTop === 0) {
+                scrollUp.classList.add('hidden');
+            } else {
+                scrollUp.classList.remove('hidden');
+            }
+            
+            if (menuContainer.scrollTop + menuContainer.clientHeight >= menuContainer.scrollHeight - 10) {
+                scrollDown.classList.add('hidden');
+            } else {
+                scrollDown.classList.remove('hidden');
+            }
+        }
+        
+        // 更新子菜单滚动按钮状态
+        function updateSubmenuScrollButtons() {
+            if (submenuContainer.scrollLeft === 0) {
+                scrollLeft.classList.add('hidden');
+            } else {
+                scrollLeft.classList.remove('hidden');
+            }
+            
+            if (submenuContainer.scrollLeft + submenuContainer.clientWidth >= submenuContainer.scrollWidth - 10) {
+                scrollRight.classList.add('hidden');
+            } else {
+                scrollRight.classList.remove('hidden');
+            }
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
+    

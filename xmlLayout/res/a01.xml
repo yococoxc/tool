@@ -1,0 +1,38 @@
+<v>
+    <h height="100">
+        <v flex="1" bg="R" main="spaceEvenly">
+            <label-c text="主音量" font-size="20"/>
+            <label-c text="60" font-size="20"/>
+        </v>
+        <v flex="1" bg="R" main="spaceEvenly">
+            <label-c text="超低音量" font-size="20"/>
+            <label-c text="60" font-size="20"/>
+        </v>
+    </h>
+    <h flex="1">
+        <v flex="1" main="center" cross="center">
+            <knob width="150" height="150" bg="R" id="slider"/>
+        </v>
+        <v flex="1" main="center" cross="center">
+            <knob width="150" height="150" bg="R" id="slider"/>
+        </v>
+    </h>
+    <grid itemHeight="40" cols="3" spacing="8" spacingH="24" padding="0,8,30,8">
+        <gap/>
+        <button text="蓝牙" color="#ffffff" bg="R" />
+        <gap/>
+    </grid>
+    <label-c text="音效" fontSize="20" color="#ffffff"/>
+    <grid itemHeight="40" rows="2" spacing="8" spacingH="24" padding="12,8">
+        <button text="预置1" color="#ffffff"  bg-img="btnbg" bg-img-selected="btnbgSelected" />
+        <button text="预置2" color="#ffffff"  bg-img="btnbg" bg-img-selected="btnbgSelected" />
+        <button text="预置3" color="#ffffff"  bg-img="btnbg" bg-img-selected="btnbgSelected"/>
+        <button text="预置4" color="#ffffff"  bg-img="btnbg" bg-img-selected="btnbgSelected" />
+        <button text="预置5" color="#ffffff"  bg-img="btnbg" bg-img-selected="btnbgSelected" />
+        <button text="预置6" color="#ffffff"  bg-img="btnbg" bg-img-selected="btnbgSelected" />
+    </grid>
+    <grid itemHeight="40" cols="2" spacing="8" spacingH="50" padding="30,8,12,8">
+        <button text="高级设置" color="#ffffff" bg-img="btnbgSelected" />
+        <button text="播放器" color="#ffffff" bg-img="btnbgSelected" />
+    </grid>
+</v>

@@ -1,0 +1,9 @@
+<v>
+    <label-c text="ID" height="30"/>
+    <slider-v flex="1" max="20" min="-20"/>
+    <label-c text="-20.0dB" height="30"/>
+    <gap height="1"/>
+    <label-c text="28.852" height="30"/>
+    <gap height="1"/>
+    <label-c text="20.0kHz" height="30"/>
+</v>

@@ -1,0 +1,35 @@
+<v padding="12">
+    <grid itemHeight="40" bg="R" cols="1" padding="8,12" spacing="8" border="2px solid red" radius="8px">
+        <h>
+            <label-c width="80" text="USB"/>
+            <slider flex="1"/>
+            <label-c width="40" text="100"/>
+        </h>
+        <h>
+            <label-c width="80" text="OPT"/>
+            <slider flex="1"/>
+            <label-c width="40" text="100"/>
+        </h>
+    </grid>
+    <gap height="12"/>
+    <v height="150" bg="R">
+        <label-c text="场景设置" fontSize="20" height="50" bg="#606060" color="#ffffff"/>
+        <h height="50" padding="8 14">
+            <button flex="3" text="预置1" color="#ffffff" bg="R" />
+            <gap width="14"/>
+            <button flex="2" text="保存场景" color="#ffffff" bg="R" />
+            <gap width="8"/>
+            <button flex="2" text="删除场景" color="#ffffff" bg="R" />
+        </h>
+        <h height="36" padding="0 14" >
+            <label text="名称" fontSize="18" color="#ffffff"/>
+            <gap width="14"/>
+            <textfeild-c flex="1" color="#ffffff"/>
+        </h>
+    </v>
+    <gap flex="1"/>
+    <label text="设备: EL-PA200"/>
+    <gap height="6"/>
+    <label text="软件版本: EL-PA200 V1.0.0"/>
+</v>
+

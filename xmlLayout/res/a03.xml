@@ -1,0 +1,42 @@
+<v>
+    <grid itemHeight="40" rows="2" spacing="8" spacingH="24" padding="12,8">
+        <button text="CH1" color="#ffffff" bg-img="btnbg" bg-img-selected="btnbgSelected" />
+        <button text="CH2" color="#ffffff" bg-img="btnbg" bg-img-selected="btnbgSelected" />
+        <button text="CH3" color="#ffffff" bg-img="btnbg" bg-img-selected="btnbgSelected" />
+        <button text="CH4" color="#ffffff" bg-img="btnbg" bg-img-selected="btnbgSelected" />
+        <button text="CH5" color="#ffffff" bg-img="btnbg" bg-img-selected="btnbgSelected" />
+        <button text="CH6" color="#ffffff" bg-img="btnbg" bg-img-selected="btnbgSelected" />
+    </grid>
+    <container height="40">
+        <label-c text="60" fontSize="30" color="#ffffff" id="sliderText"/>
+    </container>
+    <h bg="R" flex="1" main="spaceEvenly" cross="center">
+        <label-c width="50" height="50" bg="R" text="-" fontSize="60"/>
+        <knob width="150" height="150" bg="R" id="slider"/>
+        <label-c width="50" height="50" bg="R" text="+" fontSize="60"/>
+    </h>
+    <grid itemHeight="40" cols="3" spacing="8" spacingH="24" padding="12,8">
+        <button text="正相" color="#ffffff" bg="R" />
+        <button text="空" color="#ffffff" bg="R" />
+        <button text="非静音" color="#ffffff" bg="R" />
+    </grid>
+    <label-c text="高通" fontSize="20" color="#ffffff"/>
+    <grid itemHeight="40" cols="3" spacing="8" spacingH="24" padding="12,8">
+        <button text="巴特沃斯" color="#ffffff" bg="R" />
+        <button text="20.0kHz" color="#ffffff" bg="R" />
+        <button text="6dB/Oct" color="#ffffff" bg="R" />
+    </grid>
+    <label-c text="低通" fontSize="20" color="#ffffff"/>
+    <grid itemHeight="40" cols="3" spacing="8" spacingH="24" padding="12,8">
+        <button text="巴特沃斯" color="#ffffff" bg="R" />
+        <button text="20.0kHz" color="#ffffff" bg="R" />
+        <button text="6dB/Oct" color="#ffffff" bg="R" />
+    </grid>
+    <grid itemHeight="40" cols="3" spacing="8" spacingH="24" padding="0,8,12,8">
+        <gap/>
+        <button text="输出联调" color="#ffffff" bg="R" />
+        <gap/>
+    </grid>
+</v>
+
+

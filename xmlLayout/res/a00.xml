@@ -1,0 +1,7 @@
+<tab bg="#808080">
+    <view tabName="首页" src="c01.xml"/>
+    <view tabName="延时" src="c02.xml"/>
+    <view tabName="通道" src="c03.xml"/>
+    <view tabName="EQ" src="c04.xml"/>
+    <view tabName="系统" src="c05.xml"/>
+</tab>

@@ -1,0 +1,40 @@
+<v>
+    <grid itemHeight="40" rows="2" spacing="8" spacingH="24" padding="12,8">
+        <button text="CH1" color="#ffffff" bg-img="btnbg" bg-img-selected="btnbgSelected" />
+        <button text="CH2" color="#ffffff" bg-img="btnbg" bg-img-selected="btnbgSelected" />
+        <button text="CH3" color="#ffffff" bg-img="btnbg" bg-img-selected="btnbgSelected" />
+        <button text="CH4" color="#ffffff" bg-img="btnbg" bg-img-selected="btnbgSelected" />
+        <button text="CH5" color="#ffffff" bg-img="btnbg" bg-img-selected="btnbgSelected" />
+        <button text="CH6" color="#ffffff" bg-img="btnbg" bg-img-selected="btnbgSelected" />
+    </grid>
+    <view flex="1" bg="R"/>
+    <h height="300" bg="R">
+        <v width="50" bg="R">
+            <label-c text="ID" height="30"/>
+            <label-c text="+20dB" height="30"/>
+            <gap flex="1"/>
+            <label-c text="0dB" height="30"/>
+            <gap flex="1"/>
+            <label-c text="-20dB" height="30"/>
+            <label-c text="增益" height="30"/>
+            <gap height="1"/>
+            <label-c text="Q值" height="30"/>
+            <gap height="1"/>
+            <label-c text="频率" height="30"/>
+        </v>
+        <hs flex="1" bg="R">
+            <xml src="c0401" width="80" bg="R"/>
+            <xml src="c0401" width="80" bg="R"/>
+            <xml src="c0401" width="80" bg="R"/>
+            <xml src="c0401" width="80" bg="R"/>
+            <xml src="c0401" width="80" bg="R"/>
+            <xml src="c0401" width="80" bg="R"/>
+            <xml src="c0401" width="80" bg="R"/>
+        </hs>
+    </h>
+    <grid itemHeight="40" cols="3" spacing="8" spacingH="24" padding="12,8">
+        <button text="直通" color="#ffffff" bg="R" />
+        <button text="复位" color="#ffffff" bg="R" />
+        <button text="输出联调" color="#ffffff" bg="R" />
+    </grid>
+</v>

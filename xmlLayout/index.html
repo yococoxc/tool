@@ -6,7 +6,7 @@
     <title>XMLLayout展示</title>
     
     <style>
-        /* 基础样式重置 */
+        /* 基础样式 */
         * {
             margin: 0;
             padding: 0;
@@ -246,7 +246,7 @@
         
         /* 左侧导航菜单 */
         .left-menu {
-            width: 256px;
+            width: 180px;
             border-right: 1px solid #e5e7eb;
             background-color: white;
             display: flex;
@@ -314,8 +314,8 @@
         }
         
         .menu-item.active {
-            background-color: rgba(22, 93, 255, 0.1);
-            color: #165DFF;
+            background-color: rgba(6, 44, 133, 0.865);
+            color: #ffffff;
             font-weight: 500;
         }
         
@@ -397,14 +397,15 @@
             display: none;
         }
         
-        /* 图片和XML内容展示 */
+        /* 图片和JSON内容展示 */
         #imageContainer {
             display: none;
-            width: 50%;
+            width: 30%;
             float: left;
             padding-right: 16px;
             height: 100%;
             overflow: auto;
+            background-color: #e5e5e5;
         }
         
         #imageWrapper {
@@ -437,32 +438,49 @@
             gap: 4px;
         }
         
-        #xmlContainer {
+        #jsonContainer {
             overflow: auto;
-            background-color: #f8f8f8;
+            background-color: #efe8d5;
             border-radius: 6px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             padding: 20px;
             font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 16px; /* 增大字体 */
-            line-height: 1.5; /* 增加行高提高可读性 */
+            font-size: 16px;
+            line-height: 1.5;
             height: 100%;
             position: relative;
         }
         
-        #xmlContent {
+        #jsonContent {
             white-space: pre-wrap;
             word-wrap: break-word;
         }
         
-        /* XML语法高亮样式 */
-        .xml-declaration { color: #808080; }
-        .xml-tag { color: #0000FF; }
-        .xml-attribute { color: #FF0000; }
-        .xml-attribute-value { color: #008000; }
-        .xml-text { color: #000000; }
-        .xml-comment { color: #808080; font-style: italic; }
-        .xml-cdata { color: #800000; }
+        /* JSON语法高亮样式 */
+        .json-brace { color: #0033CC; }
+        .json-quote { color: #555555; }
+        .json-key { color: #CC3300; }
+        .json-value { color: #007722;}
+        .json-string { color: #008000; }
+        .json-number { color: #ff0000; }
+        .json-boolean { color: #aa5d00; }
+        .json-null { color: #aa5d00; }
+        
+        /* 折叠/展开按钮 */
+        .toggle-btn {
+            color: #165DFF;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            width: 18px;
+            height: 18px;
+            padding: 0;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
         
         /* 子菜单滚动区域 */
         .submenu-container {
@@ -583,7 +601,7 @@
 </head>
 <body>
     <!-- 引入外部数据 -->
-    <script src="./data.js"></script>
+    <script src="data.js"></script>
     
     <!-- 左侧导航菜单 -->
     <div class="left-menu">
@@ -617,7 +635,7 @@
                 <p>请从左侧菜单选择一个选项</p>
             </div>
             
-            <!-- 图片和XML内容展示区 -->
+            <!-- 图片和JSON内容展示区 -->
             <div id="displayArea">
                 <!-- 图片区域 -->
                 <div id="imageContainer" class="scrollbar-hide">
@@ -629,14 +647,14 @@
                     </div>
                 </div>
                 
-                <!-- XML内容区域 -->
-                <div id="xmlContainer" class="scrollbar-hide">
+                <!-- JSON内容区域 -->
+                <div id="jsonContainer" class="scrollbar-hide">
                     <div id="xmlLoading" class="loading hidden">
                         <div class="spinner"></div>
                         <p>加载中...</p>
                     </div>
                     <div id="xmlError" class="error-message hidden"></div>
-                    <div id="xmlContent"></div> <!-- 改为div而非pre，以便支持HTML高亮 -->
+                    <div id="jsonContent"></div>
                 </div>
             </div>
         </div>
@@ -676,9 +694,9 @@
         const displayArea = document.getElementById('displayArea');
         const initialMessage = document.getElementById('initialMessage');
         const imageContainer = document.getElementById('imageContainer');
-        const xmlContainer = document.getElementById('xmlContainer');
+        const jsonContainer = document.getElementById('jsonContainer');
         const contentImage = document.getElementById('contentImage');
-        const xmlContent = document.getElementById('xmlContent');
+        const jsonContent = document.getElementById('jsonContent');
         const xmlLoading = document.getElementById('xmlLoading');
         const xmlError = document.getElementById('xmlError');
         const imageWrapper = document.getElementById('imageWrapper');
@@ -769,10 +787,10 @@
             updateSubmenuScrollButtons();
         }
         
-        // 加载并显示XML文件内容
-        function loadXmlFile(xmlPath) {
+        // 加载XML文件并转换为JSON
+        function loadXmlAndConvertToJson(xmlPath) {
             // 显示加载状态
-            xmlContent.style.display = 'none';
+            jsonContent.style.display = 'none';
             xmlError.style.display = 'none';
             xmlLoading.style.display = 'block';
             
@@ -782,16 +800,24 @@
             
             xhr.onload = function() {
                 if (xhr.status >= 200 && xhr.status < 300) {
-                    // 请求成功，格式化并高亮XML
-                    const highlightedXml = highlightXml(xhr.responseText);
-                    xmlContent.innerHTML = highlightedXml;
-                    xmlContent.style.display = 'block';
-                    xmlError.style.display = 'none';
+                    try {
+                        // 将XML转换为JSON
+                        const json = xmlToJson(xhr.responseText);
+                        // 高亮显示JSON
+                        const highlightedJson = highlightJson2(json, 0);
+                        jsonContent.innerHTML = highlightedJson;
+                        jsonContent.style.display = 'block';
+                        
+                        // 添加折叠/展开功能
+                        addToggleFunctionality();
+                    } catch (error) {
+                        xmlError.textContent = `XML转换失败: ${error.message}`;
+                        xmlError.style.display = 'block';
+                    }
                 } else {
                     // 请求失败
                     xmlError.textContent = `加载XML文件失败: 状态码 ${xhr.status}`;
                     xmlError.style.display = 'block';
-                    xmlContent.style.display = 'none';
                 }
                 xmlLoading.style.display = 'none';
             };
@@ -800,115 +826,220 @@
                 // 网络错误
                 xmlError.textContent = '加载XML文件时发生网络错误';
                 xmlError.style.display = 'block';
-                xmlContent.style.display = 'none';
                 xmlLoading.style.display = 'none';
             };
             
             xhr.send();
         }
         
-        // XML语法高亮和格式化
-        function highlightXml(xml) {
-            // 移除XML声明前的空白字符
-            xml = xml.trim();
+        // 将XML转换为指定格式的JSON对象
+        function xmlToJson(xmlString) {
+            // 创建DOMParser解析XML
+            const parser = new DOMParser();
+            let xmlDoc;
             
-            let formatted = '';
-            let indent = '';
-            const indentSize = 4; // 4个空格缩进
-            let inComment = false;
-            
-            // 按标签分割XML，但保留标签完整性
-            const tokens = xml.match(/<\?xml.*?\?>|<![CDATA[\s\S]*?]]>|<--[\s\S]*?-->|<\/[^>]+>|<[^>]+\/>|<[^>]+>|[^<]+/g) || [];
-            
-            tokens.forEach(function(token) {
-                // 跳过空 token
-                if (!token.trim()) return;
+            try {
+                xmlDoc = parser.parseFromString(xmlString, "text/xml");
                 
-                // 处理XML声明
-                if (token.startsWith('<?xml')) {
-                    formatted += token + '\n';
-                    return;
+                // 检查解析错误
+                const errors = xmlDoc.getElementsByTagName("parsererror");
+                if (errors.length > 0) {
+                    throw new Error("XML解析错误: " + errors[0].textContent);
+                }
+            } catch (e) {
+                throw new Error("无法解析XML: " + e.message);
+            }
+            
+            // 递归转换XML节点为指定的JSON结构
+            function convertNode(node) {
+                // 只处理元素节点
+                if (node.nodeType !== Node.ELEMENT_NODE) {
+                    return null;
                 }
                 
-                // 处理注释
-                if (token.startsWith('<!--')) {
-                    inComment = true;
-                    formatted += indent + `<span class="xml-comment">${escapeHtml(token)}</span>\n`;
-                    return;
-                }
-                if (inComment) {
-                    formatted += indent + `<span class="xml-comment">${escapeHtml(token)}</span>\n`;
-                    if (token.includes('-->')) {
-                        inComment = false;
+                // 创建基础节点结构
+                const nodeObj = {
+                    name: node.nodeName
+                };
+                
+                // 处理属性
+                if (node.attributes.length > 0) {
+                    nodeObj.attributes = {};
+                    for (let i = 0; i < node.attributes.length; i++) {
+                        const attr = node.attributes[i];
+                        nodeObj.attributes[attr.name] = attr.value;
                     }
-                    return;
                 }
                 
-                // 处理CDATA
-                if (token.startsWith('<![CDATA[')) {
-                    formatted += indent + `<span class="xml-cdata">${escapeHtml(token)}</span>\n`;
-                    return;
+                // 处理子节点
+                const children = Array.from(node.childNodes)
+                    .filter(child => child.nodeType === Node.ELEMENT_NODE)
+                    .map(child => convertNode(child))
+                    .filter(child => child !== null);
+                
+                // 如果有子节点，添加children数组
+                if (children.length > 0) {
+                    nodeObj.children = children;
                 }
                 
-                // 处理开始标签
-                if (token.startsWith('<') && !token.startsWith('</') && !token.endsWith('/>')) {
-                    // 高亮标签和属性
-                    const highlightedToken = highlightTag(token);
-                    formatted += indent + highlightedToken + '\n';
-                    indent += ' '.repeat(indentSize);
+                // 处理自闭合标签和空标签
+                const isSelfClosing = node.innerHTML.trim() === "" && 
+                                     node.outerHTML.includes("/>") || 
+                                     node.childNodes.length === 0;
+                
+                // 对于没有属性和子节点的自闭合标签，保持简洁格式
+                if (isSelfClosing && !nodeObj.attributes && !nodeObj.children) {
+                    return { name: node.nodeName };
                 }
-                // 处理自闭合标签
-                else if (token.startsWith('<') && token.endsWith('/>')) {
-                    const highlightedToken = highlightTag(token);
-                    formatted += indent + highlightedToken + '\n';
-                }
-                // 处理结束标签
-                else if (token.startsWith('</')) {
-                    indent = indent.substring(indentSize);
-                    const highlightedToken = `<span class="xml-tag">${escapeHtml(token)}</span>`;
-                    formatted += indent + highlightedToken + '\n';
-                }
-                // 处理文本内容
-                else {
-                    formatted += indent + `<span class="xml-text">${escapeHtml(token.trim())}</span>\n`;
-                }
-            });
+                
+                return nodeObj;
+            }
             
-            return formatted.trim();
+            // 从根节点开始转换
+            const rootElement = xmlDoc.documentElement;
+            return convertNode(rootElement);
         }
         
-        // 高亮单个标签中的元素
-        function highlightTag(tag) {
-            // 转义HTML特殊字符
-            tag = escapeHtml(tag);
+        // 高亮JSON并添加折叠功能
+        function highlightJson(json) {
+            // 首先将JSON转换为格式化的字符串
+            const jsonString = JSON.stringify(json, null, 4);
             
-            // 匹配标签名和属性
-            // 先匹配标签名
-            let result = tag.replace(/^<\/?([a-zA-Z0-9_-]+)/, function(match, tagName) {
-                return match.replace(tagName, `<span class="xml-tag">${tagName}</span>`);
+            // 使用正则表达式匹配JSON的不同部分并添加高亮类
+            let highlighted = jsonString
+                // 匹配大括号和中括号
+                .replace(/([{}[\]])/g, '<span class="json-brace">$1</span>')
+                // 匹配键名
+                .replace(/"([^"]+)":/g, '<span class="json-quote">"</span><span class="json-key">$1</span><span class="json-quote">"</span>:')
+                // 匹配字符串值
+                .replace(/"([^"]+)"/g, '<span class="json-quote">"</span><span class="json-string">$1</span><span class="json-quote">"</span>')
+                // 匹配数字
+                .replace(/(\b|-)(\d+(\.\d+)?)(\b)/g, '<span class="json-number">$2</span>')
+                // 匹配布尔值
+                .replace(/\b(true|false)\b/g, '<span class="json-boolean">$1</span>')
+                // 匹配null
+                .replace(/\b(null)\b/g, '<span class="json-null">$1</span>');
+            
+            // 在对象和数组前添加折叠/展开按钮
+            highlighted = highlighted.replace(/(<span class="json-brace">\{<\/span>|<span class="json-brace">\[<\/span>)/g, 
+                '<button class="toggle-btn">-</button>$1');
+                
+            return highlighted;
+        }
+
+
+        function highlightJson2(json, lineIndex) {
+            console.log(json);
+
+            let targetStr = '';
+            
+            if (typeof json === 'object' && json !== null) {
+                for (let i = 0; i < lineIndex; i++) {
+                    targetStr += '&#32;&#32;&#32;&#32;';
+                }
+
+                targetStr += '&#60;';
+                let name = json.name;
+
+                targetStr += '<span class="json-brace">' + name + '</span>';
+                let attributes = json.attributes;
+                if (attributes != undefined) {
+                    const attributesLen = Object.keys(attributes).length;
+                    if (attributesLen > 0) {
+                        targetStr += '&#32;';
+
+                        let tempIndex = 0;
+                        for (let key2 in attributes) {
+                            targetStr += '<span class="json-key">' + key2 + '</span>';
+                            targetStr += '<span class="json-colon">=</span>';
+                            targetStr += '<span class="json-value">"' + attributes[key2] + '"</span>';
+
+                            if (tempIndex < attributesLen - 1) {
+                                targetStr += '<span class="json-comma">&#32;</span>';
+                            }
+                            tempIndex++;
+                        }
+                    }
+                }
+
+                let children = json.children;
+                if (children != undefined) {
+                    targetStr += '&#62;';
+                    const childrenLen = Object.keys(children).length;
+                    if (childrenLen > 0) {
+                        for (let i= 0; i < childrenLen; i++) {
+                            let child = children[i];
+                            targetStr += "\n" + highlightJson2(child, lineIndex+1);
+                        }
+                    }
+
+                    targetStr += "\n"
+                    for (let i = 0; i < lineIndex; i++) {
+                        targetStr += '&#32;&#32;&#32;&#32;';
+                    }
+                    targetStr += "&#60;" + '<span class="json-brace">/' + name + '</span>' + "&#62;";
+                } else {
+                    targetStr += '/&#62;';
+                }
+            }
+            return targetStr;
+        }
+
+        
+        // 添加折叠/展开功能
+        function addToggleFunctionality() {
+            // 为所有切换按钮添加点击事件
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const isExpanded = this.textContent === '-';
+                    this.textContent = isExpanded ? '+' : '-';
+                    
+                    // 找到对应的内容区域
+                    const contentElement = this.parentElement;
+                    
+                    // 实现折叠/展开逻辑
+                    if (isExpanded) {
+                        collapseContent(contentElement);
+                    } else {
+                        expandContent(contentElement);
+                    }
+                });
             });
-            
-            // 再匹配属性和属性值
-            result = result.replace(/(\s+)([a-zA-Z0-9_-]+)(=)/g, function(match, space, attr, eq) {
-                return `${space}<span class="xml-attribute">${attr}</span>${eq}`;
-            });
-            
-            // 匹配属性值
-            result = result.replace(/=(".*?"|'.*?')/g, function(match, value) {
-                return `=<span class="xml-attribute-value">${value}</span>`;
-            });
-            
-            return `<span class="xml-tag">${result}</span>`;
         }
         
-        // 转义HTML特殊字符
-        function escapeHtml(unsafe) {
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+        // 折叠内容
+        function collapseContent(element) {
+            // 保存原始内容以便展开时恢复
+            if (!element.dataset.originalContent) {
+                element.dataset.originalContent = element.innerHTML;
+            }
+            
+            // 找到第一个和最后一个括号的位置
+            const content = element.innerHTML;
+            const firstBraceIndex = content.indexOf('{') + 1;
+            const lastBraceIndex = content.lastIndexOf('}');
+            
+            if (firstBraceIndex > 0 && lastBraceIndex > firstBraceIndex) {
+                // 保留开始部分和结束部分，中间用省略号代替
+                const startPart = content.substring(0, firstBraceIndex);
+                const endPart = content.substring(lastBraceIndex);
+                element.innerHTML = startPart + ' ... ' + endPart;
+                
+                // 重新添加按钮事件
+                addToggleFunctionality();
+            }
+        }
+        
+        // 展开内容
+        function expandContent(element) {
+            // 恢复原始内容
+            if (element.dataset.originalContent) {
+                element.innerHTML = element.dataset.originalContent;
+                delete element.dataset.originalContent;
+                
+                // 重新添加按钮事件
+                addToggleFunctionality();
+            }
         }
         
         // 选择子项
@@ -930,19 +1061,19 @@
             // 更新内容展示
             const item = data[currentCategoryIndex].items[index];
             
-            // 加载并显示XML文件
-            loadXmlFile(item.xml);
+            // 加载XML并转换为JSON显示
+            loadXmlAndConvertToJson(item.xml);
             
             // 更新图片
             if (item.pic) {
                 // 有图片，平分空间
                 imageContainer.style.display = 'block';
-                imageContainer.style.width = '50%';
+                imageContainer.style.width = '35%';
                 imageContainer.style.float = 'left';
                 imageContainer.style.paddingRight = '16px';
-                xmlContainer.style.width = '50%';
-                xmlContainer.style.float = 'right';
-                xmlContainer.style.paddingLeft = '16px';
+                jsonContainer.style.width = '65%';
+                jsonContainer.style.float = 'right';
+                jsonContainer.style.paddingLeft = '16px';
                 
                 // 加载图片并添加淡入效果
                 contentImage.style.opacity = '0';
@@ -959,11 +1090,11 @@
                     contentImage.alt = '图片加载失败';
                 };
             } else {
-                // 无图片，XML占满空间
+                // 无图片，JSON占满空间
                 imageContainer.style.display = 'none';
-                xmlContainer.style.width = '100%';
-                xmlContainer.style.float = 'none';
-                xmlContainer.style.paddingLeft = '0';
+                jsonContainer.style.width = '100%';
+                jsonContainer.style.float = 'none';
+                // jsonContainer.style.paddingLeft = '0';
             }
         }
         

@@ -6,7 +6,7 @@
     <title>XMLLayout展示</title>
     
     <style>
-        /* 基础样式重置 */
+        /* 保持原有样式不变 */
         * {
             margin: 0;
             padding: 0;
@@ -797,14 +797,14 @@
             xhr.send();
         }
         
-        // 修复后的XML格式化函数 - 不会在前后添加多余的尖括号
+        // 改进的XML格式化函数 - 使用4个空格作为缩进
         function formatXml(xml) {
             // 移除XML声明前的空白字符
             xml = xml.trim();
             
             let formatted = '';
             let indent = '';
-            const indentSize = 2;
+            const indentSize = 4; // 将缩进改为4个空格
             let inComment = false;
             
             // 按标签分割XML，但保留标签完整性
@@ -831,7 +831,7 @@
                 // 处理开始标签
                 if (token.startsWith('<') && !token.startsWith('</') && !token.endsWith('/>')) {
                     formatted += indent + token + '\n';
-                    indent += ' '.repeat(indentSize);
+                    indent += ' '.repeat(indentSize); // 使用4个空格
                 }
                 // 处理自闭合标签
                 else if (token.startsWith('<') && token.endsWith('/>')) {
@@ -839,7 +839,7 @@
                 }
                 // 处理结束标签
                 else if (token.startsWith('</')) {
-                    indent = indent.substring(indentSize);
+                    indent = indent.substring(indentSize); // 减少4个空格
                     formatted += indent + token + '\n';
                 }
                 // 处理CDATA

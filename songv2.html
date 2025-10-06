@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <title id="titleMessage">木子才演唱会</title>
     <style>
+        /* 保持原有样式不变 */
         body {
             padding: 0;
             margin: 0;
@@ -33,6 +34,7 @@
         button {
             padding: 8px 8px;
             cursor: pointer;
+            margin: 0 5px; /* 增加一点按钮间距 */
         }
         .bgColor {
             background-color: #fcfcfc;
@@ -59,6 +61,7 @@
         }
         .div1 {
             height: auto;
+            margin: 20px 0;
         }
         .div2 {
             display: flex;
@@ -66,6 +69,9 @@
             justify-content: center;
             align-items: center;
             height: auto;
+            flex-wrap: wrap; /* 允许按钮换行 */
+            gap: 5px;
+            padding: 10px;
         }
         .songInfo {
             margin-bottom: 10px;
@@ -93,15 +99,21 @@
             <button class="textColor" id="loopButton" onclick="handleLoop()">模式全部</button>
             <button class="textColor" onclick="playRandomTrack()">抽歌</button>
             <button class="textColor" id="listButton" onclick="listShowOrHidden()">列表隐藏</button>
+            <!-- 添加数据源切换按钮 -->
+            <button class="textColor" id="sourceSwitchButton" onclick="switchDataSource()">切换到2025年演唱会</button>
         </div>
         <div class="buttonContentLoad" id="songList" style="display: none;">
             <div class="buttonContent" id="buttonContent"></div>
         </div>
     </div>
 
-    <script src="./data/sunodata2.js"></script>
+    <!-- 引入两个数据源 -->
+    <script src="https://yococoxc.github.io/tool/data/sunodata2.js"></script>
+    <script src="https://yococoxc.github.io/tool/data/sunodata2025.js"></script>
     <script type="text/javascript">
-        // 定义一个包含所有音频文件URL的数组
+        // 定义当前使用的数据源，默认使用原始数据源
+        let currentTracks = tracks;
+        let isUsing2025 = false; // 标记当前是否使用2025数据源
 
         var loopValue = 0;
         var isFrist = true;
@@ -112,6 +124,7 @@
         var currentIndex = 0;
         var currentUrl = null;
 
+        // 处理循环模式切换
         function handleLoop() {
             loopValue++;
             if (loopValue >= 4) {
@@ -129,6 +142,7 @@
             }
         }
 
+        // 显示/隐藏列表
         function listShowOrHidden() {
             var list = document.getElementById('songList');
             if (list.style.display == 'none') {
@@ -140,9 +154,10 @@
             }
         }
 
+        // 歌曲组按钮点击事件
         function trackButtonAction(e) {
             let index = e.target.getAttribute('data-index');
-            let array = tracks[index].array;
+            let array = currentTracks[index].array; // 使用当前数据源
             if (array.length == 0) {
                 e.stopPropagation();
                 return;
@@ -150,8 +165,10 @@
 
             currentIndex = index;
             playNextTrack();
+            e.stopPropagation();
         }
 
+        // 播放器事件监听
         player.addEventListener('play', function () {
             isPlaying = true;
             document.getElementById('playOrPauseButton').innerHTML = '暂停';
@@ -162,12 +179,15 @@
             document.getElementById('playOrPauseButton').innerHTML = '播放';
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // 初始化歌曲列表
+        function initSongList() {
             var buttonContent = document.getElementById('buttonContent');
+            // 清空现有列表
+            buttonContent.innerHTML = '';
             let sumTrackNum = 0;
             
-            for (var i = 0; i < tracks.length; i++) {
-                let tempTrack = tracks[i];
+            for (var i = 0; i < currentTracks.length; i++) { // 使用当前数据源
+                let tempTrack = currentTracks[i];
 
                 var button = document.createElement('button');
                 button.innerHTML = i + 1 + '. ' + tempTrack.title + ' (' +  tempTrack.array.length + ')';
@@ -179,16 +199,24 @@
                 sumTrackNum += tempTrack.array.length;
             }
 
-            // 使用 requestAnimationFrame 确保在浏览器重绘前执行
+            // 滚动到顶部
             requestAnimationFrame(() => {
                 buttonContent.scrollTop = 0;
             });
 
-            document.getElementById('songInfo').innerHTML = '木子才演唱会，共 ' + sumTrackNum + ' 首';
+            // 更新歌曲总数信息
+            document.getElementById('songInfo').innerHTML = `木子才${isUsing2025 ? '2025年演唱会' : '全部歌曲'}，共 ${sumTrackNum} 首`;
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initSongList();
         });
+
+        // 随机播放
         function playRandomTrack() {
-            currentIndex = Math.floor(Math.random() * tracks.length);
-            let array = tracks[currentIndex].array;
+            currentIndex = Math.floor(Math.random() * currentTracks.length); // 使用当前数据源
+            let array = currentTracks[currentIndex].array;
             if (array.length == 0) {
                 playRandomTrack();
                 return;
@@ -196,6 +224,8 @@
 
             playNextTrack();
         }
+
+        // 播放下一首
         function playNextTrack() {
             if (isFrist) {
                 document.getElementById('playOrPauseButton').innerHTML = '播放';
@@ -205,7 +235,7 @@
             
             isFrist = false;
 
-            let array = tracks[currentIndex].array;
+            let array = currentTracks[currentIndex].array; // 使用当前数据源
             if (array == undefined || array.length == 0) {
                 return;
             }
@@ -221,11 +251,11 @@
             isPlaying = true;
 
 
-            document.getElementById('titleMessage').innerHTML = "木子才演唱会 《" + currentTitle + "》";
+            document.getElementById('titleMessage').innerHTML = `木子才${isUsing2025 ? '2025年演唱会' : '全部歌曲'} 《${currentTitle}》`;
             document.getElementById('title').innerHTML = currentTitle;
-            event.stopPropagation();
         }
 
+        // 上一首
         function handlePreviousTrack() {
             if (loopValue == 3) {
                 playRandomTrack();
@@ -233,10 +263,10 @@
             }
             currentIndex = parseInt(currentIndex) - 1;
             if (currentIndex < 0) {
-                currentIndex = tracks.length - 1;
+                currentIndex = currentTracks.length - 1; // 使用当前数据源
             }
 
-            let array = tracks[currentIndex].array;
+            let array = currentTracks[currentIndex].array; // 使用当前数据源
             if (array.length == 0) {
                 handlePreviousTrack();
                 return;
@@ -245,17 +275,18 @@
             playNextTrack();
         }
         
+        // 下一首
         function handleNextTrack() {
             if (loopValue == 3) {
                 playRandomTrack();
                 return;
             }
             currentIndex = parseInt(currentIndex) + 1;
-            if (currentIndex >= tracks.length) {
+            if (currentIndex >= currentTracks.length) { // 使用当前数据源
                 currentIndex = 0;
             }
 
-            let array = tracks[currentIndex].array;
+            let array = currentTracks[currentIndex].array; // 使用当前数据源
             if (array.length == 0) {
                 handleNextTrack();
                 return;
@@ -264,6 +295,7 @@
             playNextTrack();
         }
         
+        // 播放结束处理
         function handleEnded() {
             if (loopValue == 3) {
                 playRandomTrack();
@@ -281,11 +313,11 @@
             }
 
             currentIndex = parseInt(currentIndex) + 1;
-            if (currentIndex >= tracks.length) {
+            if (currentIndex >= currentTracks.length) { // 使用当前数据源
                 currentIndex = 0;
             }
 
-            let array = tracks[currentIndex].array;
+            let array = currentTracks[currentIndex].array; // 使用当前数据源
             if (array.length == 0) {
                 handleEnded();
                 return;
@@ -294,6 +326,7 @@
             playNextTrack();
         }
 
+        // 播放/暂停按钮
         document.getElementById('playOrPauseButton').addEventListener('click', function() {
             isFrist = false;
 
@@ -312,11 +345,13 @@
             }
         });
 
+        // 页面加载完成后自动播放
         window.onload = function() {
             playNextTrack();
             isFrist = true;
         }
         
+        //  body点击事件
         function bodyAction() {
             if (isFrist == false) {
                 return;
@@ -326,6 +361,23 @@
             player.play();
             isPlaying = true;
             document.getElementById('playOrPauseButton').innerHTML = '暂停';
+        }
+
+        // 切换数据源函数
+        function switchDataSource() {
+            // 切换数据源标记
+            isUsing2025 = !isUsing2025;
+            // 更新当前数据源
+            currentTracks = isUsing2025 ? tracks2025 : tracks;
+            // 更新切换按钮文字
+            document.getElementById('sourceSwitchButton').innerHTML = isUsing2025 ? '切换到全部歌曲' : '切换到2025年演唱会';
+            // 重置当前播放索引
+            currentIndex = 0;
+            // 重新初始化歌曲列表
+            initSongList();
+            // 停止当前播放并加载新数据源的歌曲
+            player.pause();
+            playNextTrack();
         }
     </script>
 </body>

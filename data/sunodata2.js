@@ -1002,19 +1002,44 @@ var tracks = [
       ]
     },
     {
-      title: "随笔34-回到过去",
+      title: "随笔35",
       array: [
         {
-          "mp3": "https://cdn1.suno.ai/37c310d6-a946-442a-9676-a52cacd17ec6.mp3",
-          "name2": "随笔34-回到过去_c6"
+          "mp3": "https://cdn1.suno.ai/bda78c07-c768-4eaa-b1d0-51c02fa2ea7e.mp3",
+          "name2": "随笔35_7e"
         },
         {
-          "mp3": "https://cdn1.suno.ai/8e4b0189-6d5b-4b36-8862-3caf6e46f4e2.mp3",
-          "name2": "随笔34-回到过去_e2"
+          "mp3": "https://cdn1.suno.ai/d0245884-0cc1-4684-af2d-f1deab3bba4f.mp3",
+          "name2": "随笔35_4f"
         },
         {
-          "mp3": "https://cdn1.suno.ai/ef083f5d-4c2e-416d-aff3-e4ee4403d36e.mp3",
-          "name2": "随笔34-回到过去_6e"
+          "mp3": "https://cdn1.suno.ai/e068e0c0-d203-46aa-ac79-bc87feeeb576.mp3",
+          "name2": "随笔35_76"
+        }
+      ]
+    },
+    {
+      title: "随笔36-她的小调",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/abe317bf-74d5-415e-b936-c1f44b862601.mp3",
+          "name2": "随笔36-她的小调_01"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/999c1495-5559-49df-9723-1ba1825023cd.mp3",
+          "name2": "随笔36-她的小调_cd"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/8581ae5a-82ee-4136-b781-fb21899401e9.mp3",
+          "name2": "随笔36-她的小调_e9"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/a5cd6ee2-934f-4e44-a16a-3462cdda2e5d.mp3",
+          "name2": "随笔36-她的小调_5d"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/6ba469a2-f242-4a93-95cb-ebf799a6d32c.mp3",
+          "name2": "随笔36-她的小调_2c"
         }
       ]
     }

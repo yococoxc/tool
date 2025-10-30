@@ -1002,6 +1002,23 @@ var tracks = [
       ]
     },
     {
+      title: "随笔34-回到过去",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/37c310d6-a946-442a-9676-a52cacd17ec6.mp3",
+          "name2": "随笔34-回到过去_c6"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/8e4b0189-6d5b-4b36-8862-3caf6e46f4e2.mp3",
+          "name2": "随笔34-回到过去_e2"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/ef083f5d-4c2e-416d-aff3-e4ee4403d36e.mp3",
+          "name2": "随笔34-回到过去_6e"
+        }
+      ]
+    },
+    {
       title: "随笔35",
       array: [
         {

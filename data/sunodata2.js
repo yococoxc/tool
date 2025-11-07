@@ -1019,19 +1019,19 @@ var tracks = [
       ]
     },
     {
-      title: "随笔35",
+      title: "随笔35-错在哪里",
       array: [
         {
           "mp3": "https://cdn1.suno.ai/bda78c07-c768-4eaa-b1d0-51c02fa2ea7e.mp3",
-          "name2": "随笔35_7e"
+          "name2": "随笔35-错在哪里_7e"
         },
         {
           "mp3": "https://cdn1.suno.ai/d0245884-0cc1-4684-af2d-f1deab3bba4f.mp3",
-          "name2": "随笔35_4f"
+          "name2": "随笔35-错在哪里_4f"
         },
         {
           "mp3": "https://cdn1.suno.ai/e068e0c0-d203-46aa-ac79-bc87feeeb576.mp3",
-          "name2": "随笔35_76"
+          "name2": "随笔35-错在哪里_76"
         }
       ]
     },
@@ -1059,5 +1059,50 @@ var tracks = [
           "name2": "随笔36-她的小调_2c"
         }
       ]
-    }
+    },
+    {
+      title: "随笔37-梦",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/e9109d6f-13c8-4d9f-81af-5a47e43b13cd.mp3",
+          "name2": "随笔37-梦_cd"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/e9d37792-f784-42d5-b39a-6a97bc66ca80.mp3",
+          "name2": "随笔37-梦_80"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/a1789b5c-0b50-4747-b3e9-438c9f98bb45.mp3",
+          "name2": "随笔37-梦_45"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/13930837-43b9-41fd-a981-326cc8abe13a.mp3",
+          "name2": "随笔37-梦_3a"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/459d6425-5416-46e8-a42a-b301aec1eba4.mp3",
+          "name2": "随笔37-梦_a4"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/18540cba-2cb1-4f4d-97dd-97a85586d92a.mp3",
+          "name2": "随笔37-梦_2a"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/9bb1b6af-29da-47c4-ab00-48b65339c12f.mp3",
+          "name2": "随笔37-梦_2f"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/7c9b336a-306b-46fa-bd34-96bf5ae74be1.mp3",
+          "name2": "随笔37-梦_e1"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/a6018ae7-d5ff-4afd-8b5f-36f2473c5a5a.mp3",
+          "name2": "随笔37-梦_5a"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/567252c3-ee0b-4f2f-bd69-f1a1e5320b2d.mp3",
+          "name2": "随笔37-梦_2d"
+        }
+      ]
+    },
 ];

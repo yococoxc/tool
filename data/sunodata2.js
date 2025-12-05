@@ -1105,4 +1105,29 @@ var tracks = [
         }
       ]
     },
+    {
+      title: "随笔38-成为一个小说家",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/3db25c01-1e92-42c8-974b-a5beceaa915d.mp3",
+          "name2": "随笔38-成为一个小说家_5d"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/50da9c16-eacc-467f-866d-f67f7a493d9c.mp3",
+          "name2": "随笔38-成为一个小说家_9c"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/db8645e8-9548-47f6-a8b0-81b3e055f128.mp3",
+          "name2": "随笔38-成为一个小说家_28"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/35eea8d4-229e-4ab9-ae3e-5ffedc23b80a.mp3",
+          "name2": "随笔38-成为一个小说家_0a"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/fac592eb-0b7b-4c4d-8109-0ef5b2817404.mp3",
+          "name2": "随笔38-成为一个小说家_04"
+        }
+      ]
+    },
 ];

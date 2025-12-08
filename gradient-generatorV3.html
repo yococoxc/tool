@@ -1,0 +1,942 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渐变色图片生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", Arial, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .control-group {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        label {
+            width: 80px;
+            text-align: right;
+            font-size: 14px;
+            color: #666;
+        }
+        input[type="number"] {
+            width: 80px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            outline: none;
+        }
+        input[type="number"]:focus {
+            border-color: #409eff;
+        }
+        input[type="color"] {
+            width: 60px;
+            height: 30px;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            background: transparent;
+        }
+        input[type="range"] {
+            outline: none;
+        }
+        button {
+            padding: 8px 20px;
+            background: #409eff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+            outline: none;
+        }
+        button:hover {
+            background: #66b1ff;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        /* 预览区域 - 彻底修复透明显示 */
+        .preview-area {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #canvas {
+            border: 1px solid #ddd;
+            background: none !important;
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 100%;
+            height: auto;
+        }
+        /* 透明网格背景 - 增强对比度 */
+        .preview-wrap {
+            margin-top: 10px;
+            padding: 15px;
+            background: 
+                linear-gradient(45deg, #ccc 25%, transparent 25%), 
+                linear-gradient(-45deg, #ccc 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #ccc 75%), 
+                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+            border-radius: 4px;
+            display: inline-block;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        #preview-img {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            display: block;
+            background: none !important;
+            -webkit-background-size: 0;
+            background-size: 0;
+            /* 新增：隐藏加载失败的默认图标 */
+            object-fit: contain;
+        }
+        /* 新增：加载状态提示 */
+        .preview-status {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .opacity-label, .stop-position-label {
+            width: auto;
+            font-size: 12px;
+            color: #666;
+        }
+        .opacity-val, .stop-position-val {
+            width: 40px;
+            display: inline-block;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        .tip {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+        .color-stop-group {
+            border: 1px dashed #ccc;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .color-stop-title {
+            width: 80px;
+            text-align: right;
+            font-size: 14px;
+            color: #666;
+        }
+        .stop-position-slider {
+            width: 100px;
+            margin: 0 5px;
+        }
+        .stop-op-btn-group {
+            display: flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+        .stop-op-btn {
+            padding: 4px 8px;
+            font-size: 12px;
+            height: 28px;
+            line-height: 1;
+        }
+        .delete-stop-btn {
+            background: #f5f5f5;
+            color: #f56c6c;
+            border: 1px solid #f56c6c;
+        }
+        .insert-stop-btn {
+            background: #f0f9ff;
+            color: #67c23a;
+            border: 1px solid #67c23a;
+        }
+        .color-btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        .color-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            background: #909399;
+        }
+        .reverse-btn {
+            background: #1989fa;
+        }
+        .reverse-pos-btn {
+            background: #f9826c;
+        }
+        .swap-color-btn {
+            background: #722ed1;
+        }
+        .swap-size-btn {
+            background: #36cfc9;
+        }
+        .random-mode-btn {
+            background: #faad14;
+        }
+        .linear90-random-btn {
+            background: #00a86b;
+        }
+        .linear90-2color-btn {
+            background: #e6a23c;
+        }
+        .linear90-3color-btn {
+            background: #8e44ad;
+        }
+        .angle-btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-right: 5px;
+        }
+        .angle-btn {
+            padding: 4px 10px;
+            font-size: 12px;
+            background: #e5e6eb;
+            color: #333;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .angle-btn.active {
+            background: #409eff;
+            color: white;
+        }
+        #angle-slider {
+            width: 180px;
+        }
+        #angle-input {
+            width: 60px;
+            padding: 4px;
+        }
+        .size-swap-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            height: 32px;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>渐变色图片生成器（透明预览最终修复版）</h2>
+        
+        <!-- 尺寸控制 -->
+        <div class="control-group">
+            <label>宽度(px)：</label>
+            <input type="number" id="width" value="300" min="10" max="2000">
+            <label>高度(px)：</label>
+            <input type="number" id="height" value="200" min="10" max="2000">
+            <button class="color-btn swap-size-btn size-swap-btn" id="swap-size-btn">一键切换宽高</button>
+        </div>
+
+        <!-- 渐变类型 -->
+        <div class="control-group">
+            <label>渐变类型：</label>
+            <label><input type="radio" name="gradient-type" value="linear" checked> 线性</label>
+            <label><input type="radio" name="gradient-type" value="radial"> 径向</label>
+        </div>
+
+        <!-- 渐变角度 -->
+        <div class="control-group">
+            <label>渐变角度：</label>
+            <div class="angle-btn-group">
+                <button class="angle-btn" data-angle="0">0°</button>
+                <button class="angle-btn" data-angle="45">45°</button>
+                <button class="angle-btn" data-angle="90">90°</button>
+                <button class="angle-btn" data-angle="135">135°</button>
+                <button class="angle-btn" data-angle="180">180°</button>
+                <button class="angle-btn" data-angle="270">270°</button>
+                <button class="angle-btn" data-angle="-45">-45°</button>
+                <button class="angle-btn" data-angle="-90">-90°</button>
+                <button class="angle-btn" data-angle="-135">-135°</button>
+                <button class="angle-btn" data-angle="-180">-180°</button>
+                <button class="angle-btn" data-angle="-270">-270°</button>
+            </div>
+            <input type="range" id="angle-slider" min="-360" max="360" step="1" value="0">
+            <input type="number" id="angle-input" min="-360" max="360" value="0">°
+        </div>
+
+        <!-- 颜色停止点容器 -->
+        <div id="color-stops-container">
+            <div class="control-group color-stop-group">
+                <span class="color-stop-title">颜色1：</span>
+                <input type="color" class="color-input" value="#ff0000">
+                <label class="opacity-label">透明度：</label>
+                <input type="range" class="opacity-slider" min="0" max="1" step="0.01" value="0.5">
+                <span class="opacity-val">50%</span>
+                <label class="stop-position-label">位置：</label>
+                <input type="range" class="stop-position-slider" min="0" max="100" step="1" value="0">
+                <span class="stop-position-val">0%</span>
+                <div class="stop-op-btn-group">
+                    <button class="stop-op-btn insert-stop-btn">插入颜色</button>
+                    <button class="stop-op-btn delete-stop-btn">删除</button>
+                </div>
+            </div>
+            <div class="control-group color-stop-group">
+                <span class="color-stop-title">颜色2：</span>
+                <input type="color" class="color-input" value="#0000ff">
+                <label class="opacity-label">透明度：</label>
+                <input type="range" class="opacity-slider" min="0" max="1" step="0.01" value="0.3">
+                <span class="opacity-val">30%</span>
+                <label class="stop-position-label">位置：</label>
+                <input type="range" class="stop-position-slider" min="0" max="100" step="1" value="100">
+                <span class="stop-position-val">100%</span>
+                <div class="stop-op-btn-group">
+                    <button class="stop-op-btn insert-stop-btn">插入颜色</button>
+                    <button class="stop-op-btn delete-stop-btn">删除</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 全局操作按钮组 -->
+        <div class="color-btn-group">
+            <button class="color-btn" id="add-first-color-btn">添加第一个颜色</button>
+            <button class="color-btn reverse-btn" id="reverse-color-btn">一键反转颜色顺序（位置跟随）</button>
+            <button class="color-btn reverse-pos-btn" id="reverse-color-position-btn">颜色+位置都反转</button>
+            <button class="color-btn swap-color-btn" id="swap-color-order-btn">仅换颜色顺序（位置不变）</button>
+            <button class="color-btn random-mode-btn" id="random-mode-btn">随机模式</button>
+            <button class="color-btn linear90-random-btn" id="linear90-random-btn">线性90°专属随机</button>
+            <button class="color-btn linear90-2color-btn" id="linear90-2color-btn">线性90°-2色随机</button>
+            <button class="color-btn linear90-3color-btn" id="linear90-3color-btn">线性90°-3色随机</button>
+        </div>
+
+        <!-- 生成/下载按钮 -->
+        <div class="control-group" style="justify-content: center; margin-top: 20px;">
+            <button id="generate-btn">生成渐变图片</button>
+            <button id="download-btn" style="background: #67c23a; margin-left: 10px;" disabled>下载图片</button>
+        </div>
+
+        <!-- 预览区域 - 新增加载状态提示 -->
+        <div class="preview-area">
+            <p>Canvas 实时预览：</p>
+            <canvas id="canvas"></canvas>
+            <div class="preview-wrap">
+                <p>PNG 透明预览（网格=透明）：</p>
+                <img id="preview-img" alt="渐变图片预览">
+                <div class="preview-status" id="preview-status">准备生成预览...</div>
+                <p class="tip">测试：拖动颜色透明度滑块，透明区域会显示网格背景</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentBlobUrl = '';
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d', { alpha: true }); // 强制启用alpha通道
+        const widthInput = document.getElementById('width');
+        const heightInput = document.getElementById('height');
+        const generateBtn = document.getElementById('generate-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const previewImg = document.getElementById('preview-img');
+        const previewStatus = document.getElementById('preview-status'); // 新增状态提示
+        const gradientTypeRadios = document.getElementsByName('gradient-type');
+        const angleSlider = document.getElementById('angle-slider');
+        const angleInput = document.getElementById('angle-input');
+        const angleBtns = document.querySelectorAll('.angle-btn');
+        const colorStopsContainer = document.getElementById('color-stops-container');
+        const addFirstColorBtn = document.getElementById('add-first-color-btn');
+        const reverseColorBtn = document.getElementById('reverse-color-btn');
+        const reverseColorPositionBtn = document.getElementById('reverse-color-position-btn');
+        const swapColorOrderBtn = document.getElementById('swap-color-order-btn');
+        const swapSizeBtn = document.getElementById('swap-size-btn');
+        const randomModeBtn = document.getElementById('random-mode-btn');
+        const linear90RandomBtn = document.getElementById('linear90-random-btn');
+        const linear902ColorBtn = document.getElementById('linear90-2color-btn');
+        const linear903ColorBtn = document.getElementById('linear90-3color-btn');
+
+        // 工具函数
+        function generateRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function getRandomFloat(min, max, decimals = 2) {
+            return parseFloat((Math.random() * (max - min) + min).toFixed(decimals));
+        }
+
+        function generateFixedCountPositions(count) {
+            const positions = [0, 100];
+            if (count > 2) {
+                while (positions.length < count) {
+                    const pos = getRandomInt(5, 95);
+                    if (!positions.includes(pos)) positions.push(pos);
+                }
+            }
+            return positions.sort((a, b) => a - b).slice(0, count);
+        }
+
+        // 1. 初始化Canvas
+        function initCanvas() {
+            const width = parseInt(widthInput.value) || 300;
+            const height = parseInt(heightInput.value) || 200;
+            
+            ctx.save();
+            canvas.width = width;
+            canvas.height = height;
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // 清空包括alpha通道
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = 1.0;
+            ctx.restore();
+            
+            canvas.style.width = `${Math.min(width, 700)}px`;
+            canvas.style.height = 'auto';
+        }
+
+        // 2. 角度事件初始化
+        function initAngleEvents() {
+            angleSlider.addEventListener('input', () => {
+                angleInput.value = angleSlider.value;
+                updateAngleBtnActive();
+                generateGradient();
+            });
+
+            angleInput.addEventListener('input', () => {
+                let val = parseInt(angleInput.value) || 0;
+                val = Math.max(-360, Math.min(360, val));
+                angleInput.value = val;
+                angleSlider.value = val;
+                updateAngleBtnActive();
+                generateGradient();
+            });
+
+            angleBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const angle = parseInt(btn.dataset.angle);
+                    angleInput.value = angle;
+                    angleSlider.value = angle;
+                    updateAngleBtnActive();
+                    generateGradient();
+                });
+            });
+
+            widthInput.addEventListener('input', generateGradient);
+            heightInput.addEventListener('input', generateGradient);
+            gradientTypeRadios.forEach(radio => {
+                radio.addEventListener('change', generateGradient);
+            });
+
+            function updateAngleBtnActive() {
+                const currentAngle = parseInt(angleInput.value);
+                angleBtns.forEach(btn => {
+                    btn.classList.toggle('active', parseInt(btn.dataset.angle) === currentAngle);
+                });
+            }
+            updateAngleBtnActive();
+        }
+
+        // 3. 颜色点事件初始化
+        function initColorStopEvents(stopElement) {
+            const opacitySlider = stopElement.querySelector('.opacity-slider');
+            const opacityVal = stopElement.querySelector('.opacity-val');
+            const positionSlider = stopElement.querySelector('.stop-position-slider');
+            const positionVal = stopElement.querySelector('.stop-position-val');
+            const colorInput = stopElement.querySelector('.color-input');
+            const deleteBtn = stopElement.querySelector('.delete-stop-btn');
+            const insertBtn = stopElement.querySelector('.insert-stop-btn');
+
+            opacitySlider.addEventListener('input', () => {
+                const val = (opacitySlider.value * 100).toFixed(0);
+                opacityVal.textContent = `${val}%`;
+                generateGradient();
+            });
+
+            positionSlider.addEventListener('input', () => {
+                const val = positionSlider.value;
+                positionVal.textContent = `${val}%`;
+                generateGradient();
+            });
+
+            colorInput.addEventListener('input', generateGradient);
+
+            deleteBtn.addEventListener('click', () => {
+                const allStops = colorStopsContainer.querySelectorAll('.color-stop-group');
+                if (allStops.length <= 2) {
+                    alert('至少需要保留2个颜色点！');
+                    return;
+                }
+                stopElement.remove();
+                refreshColorStopTitles();
+                generateGradient();
+            });
+
+            insertBtn.addEventListener('click', () => {
+                const allStops = colorStopsContainer.querySelectorAll('.color-stop-group');
+                const currentIndex = Array.from(allStops).indexOf(stopElement);
+                const nextIndex = currentIndex + 1;
+                
+                const currentPosition = parseInt(stopElement.querySelector('.stop-position-slider').value);
+                const nextPosition = nextIndex < allStops.length 
+                    ? parseInt(allStops[nextIndex].querySelector('.stop-position-slider').value)
+                    : currentPosition + 20;
+                
+                const newPosition = Math.round((currentPosition + nextPosition) / 2);
+                const finalPosition = Math.max(0, Math.min(100, newPosition));
+
+                const newStop = createColorStopElement(finalPosition);
+                stopElement.after(newStop);
+                initColorStopEvents(newStop);
+                refreshColorStopTitles();
+                generateGradient();
+            });
+        }
+
+        // 4. 生成颜色点DOM
+        function createColorStopElement(position, color, opacity) {
+            const newStop = document.createElement('div');
+            newStop.className = 'control-group color-stop-group';
+            const randomColorVal = color || generateRandomColor();
+            const randomOpacityVal = opacity || getRandomFloat(0.2, 1);
+            const positionVal = position || getRandomInt(0, 100);
+            
+            newStop.innerHTML = `
+                <span class="color-stop-title">颜色X：</span>
+                <input type="color" class="color-input" value="${randomColorVal}">
+                <label class="opacity-label">透明度：</label>
+                <input type="range" class="opacity-slider" min="0" max="1" step="0.01" value="${randomOpacityVal}">
+                <span class="opacity-val">${Math.round(randomOpacityVal * 100)}%</span>
+                <label class="stop-position-label">位置：</label>
+                <input type="range" class="stop-position-slider" min="0" max="100" step="1" value="${positionVal}">
+                <span class="stop-position-val">${positionVal}%</span>
+                <div class="stop-op-btn-group">
+                    <button class="stop-op-btn insert-stop-btn">插入颜色</button>
+                    <button class="stop-op-btn delete-stop-btn">删除</button>
+                </div>
+            `;
+            return newStop;
+        }
+
+        // 5. 刷新颜色点序号
+        function refreshColorStopTitles() {
+            const allStops = colorStopsContainer.querySelectorAll('.color-stop-group');
+            allStops.forEach((stop, index) => {
+                const title = stop.querySelector('.color-stop-title');
+                title.textContent = `颜色${index + 1}：`;
+            });
+        }
+
+        // 6. Hex转RGBA
+        function hexToRgba(hex, opacity) {
+            hex = hex.replace(/^#/, '');
+            if (hex.length === 3) {
+                hex = hex.split('').map(c => c + c).join('');
+            }
+            if (hex.length !== 6) return `rgba(255,255,255,${opacity})`;
+            
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            const safeOpacity = Math.max(0, Math.min(1, parseFloat(opacity) || 1));
+            return `rgba(${r}, ${g}, ${b}, ${safeOpacity})`;
+        }
+
+        // 7. 线性渐变角度计算
+        function getLinearGradientByAngle(canvas, angleDeg) {
+            const radians = (angleDeg * Math.PI) / 180;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const maxDist = Math.sqrt(Math.pow(canvas.width/2, 2) + Math.pow(canvas.height/2, 2));
+            const x1 = centerX - maxDist * Math.cos(radians);
+            const y1 = centerY - maxDist * Math.sin(radians);
+            const x2 = centerX + maxDist * Math.cos(radians);
+            const y2 = centerY + maxDist * Math.sin(radians);
+            return ctx.createLinearGradient(x1, y1, x2, y2);
+        }
+
+        // 8. 核心：生成渐变（重点修复预览加载）
+        function generateGradient() {
+            // 输入验证
+            const width = parseInt(widthInput.value);
+            const height = parseInt(heightInput.value);
+            if (isNaN(width) || width < 10 || width > 2000) {
+                alert('宽度请输入10-2000之间的有效数字');
+                widthInput.value = 300;
+                previewStatus.textContent = '错误：宽度值无效';
+                return;
+            }
+            if (isNaN(height) || height < 10 || height > 2000) {
+                alert('高度请输入10-2000之间的有效数字');
+                heightInput.value = 200;
+                previewStatus.textContent = '错误：高度值无效';
+                return;
+            }
+
+            // 更新状态
+            previewStatus.textContent = '正在生成Canvas...';
+            initCanvas();
+
+            // 收集颜色点
+            const colorStops = colorStopsContainer.querySelectorAll('.color-stop-group');
+            if (colorStops.length < 2) {
+                previewStatus.textContent = '错误：至少需要2个颜色点';
+                return;
+            }
+
+            // 创建渐变
+            previewStatus.textContent = '正在创建渐变...';
+            let gradient;
+            const gradientType = Array.from(gradientTypeRadios).find(radio => radio.checked).value;
+            if (gradientType === 'linear') {
+                const angle = parseInt(angleInput.value) || 0;
+                gradient = getLinearGradientByAngle(canvas, angle);
+            } else {
+                gradient = ctx.createRadialGradient(
+                    canvas.width/2, canvas.height/2, 0,
+                    canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height)/2
+                );
+            }
+
+            // 添加颜色停止点
+            colorStops.forEach(stop => {
+                const color = stop.querySelector('.color-input').value;
+                const opacity = stop.querySelector('.opacity-slider').value;
+                const position = stop.querySelector('.stop-position-slider').value / 100;
+                gradient.addColorStop(position, hexToRgba(color, opacity));
+            });
+
+            // 绘制渐变
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 生成预览 - 核心修复：简化逻辑+添加加载/错误事件
+            try {
+                previewStatus.textContent = '正在生成PNG预览...';
+                // 1. 生成dataURL（强制PNG）
+                const dataUrl = canvas.toDataURL('image/png', 1.0);
+                console.log('生成的dataURL长度：', dataUrl.length); // 调试用
+
+                // 2. 释放旧Blob URL
+                if (currentBlobUrl) {
+                    URL.revokeObjectURL(currentBlobUrl);
+                }
+
+                // 3. 生成Blob用于下载（仅下载用）
+                const byteString = atob(dataUrl.split(',')[1]);
+                const mimeString = 'image/png'; // 强制指定PNG
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                const blob = new Blob([ab], { type: mimeString });
+                currentBlobUrl = URL.createObjectURL(blob);
+
+                // 4. 预览图直接用dataURL（关键：先清空src，再赋值）
+                previewImg.onload = function() {
+                    previewStatus.textContent = '预览加载成功 ✔️';
+                    downloadBtn.disabled = false;
+                };
+                previewImg.onerror = function(err) {
+                    previewStatus.textContent = `预览加载失败 ❌：${err.message}`;
+                    console.error('预览图加载失败：', err);
+                    downloadBtn.disabled = false; // 下载仍可用
+                };
+
+                // 清空原有src，强制重新加载
+                previewImg.src = '';
+                previewImg.src = dataUrl; 
+
+            } catch (err) {
+                previewStatus.textContent = `生成失败 ❌：${err.message}`;
+                console.error('生成渐变失败：', err);
+                downloadBtn.disabled = true;
+            }
+        }
+
+        // 9. 全局按钮事件（保留原有逻辑）
+        addFirstColorBtn.addEventListener('click', () => {
+            const allStops = colorStopsContainer.querySelectorAll('.color-stop-group');
+            const firstStop = allStops[0];
+            const firstPosition = parseInt(firstStop.querySelector('.stop-position-slider').value);
+            const newPosition = Math.max(0, firstPosition - 20);
+            
+            const newStop = createColorStopElement(newPosition);
+            colorStopsContainer.prepend(newStop);
+            initColorStopEvents(newStop);
+            refreshColorStopTitles();
+            generateGradient();
+        });
+
+        reverseColorBtn.addEventListener('click', () => {
+            const allStops = colorStopsContainer.querySelectorAll('.color-stop-group');
+            if (allStops.length < 2) {
+                alert('至少需要2个颜色点才能反转！');
+                return;
+            }
+
+            const stopElements = Array.from(allStops).reverse();
+            colorStopsContainer.innerHTML = '';
+            stopElements.forEach((stop, index) => {
+                const title = stop.querySelector('.color-stop-title');
+                title.textContent = `颜色${index + 1}：`;
+                colorStopsContainer.appendChild(stop);
+            });
+
+            generateGradient();
+        });
+
+        reverseColorPositionBtn.addEventListener('click', () => {
+            const allStops = colorStopsContainer.querySelectorAll('.color-stop-group');
+            if (allStops.length < 2) {
+                alert('至少需要2个颜色点才能反转！');
+                return;
+            }
+
+            const stopElements = Array.from(allStops).reverse();
+            stopElements.forEach(stop => {
+                const positionSlider = stop.querySelector('.stop-position-slider');
+                const positionVal = stop.querySelector('.stop-position-val');
+                const originalPos = parseInt(positionSlider.value);
+                const reversedPos = 100 - originalPos;
+                
+                positionSlider.value = reversedPos;
+                positionVal.textContent = `${reversedPos}%`;
+            });
+
+            colorStopsContainer.innerHTML = '';
+            stopElements.forEach((stop, index) => {
+                const title = stop.querySelector('.color-stop-title');
+                title.textContent = `颜色${index + 1}：`;
+                colorStopsContainer.appendChild(stop);
+            });
+
+            generateGradient();
+        });
+
+        swapColorOrderBtn.addEventListener('click', () => {
+            const allStops = colorStopsContainer.querySelectorAll('.color-stop-group');
+            if (allStops.length < 2) {
+                alert('至少需要2个颜色点才能交换！');
+                return;
+            }
+
+            const colorOpacityList = Array.from(allStops).map(stop => ({
+                color: stop.querySelector('.color-input').value,
+                opacity: stop.querySelector('.opacity-slider').value,
+                opacityText: stop.querySelector('.opacity-val').textContent
+            }));
+
+            const reversedColorOpacityList = colorOpacityList.reverse();
+
+            allStops.forEach((stop, index) => {
+                const colorInput = stop.querySelector('.color-input');
+                const opacitySlider = stop.querySelector('.opacity-slider');
+                const opacityVal = stop.querySelector('.opacity-val');
+
+                colorInput.value = reversedColorOpacityList[index].color;
+                opacitySlider.value = reversedColorOpacityList[index].opacity;
+                opacityVal.textContent = reversedColorOpacityList[index].opacityText;
+            });
+
+            generateGradient();
+        });
+
+        swapSizeBtn.addEventListener('click', () => {
+            let currentWidth = parseInt(widthInput.value) || 300;
+            let currentHeight = parseInt(heightInput.value) || 200;
+
+            if (currentHeight < 10 || currentHeight > 2000) {
+                alert('高度值超出范围（10-2000），无法交换');
+                heightInput.value = 200;
+                return;
+            }
+            if (currentWidth < 10 || currentWidth > 2000) {
+                alert('宽度值超出范围（10-2000），无法交换');
+                widthInput.value = 300;
+                return;
+            }
+
+            widthInput.value = currentHeight;
+            heightInput.value = currentWidth;
+
+            generateGradient();
+        });
+
+        randomModeBtn.addEventListener('click', () => {
+            const targetStopCount = getRandomInt(2, 8);
+            colorStopsContainer.innerHTML = '';
+            const randomPositions = generateFixedCountPositions(targetStopCount);
+            
+            randomPositions.forEach(pos => {
+                const randomColor = generateRandomColor();
+                const randomOpacity = getRandomFloat(0.2, 1);
+                const newStop = createColorStopElement(pos, randomColor, randomOpacity);
+                colorStopsContainer.appendChild(newStop);
+                initColorStopEvents(newStop);
+            });
+
+            refreshColorStopTitles();
+            const randomAngle = getRandomInt(-359, 359);
+            angleInput.value = randomAngle;
+            angleSlider.value = randomAngle;
+            angleBtns.forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.angle) === randomAngle);
+            });
+
+            const gradientTypes = ['linear', 'radial'];
+            const randomType = gradientTypes[Math.floor(Math.random() * gradientTypes.length)];
+            gradientTypeRadios.forEach(radio => {
+                radio.checked = radio.value === randomType;
+            });
+
+            generateGradient();
+        });
+
+        linear90RandomBtn.addEventListener('click', () => {
+            gradientTypeRadios.forEach(radio => {
+                radio.checked = radio.value === 'linear';
+            });
+
+            const fixedAngle = 90;
+            angleInput.value = fixedAngle;
+            angleSlider.value = fixedAngle;
+            angleBtns.forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.angle) === fixedAngle);
+            });
+
+            const targetStopCount = getRandomInt(2, 8);
+            colorStopsContainer.innerHTML = '';
+            const randomPositions = generateFixedCountPositions(targetStopCount);
+            
+            randomPositions.forEach(pos => {
+                const randomColor = generateRandomColor();
+                const randomOpacity = getRandomFloat(0.2, 1);
+                const newStop = createColorStopElement(pos, randomColor, randomOpacity);
+                colorStopsContainer.appendChild(newStop);
+                initColorStopEvents(newStop);
+            });
+
+            refreshColorStopTitles();
+            generateGradient();
+        });
+
+        linear902ColorBtn.addEventListener('click', () => {
+            gradientTypeRadios.forEach(radio => {
+                radio.checked = radio.value === 'linear';
+            });
+
+            const fixedAngle = 90;
+            angleInput.value = fixedAngle;
+            angleSlider.value = fixedAngle;
+            angleBtns.forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.angle) === fixedAngle);
+            });
+
+            const targetStopCount = 2;
+            colorStopsContainer.innerHTML = '';
+            const randomPositions = generateFixedCountPositions(targetStopCount);
+            
+            randomPositions.forEach(pos => {
+                const randomColor = generateRandomColor();
+                const randomOpacity = getRandomFloat(0.2, 1);
+                const newStop = createColorStopElement(pos, randomColor, randomOpacity);
+                colorStopsContainer.appendChild(newStop);
+                initColorStopEvents(newStop);
+            });
+
+            refreshColorStopTitles();
+            generateGradient();
+        });
+
+        linear903ColorBtn.addEventListener('click', () => {
+            gradientTypeRadios.forEach(radio => {
+                radio.checked = radio.value === 'linear';
+            });
+
+            const fixedAngle = 90;
+            angleInput.value = fixedAngle;
+            angleSlider.value = fixedAngle;
+            angleBtns.forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.angle) === fixedAngle);
+            });
+
+            const targetStopCount = 3;
+            colorStopsContainer.innerHTML = '';
+            const randomPositions = generateFixedCountPositions(targetStopCount);
+            
+            randomPositions.forEach(pos => {
+                const randomColor = generateRandomColor();
+                const randomOpacity = getRandomFloat(0.2, 1);
+                const newStop = createColorStopElement(pos, randomColor, randomOpacity);
+                colorStopsContainer.appendChild(newStop);
+                initColorStopEvents(newStop);
+            });
+
+            refreshColorStopTitles();
+            generateGradient();
+        });
+
+        // 生成/下载按钮
+        generateBtn.addEventListener('click', generateGradient);
+        downloadBtn.addEventListener('click', () => {
+            if (!currentBlobUrl) {
+                alert('请先生成渐变图片');
+                return;
+            }
+            const a = document.createElement('a');
+            a.href = currentBlobUrl;
+            a.download = `gradient-${Date.now()}.png`;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+            }, 500);
+        });
+
+        // 页面卸载释放资源
+        window.addEventListener('unload', () => {
+            if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+        });
+
+        // 初始化
+        window.onload = () => {
+            initAngleEvents();
+            colorStopsContainer.querySelectorAll('.color-stop-group').forEach(initColorStopEvents);
+            // 页面加载后立即生成预览
+            setTimeout(generateGradient, 100); // 延迟100ms，确保DOM完全加载
+        };
+    </script>
+</body>
+</html>

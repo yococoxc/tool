@@ -1130,4 +1130,42 @@ var tracks = [
         }
       ]
     },
+    {
+      title: "随笔38-成为一个漫画家",
+      array: [
+      ]
+    },
+    {
+      title: "随笔39-伽罗雪敏",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/433a6223-60a1-469b-85bc-c642965fe457.mp3",
+          "name2": "随笔39-伽罗雪敏_57"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/8284f87b-f3ab-48a6-b593-1cc22bfafe95.mp3",
+          "name2": "随笔39-伽罗雪敏_95"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/99206fae-5eb4-43ba-9dc3-7a3ee9e5f5a0.mp3",
+          "name2": "随笔39-伽罗雪敏_a0"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/4abd3607-5914-4ed8-85b4-4fb7a65a4fb0.mp3",
+          "name2": "随笔39-伽罗雪敏_b0"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/5f226597-b38b-4de6-9fc2-b613e82f1172.mp3",
+          "name2": "随笔39-伽罗雪敏_72"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/01f1e746-a5f8-45a4-8359-adcb6154f3fe.mp3",
+          "name2": "随笔39-伽罗雪敏_fe"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/3f75a664-4b5e-4106-afef-70b430bafbef.mp3",
+          "name2": "随笔39-伽罗雪敏_ef"
+        }
+      ]
+    },
 ];

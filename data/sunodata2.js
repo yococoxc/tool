@@ -1168,4 +1168,25 @@ var tracks = [
         }
       ]
     },
+    {
+      title: "随笔40-我喜欢的人",
+      array: [
+        {
+          "mp3": "https://cdn1.suno.ai/e586e4f0-8c8b-4b37-9aa8-0710b20ef2a2.mp3",
+          "name2": "随笔40-我喜欢的人_a2"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/849c8470-c7e8-48a2-a007-0ae4183f7cb3.mp3",
+          "name2": "随笔40-我喜欢的人_b3"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/1af2121c-7450-45c6-a661-3570e573f599.mp3",
+          "name2": "随笔40-我喜欢的人-_99"
+        },
+        {
+          "mp3": "https://cdn1.suno.ai/a03f0695-4671-4d75-8f7a-f8ede4b2c497.mp3",
+          "name2": "随笔40-我喜欢的人+_97"
+        }
+      ]
+    },
 ];

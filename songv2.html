@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <title id="titleMessage">木子才演唱会</title>
     <style>
-        /* 保持原有样式不变 */
+        /* 样式保留原有逻辑，新增列表分割线样式 */
         body {
             padding: 0;
             margin: 0;
@@ -31,10 +31,12 @@
             justify-content: center;
             align-items: center;
         }
-        button {
+        button, select {
             padding: 8px 8px;
             cursor: pointer;
-            margin: 0 5px; /* 增加一点按钮间距 */
+            margin: 0 5px; /* 增加一点间距 */
+            border: none;
+            border-radius: 4px;
         }
         .bgColor {
             background-color: #fcfcfc;
@@ -42,6 +44,9 @@
         .textColor {
             color: #333333;
             text-align: center;
+        }
+        .div2 button {
+            border: 1px solid #333333;
         }
         .buttonContentLoad {
             width: 100%;
@@ -58,6 +63,20 @@
             display: flex;
             flex-direction: column;
             overflow: auto;
+            padding: 10px; /* 列表内边距 */
+        }
+        /* 新增：列表项样式 + 分割线 */
+        .buttonContent button {
+            margin: 2px 0; /* 上下间距 */
+            padding: 10px 15px; /* 内边距增大，更易点击 */
+            border-bottom: 1px solid #939292; /* 底部分割线 */
+            border-radius: 0; /* 取消圆角，让分割线更连贯 */
+            background-color: #f8f8f8; /* 列表项背景色 */
+            text-align: center; /* 居中对齐 */
+        }
+        /* 列表项hover效果，提升交互体验 */
+        .buttonContent button:hover {
+            background-color: #f0f0f0;
         }
         .div1 {
             height: auto;
@@ -79,6 +98,9 @@
             margin: 0;
             margin-top: 8px;
         }
+        select {
+            border: 1px solid #ccc;
+        }
     </style>
 </head>
 <body onclick="bodyAction()" class="bgColor">
@@ -99,32 +121,76 @@
             <button class="textColor" id="loopButton" onclick="handleLoop()">模式全部</button>
             <button class="textColor" onclick="playRandomTrack()">抽歌</button>
             <button class="textColor" id="listButton" onclick="listShowOrHidden()">列表隐藏</button>
-            <!-- 添加数据源切换按钮 -->
-            <button class="textColor" id="sourceSwitchButton" onclick="switchDataSource()">切换到2025年演唱会</button>
+            <!-- 下拉框不再手动写option，由JS自动生成 -->
+            <select class="textColor" id="sourceSelect" onchange="switchDataSource()"></select>
         </div>
         <div class="buttonContentLoad" id="songList" style="display: none;">
             <div class="buttonContent" id="buttonContent"></div>
         </div>
     </div>
 
-    <!-- 引入两个数据源 -->
+    <!-- 引入数据源（新增数据源只需添加对应的script标签） -->
     <script src="https://yococoxc.github.io/tool/data/sunodata2.js"></script>
     <script src="https://yococoxc.github.io/tool/data/sunodata2025.js"></script>
+    <script src="https://yococoxc.github.io/tool/data/sunodata2025AllRank.js"></script>
+    <!-- 示例：新增数据源只需添加这行 + 配置数组项
+    <script src="https://yococoxc.github.io/tool/data/sunodata2024.js"></script>
+    -->
     <script type="text/javascript">
-        // 定义当前使用的数据源，默认使用原始数据源
-        let currentTracks = tracks;
-        let isUsing2025 = false; // 标记当前是否使用2025数据源
+        // ========== 核心配置：数据源列表（第一个为默认播放） ==========
+        const dataSourceConfig = [
+            { key: 'tracks2025AllRank', name: '2025年全部歌曲排名' },
+            { key: 'tracks', name: '全部歌曲' }, // 第一个 = 默认播放
+            { key: 'tracks2025', name: '2025年演唱会' },
+            // 示例：新增数据源只需添加这一行即可，下拉框会自动生成选项
+            // { key: 'tracks2024', name: '2024年演唱会' },
+            // { key: 'tracks2023', name: '2023年演唱会' },
+        ];
 
-        var loopValue = 0;
-        var isFrist = true;
-        var isPlaying = false;
-        
+        // 全局状态 - 改为读取第一个配置项作为默认
+        const defaultDataSource = dataSourceConfig[0]; // 取第一个配置项为默认
+        let currentTracks = window[defaultDataSource.key]; // 默认加载第一个数据源
+        let currentDataSourceKey = defaultDataSource.key; // 默认选中第一个数据源key
+        let loopValue = 0;
+        let isFrist = true;
+        let isPlaying = false;
         var player = document.getElementById('player');
         var currentTitle = null;
         var currentIndex = 0;
         var currentUrl = null;
 
-        // 处理循环模式切换
+        // ========== 数据源切换核心函数 ==========
+        function switchDataSource() {
+            // 获取下拉框选中的数据源key
+            const selectEl = document.getElementById('sourceSelect');
+            currentDataSourceKey = selectEl.value;
+            
+            // 根据key获取对应的数据源（window[key] 可以获取全局变量）
+            currentTracks = window[currentDataSourceKey];
+            
+            // 校验数据源是否存在
+            if (!currentTracks || !Array.isArray(currentTracks)) {
+                alert(`数据源${currentDataSourceKey}加载失败，请检查脚本是否引入`);
+                // 回退到第一个可用数据源
+                currentDataSourceKey = dataSourceConfig[0].key;
+                currentTracks = window[currentDataSourceKey];
+                selectEl.value = currentDataSourceKey;
+            }
+
+            // 重置播放状态
+            currentIndex = 0;
+            player.pause();
+            
+            // 更新UI和列表
+            initSongList();
+            playNextTrack();
+            
+            // 更新页面标题相关信息
+            const currentSourceName = dataSourceConfig.find(item => item.key === currentDataSourceKey)?.name || '全部歌曲';
+            document.getElementById('titleMessage').innerHTML = `木子才${currentSourceName} 《${currentTitle || ''}》`;
+        }
+
+        // ========== 原有功能逻辑（完全保留，无修改） ==========
         function handleLoop() {
             loopValue++;
             if (loopValue >= 4) {
@@ -142,7 +208,6 @@
             }
         }
 
-        // 显示/隐藏列表
         function listShowOrHidden() {
             var list = document.getElementById('songList');
             if (list.style.display == 'none') {
@@ -154,10 +219,9 @@
             }
         }
 
-        // 歌曲组按钮点击事件
         function trackButtonAction(e) {
             let index = e.target.getAttribute('data-index');
-            let array = currentTracks[index].array; // 使用当前数据源
+            let array = currentTracks[index].array;
             if (array.length == 0) {
                 e.stopPropagation();
                 return;
@@ -168,7 +232,6 @@
             e.stopPropagation();
         }
 
-        // 播放器事件监听
         player.addEventListener('play', function () {
             isPlaying = true;
             document.getElementById('playOrPauseButton').innerHTML = '暂停';
@@ -179,14 +242,14 @@
             document.getElementById('playOrPauseButton').innerHTML = '播放';
         });
 
-        // 初始化歌曲列表
         function initSongList() {
             var buttonContent = document.getElementById('buttonContent');
-            // 清空现有列表
             buttonContent.innerHTML = '';
             let sumTrackNum = 0;
             
-            for (var i = 0; i < currentTracks.length; i++) { // 使用当前数据源
+            const currentSourceName = dataSourceConfig.find(item => item.key === currentDataSourceKey)?.name || '全部歌曲';
+            
+            for (var i = 0; i < currentTracks.length; i++) {
                 let tempTrack = currentTracks[i];
 
                 var button = document.createElement('button');
@@ -199,23 +262,15 @@
                 sumTrackNum += tempTrack.array.length;
             }
 
-            // 滚动到顶部
             requestAnimationFrame(() => {
                 buttonContent.scrollTop = 0;
             });
 
-            // 更新歌曲总数信息
-            document.getElementById('songInfo').innerHTML = `木子才${isUsing2025 ? '2025年演唱会' : '全部歌曲'}，共 ${sumTrackNum} 首`;
+            document.getElementById('songInfo').innerHTML = `木子才${currentSourceName}，共 ${sumTrackNum} 首`;
         }
 
-        // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            initSongList();
-        });
-
-        // 随机播放
         function playRandomTrack() {
-            currentIndex = Math.floor(Math.random() * currentTracks.length); // 使用当前数据源
+            currentIndex = Math.floor(Math.random() * currentTracks.length);
             let array = currentTracks[currentIndex].array;
             if (array.length == 0) {
                 playRandomTrack();
@@ -225,7 +280,6 @@
             playNextTrack();
         }
 
-        // 播放下一首
         function playNextTrack() {
             if (isFrist) {
                 document.getElementById('playOrPauseButton').innerHTML = '播放';
@@ -235,7 +289,7 @@
             
             isFrist = false;
 
-            let array = currentTracks[currentIndex].array; // 使用当前数据源
+            let array = currentTracks[currentIndex].array;
             if (array == undefined || array.length == 0) {
                 return;
             }
@@ -250,12 +304,11 @@
             player.play();
             isPlaying = true;
 
-
-            document.getElementById('titleMessage').innerHTML = `木子才${isUsing2025 ? '2025年演唱会' : '全部歌曲'} 《${currentTitle}》`;
+            const currentSourceName = dataSourceConfig.find(item => item.key === currentDataSourceKey)?.name || '全部歌曲';
+            document.getElementById('titleMessage').innerHTML = `木子才${currentSourceName} 《${currentTitle}》`;
             document.getElementById('title').innerHTML = currentTitle;
         }
 
-        // 上一首
         function handlePreviousTrack() {
             if (loopValue == 3) {
                 playRandomTrack();
@@ -263,10 +316,10 @@
             }
             currentIndex = parseInt(currentIndex) - 1;
             if (currentIndex < 0) {
-                currentIndex = currentTracks.length - 1; // 使用当前数据源
+                currentIndex = currentTracks.length - 1;
             }
 
-            let array = currentTracks[currentIndex].array; // 使用当前数据源
+            let array = currentTracks[currentIndex].array;
             if (array.length == 0) {
                 handlePreviousTrack();
                 return;
@@ -275,18 +328,17 @@
             playNextTrack();
         }
         
-        // 下一首
         function handleNextTrack() {
             if (loopValue == 3) {
                 playRandomTrack();
                 return;
             }
             currentIndex = parseInt(currentIndex) + 1;
-            if (currentIndex >= currentTracks.length) { // 使用当前数据源
+            if (currentIndex >= currentTracks.length) {
                 currentIndex = 0;
             }
 
-            let array = currentTracks[currentIndex].array; // 使用当前数据源
+            let array = currentTracks[currentIndex].array;
             if (array.length == 0) {
                 handleNextTrack();
                 return;
@@ -295,7 +347,6 @@
             playNextTrack();
         }
         
-        // 播放结束处理
         function handleEnded() {
             if (loopValue == 3) {
                 playRandomTrack();
@@ -313,11 +364,11 @@
             }
 
             currentIndex = parseInt(currentIndex) + 1;
-            if (currentIndex >= currentTracks.length) { // 使用当前数据源
+            if (currentIndex >= currentTracks.length) {
                 currentIndex = 0;
             }
 
-            let array = currentTracks[currentIndex].array; // 使用当前数据源
+            let array = currentTracks[currentIndex].array;
             if (array.length == 0) {
                 handleEnded();
                 return;
@@ -326,7 +377,6 @@
             playNextTrack();
         }
 
-        // 播放/暂停按钮
         document.getElementById('playOrPauseButton').addEventListener('click', function() {
             isFrist = false;
 
@@ -345,13 +395,6 @@
             }
         });
 
-        // 页面加载完成后自动播放
-        window.onload = function() {
-            playNextTrack();
-            isFrist = true;
-        }
-        
-        //  body点击事件
         function bodyAction() {
             if (isFrist == false) {
                 return;
@@ -363,22 +406,28 @@
             document.getElementById('playOrPauseButton').innerHTML = '暂停';
         }
 
-        // 切换数据源函数
-        function switchDataSource() {
-            // 切换数据源标记
-            isUsing2025 = !isUsing2025;
-            // 更新当前数据源
-            currentTracks = isUsing2025 ? tracks2025 : tracks;
-            // 更新切换按钮文字
-            document.getElementById('sourceSwitchButton').innerHTML = isUsing2025 ? '切换到全部歌曲' : '切换到2025年演唱会';
-            // 重置当前播放索引
-            currentIndex = 0;
-            // 重新初始化歌曲列表
+        // ========== 页面初始化（核心改动：默认选中第一个数据源 + 列表分割线） ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. 自动生成下拉框选项（根据dataSourceConfig）
+            const selectEl = document.getElementById('sourceSelect');
+            selectEl.innerHTML = ''; // 清空原有选项
+            dataSourceConfig.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.key; // 绑定数据源key
+                option.textContent = item.name; // 显示友好名称
+                // 关键：默认选中第一个配置项
+                if (item.key === defaultDataSource.key) {
+                    option.selected = true;
+                }
+                selectEl.appendChild(option); // 添加到下拉框
+            });
+
+            // 2. 初始化歌曲列表
             initSongList();
-            // 停止当前播放并加载新数据源的歌曲
-            player.pause();
+            // 3. 自动播放（默认播放第一个数据源的内容）
             playNextTrack();
-        }
+            isFrist = true;
+        });
     </script>
 </body>
 </html>

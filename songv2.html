@@ -120,7 +120,7 @@
             <button class="textColor" onclick="handleNextTrack()">下一首</button>
             <button class="textColor" id="loopButton" onclick="handleLoop()">模式全部</button>
             <button class="textColor" onclick="playRandomTrack()">抽歌</button>
-            <button class="textColor" id="listButton" onclick="listShowOrHidden()">列表隐藏</button>
+            <button class="textColor" id="listButton" onclick="listShowOrHidden()">列表显示</button>
             <!-- 下拉框不再手动写option，由JS自动生成 -->
             <select class="textColor" id="sourceSelect" onchange="switchDataSource()"></select>
         </div>
@@ -130,6 +130,7 @@
     </div>
 
     <!-- 引入数据源（新增数据源只需添加对应的script标签） -->
+    <script src="https://yococoxc.github.io/tool/data/sunodataLast.js"></script>
     <script src="https://yococoxc.github.io/tool/data/sunodata2.js"></script>
     <script src="https://yococoxc.github.io/tool/data/sunodata2025.js"></script>
     <script src="https://yococoxc.github.io/tool/data/sunodata2025AllRank.js"></script>
@@ -139,6 +140,7 @@
     <script type="text/javascript">
         // ========== 核心配置：数据源列表（第一个为默认播放） ==========
         const dataSourceConfig = [
+            { key: 'tracksLast', name: '最新歌曲' },
             { key: 'tracks2025AllRank', name: '2025年全部歌曲排名' },
             { key: 'tracks', name: '全部歌曲' }, // 第一个 = 默认播放
             { key: 'tracks2025', name: '2025年演唱会' },

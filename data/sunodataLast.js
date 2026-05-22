@@ -1,5 +1,18 @@
 var tracksLast = [
     {
+        title: "随笔46-星空下的女主角",
+        array: [
+              {
+                "mp3": "https://cdn1.suno.ai/3178b419-6c16-49f4-9e0e-7d16d153fa80.mp3",
+                "name2": "随笔45-星空下的女主角_80"
+              },
+            {
+                "mp3": "https://cdn1.suno.ai/ab4731ca-5dcd-4f6b-8c3d-9b28d183986e.mp3",
+                "name2": "随笔45-星空下的女主角_6e"
+              },
+        ]
+    },
+    {
         title: "随笔45-完",
         array: [
               {

@@ -10,6 +10,10 @@ var tracksLast = [
                 "mp3": "https://cdn1.suno.ai/ab4731ca-5dcd-4f6b-8c3d-9b28d183986e.mp3",
                 "name2": "随笔45-星空下的女主角_6e"
               },
+            {
+                "mp3": "https://cdn1.suno.ai/7ad0c460-109d-4878-9e78-a61a930d355e.mp3",
+                "name2": "随笔45-星空下的女主角_5e"
+              },
         ]
     },
     {

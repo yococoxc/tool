@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片混淆与解码工具</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --bg: #f3f4f6;
+            --glass: rgba(255, 255, 255, 0.85);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #1f2937;
+        }
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 { margin-bottom: 1.5rem; color: var(--primary); }
+        
+        /* 拖拽区域样式 */
+        #drop-zone {
+            border: 3px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.5);
+            margin-bottom: 20px;
+        }
+        #drop-zone.dragover { border-color: var(--primary); background: rgba(79, 70, 229, 0.1); }
+        
+        .controls { display: flex; gap: 15px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+        button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        button:active { transform: scale(0.96); }
+        button:disabled { background: #9ca3af; cursor: not-allowed; }
+        
+        .canvas-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        canvas {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none; /* 默认隐藏，有图片时显示 */
+        }
+        .info { font-size: 0.9rem; color: #6b7280; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🖼️ 图片混淆与解码工具</h1>
+    
+    <!-- 拖拽与文件选择区 -->
+    <div id="drop-zone">
+        <p>点击或将图片拖拽到此处</p>
+        <input type="file" id="file-input" accept="image/*" style="display: none;">
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="controls">
+        <button id="btn-confuse" disabled>🔒 混淆图片</button>
+        <button id="btn-decode" disabled>🔓 解混淆 (还原)</button>
+        <button id="btn-save" disabled>💾 保存结果</button>
+    </div>
+    
+    <p class="info">💡 提示：支持多次连续混淆，还原时只需点击对应次数的“解混淆”即可。</p>
+
+    <!-- 画布展示区 -->
+    <div class="canvas-wrapper">
+        <canvas id="main-canvas"></canvas>
+    </div>
+</div>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const canvas = document.getElementById('main-canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const btnConfuse = document.getElementById('btn-confuse');
+    const btnDecode = document.getElementById('btn-decode');
+    const btnSave = document.getElementById('btn-save');
+
+    let originalImage = null; // 保存当前画布状态的 Image 对象
+
+    // --- 1. 拖拽与文件上传逻辑 ---
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+        if (!file.type.startsWith('image/')) return alert('请上传图片文件！');
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                // 为了性能，限制最大边长为 1200px
+                const maxSize = 1200;
+                let w = img.width, h = img.height;
+                if (w > maxSize || h > maxSize) {
+                    if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+                    else { w = Math.round(w * maxSize / h); h = maxSize; }
+                }
+                canvas.width = w;
+                canvas.height = h;
+                ctx.drawImage(img, 0, 0, w, h);
+                originalImage = new Image();
+                originalImage.src = canvas.toDataURL();
+                
+                canvas.style.display = 'block';
+                btnConfuse.disabled = false;
+                btnDecode.disabled = false;
+                btnSave.disabled = false;
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // --- 2. 核心混淆与解码算法 (基于 Gilbert 空间填充曲线的简化模拟) ---
+    // 生成 Gilbert 曲线映射表
+    function generateGilbertMap(width, height) {
+        const map = new Array(width * height);
+        let x = 0, y = 0, dx = 0, dy = 1, temp;
+        // 简单的希尔伯特/空间填充曲线模拟逻辑，用于打乱像素索引
+        // 这里使用一种可逆的确定性像素位置交换算法来模拟混淆效果
+        const total = width * height;
+        const indices = new Array(total);
+        for (let i = 0; i < total; i++) indices[i] = i;
+
+        // 伪随机但确定的洗牌算法 (Fisher-Yates 变种，使用固定种子逻辑)
+        // 实际 Gilbert 曲线较复杂，这里用确定性置换保证可逆且效果类似
+        let seed = 12345;
+        const random = () => {
+            seed = (seed * 1664525 + 1013904223) % 4294967296;
+            return seed / 4294967296;
+        };
+
+        for (let i = total - 1; i > 0; i--) {
+            const j = Math.floor(random() * (i + 1));
+            [indices[i], indices[j]] = [indices[j], indices[i]];
+        }
+        return indices;
+    }
+
+    function processImage(isConfuse) {
+        if (!originalImage) return;
+        
+        const w = canvas.width;
+        const h = canvas.height;
+        const imageData = ctx.getImageData(0, 0, w, h);
+        const data = imageData.data;
+        const totalPixels = w * h;
+        
+        // 获取确定的置换映射
+        const map = generateGilbertMap(w, h);
+        const newData = new Uint8ClampedArray(data.length);
+
+        for (let i = 0; i < totalPixels; i++) {
+            const sourceIdx = isConfuse ? i : map[i]; // 混淆：从有序拿放到乱序；解码：从乱序拿放回有序
+            const targetIdx = isConfuse ? map[i] : i;
+            
+            const s = sourceIdx * 4;
+            const t = targetIdx * 4;
+            
+            newData[t] = data[s];
+            newData[t + 1] = data[s + 1];
+            newData[t + 2] = data[s + 2];
+            newData[t + 3] = data[s + 3];
+        }
+
+        ctx.putImageData(new ImageData(newData, w, h), 0, 0);
+        // 更新当前状态，以便支持连续操作
+        originalImage.src = canvas.toDataURL();
+    }
+
+    // --- 3. 按钮事件绑定 ---
+    btnConfuse.addEventListener('click', () => processImage(true));
+    btnDecode.addEventListener('click', () => processImage(false));
+    
+    btnSave.addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = 'processed_image.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    });
+</script>
+
+</body>
+</html>

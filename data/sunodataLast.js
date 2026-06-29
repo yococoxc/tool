@@ -1,4 +1,58 @@
 var tracksLast = [
+    
+    {
+        title: "随笔49-痕迹",
+        array: [
+              {
+                "mp3": "https://cdn1.suno.ai/67874737-2ea7-45f6-b803-906153998200.mp3",
+                "name2": "随笔49-痕迹_00"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/f7f74038-ae07-4862-a045-d7009878c77a.mp3",
+                "name2": "随笔49-痕迹_7a"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/7d1f2a07-1b5a-4781-a3a2-21ecac6d9257.mp3",
+                "name2": "随笔49-痕迹_57"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/4eea7afc-48b1-4c6c-bb6e-8953b96e058e.mp3",
+                "name2": "随笔49-痕迹_8e"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/22660384-1dfb-4d52-8ac0-c40f6aaa0048.mp3",
+                "name2": "随笔49-痕迹_48"
+              },
+        ]
+    },
+    
+    {
+        title: "随笔48-我的故事",
+        array: [
+              {
+                "mp3": "https://cdn1.suno.ai/47165c74-1714-428f-8e0e-07e349db5a62.mp3",
+                "name2": "随笔48-我的故事_62"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/3f52dfa6-2fc9-4e3b-aac7-f39ba33f68a5.mp3",
+                "name2": "随笔48-我的故事_a5"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/7ffa6807-c721-4151-aeda-09593c5dcfa8.mp3",
+                "name2": "随笔48-我的故事_a8"
+              },
+        ]
+    },
+    
+    {
+        title: "随笔47-我",
+        array: [
+              {
+                "mp3": "https://cdn1.suno.ai/7fcb2738-e411-4792-8c42-6c6234a0ff85.mp3",
+                "name2": "随笔47-我_85"
+              },
+        ]
+    },
     {
         title: "随笔46-星空下的女主角",
         array: [
@@ -57,6 +111,15 @@ var tracksLast = [
               {
                 "mp3": "https://cdn1.suno.ai/0e05089c-482c-4bb2-9e5a-04ea5d60e4cc.mp3",
                 "name2": "心中有段情_cc"
+              },
+        ]
+    },
+    {
+        title: "随笔42-终于等到你",
+        array: [
+              {
+                "mp3": "https://cdn1.suno.ai/2baece64-32c2-447f-9031-3290d888898a.mp3",
+                "name2": "随笔42-终于等到你_8a"
               },
         ]
     },

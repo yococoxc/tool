@@ -1,6 +1,27 @@
 var tracksLast = [
     
     {
+        title: "随笔50-这首歌",
+        array: [
+              {
+                "mp3": "https://cdn1.suno.ai/aaf00956-40d5-4f28-8c6d-7f0ff6693fb3.mp3",
+                "name2": "随笔50-这首歌_b3"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/dfffd071-d10a-40d2-8ae0-36e99d924995.mp3",
+                "name2": "随笔50-这首歌_95"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/a6f5a433-7f7f-4482-b033-3d2e91837c40.mp3",
+                "name2": "随笔50-这首歌_40"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/8f2cbf71-1c98-4e95-b13f-b9a25a82a966.mp3",
+                "name2": "随笔50-这首歌_66"
+              },
+        ]
+    },
+    {
         title: "随笔49-痕迹",
         array: [
               {

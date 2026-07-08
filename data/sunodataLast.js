@@ -1,4 +1,17 @@
 var tracksLast = [
+    {
+        title: "随笔51-遥远的她",
+        array: [
+              {
+                "mp3": "https://cdn1.suno.ai/5c1ceb82-9284-4430-9f68-f10787c5f7e2.mp3",
+                "name2": "随笔51-遥远的她Other_e2"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/b4523c18-a4bf-4143-9504-eadf1fa3227e.mp3",
+                "name2": "随笔51-遥远的她Other_7e"
+              },
+        ]
+    },
     
     {
         title: "随笔50-这首歌",
@@ -136,11 +149,11 @@ var tracksLast = [
         ]
     },
     {
-        title: "随笔42-终于等到你",
+        title: "随笔42-终于等到了你",
         array: [
               {
                 "mp3": "https://cdn1.suno.ai/2baece64-32c2-447f-9031-3290d888898a.mp3",
-                "name2": "随笔42-终于等到你_8a"
+                "name2": "随笔42-终于等到了你_8a"
               },
         ]
     },

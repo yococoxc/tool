@@ -1,5 +1,22 @@
 var tracksLast = [
     {
+        title: "随笔52-航行,
+        array: [
+              {
+                "mp3": "https://cdn1.suno.ai/b85a1980-51cd-410e-94a9-2a07af09c894.mp3",
+                "name2": "随笔52-航行_94"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/c68a91df-d633-4cac-840a-e6d8725bc4c3.mp3",
+                "name2": "随笔52-航行_c3"
+              },
+              {
+                "mp3": "https://cdn1.suno.ai/ac53e5bb-5360-469e-990d-1cd06f40f7bd.mp3",
+                "name2": "随笔52-航行_bd"
+              },
+        ]
+    },
+    {
         title: "随笔51-遥远的她",
         array: [
               {

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID文本转换器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Consolas, "Microsoft Yahei", sans-serif;
+            padding: 20px;
+            background-color: #1e1e1e;
+            color: #fff;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            height: calc(100vh - 40px);
+        }
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .title {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #cccccc;
+        }
+        textarea {
+            flex: 1;
+            width: 100%;
+            background: #2d2d2d;
+            color: #dcdcdc;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+        }
+        .btn-wrap {
+            margin:10px 0;
+            display:flex;
+            gap:10px;
+        }
+        button {
+            padding:8px 16px;
+            border-radius:4px;
+            border:none;
+            cursor:pointer;
+            font-size:14px;
+        }
+        .btn-convert {
+            background:#007acc;
+            color:#fff;
+        }
+        .btn-copy {
+            background:#28a745;
+            color:#fff;
+        }
+        .btn-clear {
+            background:#dc3545;
+            color:#fff;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="panel">
+        <div class="title">输入区（原始ID文本）</div>
+        <textarea id="inputArea" placeholder="粘贴原始内容示例：
+ID_REV_EDELAY: 9994,    //REV  预延时
+  ID_Rev_DELAY: 9995,    //REV 延时
+  ID_ECHOL_IIR4_G,
+ID_IN_L_KEY: 994,    //变调
+"></textarea>
+        <div class="btn-wrap">
+            <button class="btn-convert" onclick="doConvert()">转换</button>
+            <button class="btn-clear" onclick="clearAll()">清空</button>
+        </div>
+    </div>
+    <div class="panel">
+        <div class="title">输出区（TabAddressID.xxx,）</div>
+        <textarea id="outputArea" readonly placeholder="转换结果会出现在这里"></textarea>
+        <div class="btn-wrap">
+            <button class="btn-copy" onclick="copyOutput()">复制输出</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/**
+ * 兼容两种格式提取ID：
+ * 1. ID_XXX: 999,    //注释
+ * 2. ID_ECHOL_IIR4_G,
+ * 保留原始大小写
+ */
+function extractIdName(line) {
+    // 匹配标识符：字母数字下划线，后面紧跟 : 或者 ,
+    const match = line.match(/([a-zA-Z0-9_]+)\s*[:\,]/);
+    if(!match) return null;
+    return match[1];
+}
+
+function doConvert() {
+    const inputText = document.getElementById('inputArea').value;
+    const lines = inputText.split('\n');
+    const resultLines = [];
+
+    for(let line of lines) {
+        const idName = extractIdName(line);
+        if(idName) {
+            resultLines.push(`TabAddressID.${idName},`);
+        }
+    }
+    document.getElementById('outputArea').value = resultLines.join('\n');
+}
+
+function clearAll() {
+    document.getElementById('inputArea').value = '';
+    document.getElementById('outputArea').value = '';
+}
+
+function copyOutput() {
+    const out = document.getElementById('outputArea');
+    out.select();
+    document.execCommand('copy');
+    alert("已复制输出内容");
+}
+</script>
+</body>
+</html>

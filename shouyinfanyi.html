@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>兽音翻译</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui, sans-serif;}
+body{max-width:740px;margin:26px auto;padding:0 16px;background:#f6f8fc;color:#111;}
+h1{text-align:center;font-size:24px;margin-bottom:22px;color:#2563eb;}
+.card{background:#ffffff;padding:18px;border-radius:12px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+.line{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px;}
+#symbolInput{flex:1;min-width:260px;padding:11px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:16px;}
+textarea{width:100%;min-height:150px;padding:13px;border:1px solid #d1d5db;border-radius:8px;font-size:15px;resize:vertical;}
+.btns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+button{padding:11px 18px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-size:15px;cursor:pointer;transition:0.2s;}
+button:hover{background:#1d4ed8;}
+.tip-text{color:#64748b;font-size:13px;margin-top:8px;word-break:break-all;}
+</style>
+</head>
+<body>
+<h1>兽音翻译</h1>
+
+<div class="card">
+  <div class="line">
+    <label>4个自定义编码字符：</label>
+    <input id="symbolInput" value="嗷呜啊~" placeholder="4个不重复字符，例：开心快乐">
+  </div>
+  <div class="tip-text">索引顺序 0/1/2/3；头部固定[3][1][0]，尾部自动补索引2字符</div>
+</div>
+
+<div class="card">
+  <h3>明文（加密输入/解密输出）</h3>
+  <textarea id="plainTextarea" placeholder="输入中文、网址、英文，加密生成兽音"></textarea>
+  <div class="btns">
+    <button onclick="encryptText()">🔒 加密生成兽音</button>
+    <button onclick="copyContent('plainTextarea')">复制明文</button>
+    <button onclick="clearAll()">清空全部</button>
+  </div>
+</div>
+
+<div class="card">
+  <h3>兽音密文（解密输入/加密输出）</h3>
+  <textarea id="cipherTextarea" placeholder="粘贴完整带首尾标记的兽音密文解密"></textarea>
+  <div class="btns">
+    <button onclick="decryptText()">🔓 解密还原原文</button>
+    <button onclick="copyContent('cipherTextarea')">复制密文</button>
+  </div>
+  <div class="tip-text" id="msgTip"></div>
+</div>
+
+<script>
+const tipBox = document.getElementById('msgTip');
+
+// 获取4字符集并校验
+function getSymbolList() {
+  const inputVal = document.getElementById('symbolInput').value.trim();
+  if (inputVal.length !== 4) {
+    tipBox.textContent = '❌ 错误：必须输入恰好4个互不重复字符！';
+    return null;
+  }
+  const arr = [...inputVal];
+  const unique = new Set(arr);
+  if (unique.size !== 4) {
+    tipBox.textContent = '❌ 错误：4个字符不能重复！';
+    return null;
+  }
+  tipBox.textContent = '';
+  return arr;
+}
+
+// 加密逻辑 完全复刻官网
+function encryptText() {
+  const sym = getSymbolList();
+  if (!sym) return;
+  const plain = document.getElementById('plainTextarea').value;
+  let offset = 0;
+  let cipher = [];
+  // 头部固定 sym[3], sym[1], sym[0]
+  cipher.push(sym[3], sym[1], sym[0]);
+
+  for (const char of plain) {
+    const unicode = char.charCodeAt(0);
+    // 分4段4bit：12、8、4、0
+    for (let shift = 12; shift >= 0; shift -= 4) {
+      let nibble = (unicode >> shift) & 0x0F;
+      nibble = (nibble + offset) & 0x0F;
+      offset += 1;
+      // 拆2bit高/低
+      const high2 = (nibble >> 2) & 3;
+      const low2 = nibble & 3;
+      cipher.push(sym[high2], sym[low2]);
+    }
+  }
+  // 尾部追加结束符 sym[2]
+  cipher.push(sym[2]);
+  document.getElementById('cipherTextarea').value = cipher.join('');
+  tipBox.textContent = '✅ 加密完成，密文已自动添加首尾标记';
+}
+
+// 解密逻辑 原版逆向（修复缺少尾部截断、8字符一组问题）
+function decryptText() {
+  const sym = getSymbolList();
+  if (!sym) return;
+  const cipherRaw = document.getElementById('cipherTextarea').value.trim();
+  if (cipherRaw.length < 4) {
+    tipBox.textContent = '❌ 密文长度不足，格式错误';
+    return;
+  }
+  // 校验头部3位、尾部1位
+  const head3 = cipherRaw.slice(0,3);
+  const tail1 = cipherRaw.slice(-1);
+  const targetHead = sym[3] + sym[1] + sym[0];
+  const targetTail = sym[2];
+  if (head3 !== targetHead || tail1 !== targetTail) {
+    tipBox.textContent = '⚠️ 格式校验失败：字符集不匹配/密文首尾缺失';
+  } else {
+    tipBox.textContent = '✅ 首尾格式校验通过';
+  }
+  // 去除头部3、尾部1，只保留中间有效数据
+  const dataBody = cipherRaw.slice(3, -1);
+  const charMap = new Map();
+  sym.forEach((c, idx) => charMap.set(c, idx));
+  let offset = 0;
+  let plainResult = '';
+
+  // 每8个字符 = 1个完整Unicode字符（4段×2字符）
+  for (let i = 0; i < dataBody.length; i += 8) {
+    const block = dataBody.slice(i, i + 8);
+    if (block.length !== 8) break;
+    let unicodeCode = 0;
+    let shift = 12;
+    // 每组2字符对应一段4bit
+    for (let p = 0; p < 8; p += 2) {
+      const c1 = block[p];
+      const c2 = block[p+1];
+      const idx1 = charMap.get(c1);
+      const idx2 = charMap.get(c2);
+      if (idx1 === undefined || idx2 === undefined) {
+        tipBox.textContent += '；存在未知字符';
+        continue;
+      }
+      let nibble = (idx1 << 2) | idx2;
+      // 逆向减去偏移，防负数
+      nibble = (nibble - offset + 16) & 0x0F;
+      offset += 1;
+      unicodeCode |= (nibble << shift);
+      shift -= 4;
+    }
+    plainResult += String.fromCharCode(unicodeCode);
+  }
+  document.getElementById('plainTextarea').value = plainResult;
+}
+
+// 复制文本
+async function copyContent(elId) {
+  const el = document.getElementById(elId);
+  await navigator.clipboard.writeText(el.value);
+}
+// 清空全部输入输出
+function clearAll() {
+  document.getElementById('plainTextarea').value = '';
+  document.getElementById('cipherTextarea').value = '';
+  tipBox.textContent = '';
+}
+</script>
+</body>
+</html>

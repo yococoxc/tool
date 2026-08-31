@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suno歌曲数据临时处理</title>
+    <style>
+        * {box-sizing: border-box;margin:0;padding:0;font-family:system-ui}
+        html {
+            height: 100%;
+        }
+        body {
+            height: 100%;
+            overflow: hidden; /* 整个网页禁止滚动 */
+            background:#f5f7fa;
+            padding:20px;
+            display: flex;
+            flex-direction: column;
+        }
+        h2{margin-bottom:12px;color:#222}
+        h4{margin-bottom:8px;color:#333;font-size:14px}
+        .tip{color:#666;font-size:13px;margin:0 0 10px 0}
+        .btn-group{margin:0 0 14px 0;flex-shrink:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+        button{padding:10px 18px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer;font-size:14px}
+        button:hover{background:#1d4ed8}
+        button.secondary{background:#6b7280}
+        button.secondary:hover{background:#4b5563}
+        select{padding:9px 12px;border-radius:6px;border:1px solid #ccc;font-size:14px;min-width:220px}
+
+        /* 整体大布局：左右两栏，占据剩余全部高度 */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap:16px;
+            flex: 1;
+            min-height:0; /* flex关键：允许子元素收缩 */
+        }
+
+        /* 左侧：上下堆叠 输入、输出 */
+        .left-col {
+            display: flex;
+            flex-direction: column;
+            gap:12px;
+            height:100%;
+            min-height:0;
+        }
+        .block-wrap {
+            display:flex;
+            flex-direction:column;
+            flex:1;
+            min-height:0;
+        }
+        textarea{
+            flex:1;
+            width:100%;
+            padding:12px;
+            border:1px solid #ccc;
+            border-radius:8px;
+            font-family:monospace;
+            font-size:13px;
+            background:#fff;
+            resize:none;
+            overflow:auto; /*文本框内部滚动*/
+        }
+
+        /* 右侧：仅预览列表内部滚动 */
+        .right-col {
+            height:100%;
+            display:flex;
+            flex-direction:column;
+            min-height:0;
+        }
+        .preview-box{
+            flex:1;
+            border:1px solid #d1d5db;
+            background:#fff;
+            border-radius:8px;
+            overflow-y:auto; /* 只有列表内部滚动 */
+            padding:10px;
+        }
+        .preview-item{padding:8px 10px;border-bottom:1px solid #eee}
+        .preview-item a{color:#2563eb;text-decoration:none;font-size:14px}
+        .preview-item a:hover{text-decoration:underline}
+        .empty-tip{color:#999;padding:20px;text-align:center}
+    </style>
+    <!-- 引入4个远程数据源 -->
+    <script src="./data/sunodataLast.js"></script>
+    <script src="./data/sunodata2.js"></script>
+    <script src="./data/sunodata2025.js"></script>
+    <script src="./data/sunodata2025AllRank.js"></script>
+</head>
+<body>
+    <h2>Suno歌曲数据临时处理</h2>
+    <div class="btn-group">
+        <select id="sourceSelect">
+            <option value="">--选择远程数据源--</option>
+        </select>
+        <button id="convertBtn">执行转换</button>
+        <button id="copyOutputBtn">复制输出JSON</button>
+        <button id="clearBtn" class="secondary">清空全部</button>
+    </div>
+
+    <div class="main-container">
+        <!-- 左侧：输入在上，输出在下 -->
+        <div class="left-col">
+            <div class="block-wrap">
+                <h4>输入（JS对象 / var赋值）</h4>
+                <textarea id="inputJson" placeholder='var tracksLast = [ { title:"xxx", array:[...] } ];'></textarea>
+            </div>
+            <div class="block-wrap">
+                <h4>转换后输出JSON</h4>
+                <textarea id="outputJson" readonly placeholder="转换结果JSON"></textarea>
+            </div>
+        </div>
+
+        <!-- 右侧：滚动预览列表 -->
+        <div class="right-col">
+            <h4>预览滚动列表（name2显示，点击跳转html链接）</h4>
+            <div id="previewList" class="preview-box">
+                <div class="empty-tip">执行转换后这里生成歌曲列表</div>
+            </div>
+        </div>
+    </div>
+
+<script>
+//数据源配置
+const dataSourceConfig = [
+    { key: 'tracksLast', name: '最新歌曲' },
+    { key: 'tracks2025AllRank', name: '2025年全部歌曲排名' },
+    { key: 'tracks', name: '全部歌曲' },
+    { key: 'tracks2025', name: '2025年演唱会' },
+];
+
+//初始化下拉选择
+const sourceSelect = document.getElementById('sourceSelect');
+dataSourceConfig.forEach(item=>{
+    const opt = document.createElement('option');
+    opt.value = item.key;
+    opt.textContent = item.name;
+    sourceSelect.appendChild(opt);
+});
+
+//切换数据源，把全局变量序列化为 var xxx = [...] 填入输入框
+sourceSelect.onchange = function(){
+    const key = this.value;
+    if(!key) return;
+    const raw = window[key];
+    if(raw === undefined){
+        alert(`数据源 ${key} 未加载成功`);
+        return;
+    }
+    //生成 var xxx = [...] 格式文本
+    const jsText = `var ${key} = ${JSON.stringify(raw,null,2)};`;
+    document.getElementById('inputJson').value = jsText;
+    document.getElementById('outputJson').value = '';
+    document.getElementById('previewList').innerHTML = `<div class="empty-tip">执行转换后这里生成歌曲列表</div>`;
+};
+
+//预处理：剥离 var/let/const 变量声明，去掉末尾分号
+function preProcessJsSource(str){
+    let s = str.trim();
+    const assignReg = /^(var|let|const)\s+\w+\s*=\s*/;
+    s = s.replace(assignReg,'');
+    s = s.replace(/;\s*$/,'');
+    return s;
+}
+
+//宽松解析JS对象字面量
+function looseParse(str){
+    const processed = preProcessJsSource(str);
+    const fn = new Function(`return (${processed})`);
+    return fn();
+}
+
+//核心转换：mp3生成html字段
+function transformData(rawData){
+    const data = JSON.parse(JSON.stringify(rawData));
+    if(!Array.isArray(data)) return data;
+
+    for(const item of data){
+        if(!Array.isArray(item.array)) continue;
+        for(const subItem of item.array){
+            if(!subItem.html && subItem.mp3){
+                const match = subItem.mp3.match(/\/([0-9a-f-]+)\.mp3$/);
+                if(match && match[1]){
+                    subItem.html = `https://suno.com/song/${match[1]}`;
+                }
+            }
+        }
+    }
+    return data;
+}
+
+//渲染滚动预览列表
+function renderPreviewList(data){
+    const container = document.getElementById('previewList');
+    let htmlBuf = '';
+    if(!Array.isArray(data) || data.length === 0){
+        container.innerHTML = `<div class="empty-tip">暂无数据</div>`;
+        return;
+    }
+    //遍历所有层级，取出子字典
+    for(const topItem of data){
+        if(!Array.isArray(topItem.array)) continue;
+        for(const sub of topItem.array){
+            if(sub.name2 && sub.html){
+                htmlBuf += `
+                <div class="preview-item">
+                    <a target="_blank" href="${sub.html}">${escapeHtml(sub.name2)}</a>
+                </div>`;
+            }
+        }
+    }
+    if(htmlBuf === ''){
+        container.innerHTML = `<div class="empty-tip">没有可渲染的name2+html数据</div>`;
+    }else{
+        container.innerHTML = htmlBuf;
+    }
+}
+
+//html转义，防止名称里特殊字符破坏页面
+function escapeHtml(str){
+    return String(str)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#039;');
+}
+
+const inputEl = document.getElementById('inputJson');
+const outputEl = document.getElementById('outputJson');
+
+document.getElementById('convertBtn').onclick = ()=>{
+    try{
+        const text = inputEl.value.trim();
+        if(!text){
+            alert("请输入数据或者从下拉选择数据源");
+            return;
+        }
+        const origin = looseParse(text);
+        const result = transformData(origin);
+        outputEl.value = JSON.stringify(result,null,2);
+        renderPreviewList(result);
+    }catch(e){
+        alert("解析错误："+e.message);
+    }
+}
+
+document.getElementById('copyOutputBtn').onclick = async ()=>{
+    if(!outputEl.value) return;
+    await navigator.clipboard.writeText(outputEl.value);
+    alert("已复制输出JSON");
+}
+
+document.getElementById('clearBtn').onclick = ()=>{
+    inputEl.value="";
+    outputEl.value="";
+    sourceSelect.value = "";
+    document.getElementById('previewList').innerHTML = `<div class="empty-tip">执行转换后这里生成歌曲列表</div>`;
+}
+</script>
+</body>
+</html>

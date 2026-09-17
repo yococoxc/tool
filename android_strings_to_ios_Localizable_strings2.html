@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Android XML → iOS Localizable.strings</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,monospace}
+        body{padding:20px;background:#f5f7fa}
+        .container{max-width:1200px;margin:0 auto}
+        h2{margin-bottom:16px;color:#222}
+        .row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+        textarea{width:100%;min-height:420px;padding:12px;font-size:14px;border:1px solid #ccc;border-radius:8px;background:#fff;white-space:pre-wrap}
+        .btns{display:flex;gap:10px;margin-bottom:12px}
+        button{padding:8px 16px;border:none;border-radius:6px;background:#2563eb;color:#fff;font-size:14px;cursor:pointer}
+        button#clear{background:#6b7280}
+        button#copy{background:#059669}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Android strings.xml → iOS Localizable.strings 转换器</h2>
+    <div class="btns">
+        <button id="convertBtn">开始转换</button>
+        <button id="clear">清空</button>
+        <button id="copy">复制输出结果</button>
+    </div>
+    <div class="row">
+        <div>
+            <h4>输入 Android XML</h4>
+            <textarea id="inputXml" placeholder='粘贴：
+<resources>
+    <string name="ch_router_sub">Subwoofer</string>
+</resources>'></textarea>
+        </div>
+        <div>
+            <h4>输出 iOS Localizable.strings</h4>
+            <textarea id="outputStr" readonly></textarea>
+        </div>
+    </div>
+</div>
+
+<script>
+const input = document.getElementById('inputXml');
+const output = document.getElementById('outputStr');
+const convertBtn = document.getElementById('convertBtn');
+const clearBtn = document.getElementById('clear');
+const copyBtn = document.getElementById('copy');
+
+function convertXmlToIos(xmlText){
+    // 匹配<string>块，保留标签之间空白
+    const reg = /(<string name="([^"]+)">(.*?)<\/string>)/gs;
+    let resultText = xmlText;
+
+    // 替换string节点
+    resultText = resultText.replace(reg, function(fullMatch, tagBlock, key, val){
+        // XML实体解码
+        val = val.replaceAll("&quot;", "\"");
+        val = val.replaceAll("&amp;", "&");
+        val = val.replaceAll("&lt;", "<");
+        val = val.replaceAll("&gt;", ">");
+        // %1$s → %1$@
+        val = val.replace(/%(\d+)\$s/g, `%$1$@`);
+        // iOS字符串内双引号转义
+        val = val.replaceAll('"', '\\"');
+        // 内部文本保留换行
+        val = val.replaceAll("\\n", "\n");
+        return `"${key}"="${val}";`;
+    });
+
+    // 移除resources标签
+    resultText = resultText.replace(/<\/?resources>/gi, '');
+
+    // 逐行处理：去除每行开头空格，保留换行
+    const lines = resultText.split('\n');
+    const trimmedLines = lines.map(line => line.trimStart());
+    let finalStr = trimmedLines.join('\n');
+    // 核心：去除整体首尾空白，中间空行保留
+    finalStr = finalStr.trim();
+    return finalStr;
+}
+
+convertBtn.onclick = ()=>{
+    output.value = convertXmlToIos(input.value);
+}
+clearBtn.onclick = ()=>{
+    input.value = "";
+    output.value = "";
+}
+copyBtn.onclick = async ()=>{
+    await navigator.clipboard.writeText(output.value);
+    alert("已复制！");
+}
+</script>
+</body>
+</html>
+<!-- （注：内容由AI生成） -->

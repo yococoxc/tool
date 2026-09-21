@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-    <title id="titleMessage">木子才的歌曲</title>
+    <title id="titleMessage">木子才最新歌曲</title>
     <style>
         body {
             padding: 0;
@@ -79,7 +79,7 @@
 </head>
 <body onclick="bodyAction()" class="bgColor">
     <div class="container">
-        <p id="songInfo" class="textColor songInfo">木子才的新歌曲，共 0 首</p>
+        <p id="songInfo" class="textColor songInfo">木子才最新歌曲，共 0 首</p>
 
         <div class="div1">
             <h3 id="title" class="textColor">请选择歌曲</h3>
@@ -107,20 +107,13 @@
     <script src="https://yococoxc.github.io/tool/data/sunodata3.js"></script>
 
     <script>
-        // ========== 数据源定义：不再依赖多个全局变量，而是基于 dataV3 动态生成视图 ==========
+        // ========== 视图配置：全部基于 dataV3 动态生成 ==========
         const VIEW_CONFIG = [
             {
                 key: 'latest',
                 name: '最新歌曲',
                 filter: null,                    // 不过滤
                 sort: null,                      // 保持原始顺序
-                reverse: false
-            },
-            {
-                key: 'rank2025',
-                name: '2025年全部歌曲排名',
-                filter: item => item.rank2025 > 0,
-                sort: (a, b) => a.rank2025 - b.rank2025,
                 reverse: false
             },
             {
@@ -131,10 +124,42 @@
                 reverse: true                    // 倒序
             },
             {
+                key: 'year2026',
+                name: '2026年全部歌曲',
+                // 顶层子项的 is2026 > 0 表示属于 2026 年的歌，按 is2026 排序
+                filter: item => item.is2026 > 0,
+                sort: (a, b) => a.is2026 - b.is2026,
+                reverse: false
+            },
+            {
+                key: 'year2025',
+                name: '2025年全部歌曲',
+                // 顶层子项的 is2025 > 0 表示属于 2025 年的歌，按 is2025 排序
+                filter: item => item.is2025 > 0,
+                sort: (a, b) => a.is2025 - b.is2025,
+                reverse: false
+            },
+            {
+                key: 'rank2025',
+                name: '2025年全部歌曲排名',
+                // 顶层子项的 rank2025 > 0 表示参与 2025 排名
+                filter: item => item.rank2025 > 0,
+                sort: (a, b) => a.rank2025 - b.rank2025,
+                reverse: false
+            },
+            {
                 key: 'show2025',
                 name: '2025年演唱会',
                 flatten: true                    // 特殊标记：需要扁平化处理
-            }
+            },
+            {
+                key: 'other',
+                name: '其他',
+                // 顶层子项的 rank2025 > 0 表示参与 2025 排名
+                filter: item => item.isOther > 0,
+                sort: null,
+                reverse: false
+            },
         ];
 
         // ========== 全局状态 ==========
@@ -161,7 +186,7 @@
                         group.array.forEach(sub => {
                             if (sub.is2025Show > 0) {
                                 result.push({
-                                    title: sub.name2 || sub.title || group.title,
+                                    title: sub.name || sub.title || group.title,
                                     array: [sub],           // 只包含这一首歌
                                     is2025Show: sub.is2025Show
                                 });
@@ -213,7 +238,7 @@
             }
         }
 
-        // ========== 原有播放控制逻辑（保持兼容） ==========
+        // ========== 播放控制逻辑 ==========
         function handleLoop() {
             loopValue = (loopValue + 1) % 4;
             const names = ['模式全部', '模式歌组', '模式单曲', '模式随机'];
@@ -298,7 +323,6 @@
             // 如果当前条目没有音频，自动往后找
             let track = currentTracks[currentIndex];
             if (!track || track.array.length === 0) {
-                // 向后查找有音频的条目
                 let next = currentIndex;
                 for (let i = 0; i < currentTracks.length; i++) {
                     next = (currentIndex + i + 1) % currentTracks.length;
@@ -315,7 +339,7 @@
             const newIndex = Math.floor(Math.random() * array.length);
             const tempTrack = array[newIndex];
 
-            currentTitle = tempTrack.name2;
+            currentTitle = tempTrack.name;
             currentUrl = './song/data/' + tempTrack.mp3;
 
             player.src = currentUrl;

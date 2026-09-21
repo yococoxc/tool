@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>图片混淆工具</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: #f5f6f8;
+    color: #1f2430;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 32px 16px 56px; -webkit-font-smoothing: antialiased;
+  }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: .5px; color: #1f2430; }
+  .subtitle { color: #7a8293; font-size: 13px; margin: 0 0 26px; text-align: center; line-height: 1.7; }
+
+  /* ============ 拖拽区域 ============ */
+  .drop-zone {
+    width: min(720px, 100%); min-height: 300px;
+    border: 2px dashed #cfd4dd; border-radius: 18px;
+    background: #ffffff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; padding: 36px 24px; cursor: pointer; text-align: center;
+    transition: border-color .2s, background .2s, transform .2s, box-shadow .2s;
+    user-select: none;
+    box-shadow: 0 2px 12px rgba(31, 36, 48, .04);
+  }
+  .drop-zone:hover {
+    border-color: #b6bdc9;
+    background: #fbfbfd;
+    box-shadow: 0 4px 18px rgba(31, 36, 48, .07);
+  }
+  .drop-zone svg { width: 54px; height: 54px; color: #b6bdc9; transition: color .2s, transform .2s; }
+  .drop-zone .main-text { font-size: 16px; font-weight: 600; color: #384154; }
+  .drop-zone .hint { font-size: 12.5px; color: #8b93a7; line-height: 1.8; }
+  .kbd {
+    display: inline-block; padding: 1px 6px; border: 1px solid #d8dde5;
+    border-bottom-width: 2px; border-radius: 5px; font-size: 11.5px;
+    color: #5a6274; background: #f2f4f7;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+  }
+  body.dragging .drop-zone {
+    border-color: #ff6b6b;
+    background: rgba(255, 107, 107, .06);
+    transform: scale(1.012);
+    box-shadow: 0 6px 24px rgba(255, 107, 107, .15);
+  }
+  body.dragging .drop-zone svg { color: #ff6b6b; transform: translateY(-4px); }
+
+  /* ============ 工作区 ============ */
+  .workspace {
+    width: min(1100px, 100%); display: flex; flex-direction: column; gap: 18px;
+    animation: fadeUp .3s ease;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .canvas-card {
+    position: relative;
+    background: #ffffff;
+    background-image:
+      linear-gradient(45deg, #f0f2f5 25%, transparent 25%),
+      linear-gradient(-45deg, #f0f2f5 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #f0f2f5 75%),
+      linear-gradient(-45deg, transparent 75%, #f0f2f5 75%);
+    background-size: 22px 22px;
+    background-position: 0 0, 0 11px, 11px -11px, -11px 0;
+    border: 1px solid #e4e7ec;
+    border-radius: 16px; padding: 18px;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 220px; overflow: hidden;
+    box-shadow: 0 2px 12px rgba(31, 36, 48, .04);
+  }
+  #canvas {
+    max-width: 100%; max-height: 62vh; display: block;
+    border-radius: 8px; box-shadow: 0 8px 28px rgba(31, 36, 48, .12);
+  }
+
+  /* ============ 工具栏 ============ */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  button {
+    font: inherit; font-size: 14px; padding: 10px 20px; border-radius: 10px;
+    border: 1px solid #dcdfe6; background: #ffffff; color: #2b3242;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, transform .1s, filter .15s, box-shadow .15s;
+    box-shadow: 0 1px 3px rgba(31, 36, 48, .05);
+  }
+  button:hover {
+    background: #f7f8fa;
+    border-color: #c8ced8;
+    box-shadow: 0 2px 6px rgba(31, 36, 48, .08);
+  }
+  button:active { transform: scale(.97); }
+  button.primary {
+    background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+    border: none; color: #fff; font-weight: 600;
+    box-shadow: 0 6px 16px rgba(255, 107, 107, .28);
+  }
+  button.primary:hover {
+    filter: brightness(1.06);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, .35);
+  }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+
+  /* ============ 状态栏 ============ */
+  .status {
+    min-height: 20px; text-align: center; font-size: 13px; color: #7a8293;
+    transition: color .2s;
+  }
+  .status.warn { color: #e08c1f; }
+  .status.ok   { color: #2fa76c; }
+  [hidden] { display: none !important; }
+
+  /* ============ 全局拖拽遮罩 ============ */
+  .drop-overlay {
+    position: fixed; inset: 0; z-index: 999; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(245, 246, 248, .85);
+    backdrop-filter: blur(6px);
+    pointer-events: none;
+  }
+  body.dragging .drop-overlay { display: flex; }
+  .drop-overlay-inner {
+    border: 2px dashed #ff6b6b; border-radius: 22px; padding: 46px 74px;
+    text-align: center; color: #ff6b6b; font-size: 18px; font-weight: 600;
+    letter-spacing: 1px; background: rgba(255, 107, 107, .06);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+
+  @media (max-width: 560px) {
+    .drop-zone { min-height: 240px; }
+    button { padding: 9px 15px; font-size: 13px; }
+    h1 { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+  <div class="drop-zone" id="dropZone">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"
+         stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="3"></rect>
+      <circle cx="8.5" cy="8.5" r="1.6"></circle>
+      <path d="M21 15.5l-4.6-4.6a2 2 0 0 0-2.8 0L5 19"></path>
+      <path d="M3 16.5l2.3-2.3a2 2 0 0 1 2.8 0L12 18"></path>
+    </svg>
+    <div class="main-text">拖拽图片到此处</div>
+    <div class="hint">
+      或点击选择文件 · 支持 <span class="kbd">Ctrl</span> + <span class="kbd">V</span> 粘贴<br />
+      支持 PNG / JPG / GIF / WebP / BMP
+    </div>
+    <input type="file" id="fileInput" accept="image/*" hidden />
+  </div>
+
+  <div class="workspace" id="workspace" hidden>
+    <div class="canvas-card">
+      <canvas id="canvas"></canvas>
+    </div>
+    <div class="toolbar">
+      <button class="primary" id="btnObfuscate">🔒 混淆</button>
+      <button id="btnDeobfuscate">🔓 解混淆</button>
+      <button id="btnReset">↩️ 还原</button>
+      <button id="btnDownload">⬇️ 下载</button>
+      <button id="btnChange">🖼️ 换一张</button>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div class="drop-overlay">
+    <div class="drop-overlay-inner">松开鼠标，加载图片</div>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+
+  const MAX_PIXELS_WARN = 16_000_000;
+
+  const dropZone  = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const workspace = document.getElementById('workspace');
+  const canvas    = document.getElementById('canvas');
+  const ctx       = canvas.getContext('2d', { willReadFrequently: true });
+  const statusEl  = document.getElementById('status');
+  const btnObf    = document.getElementById('btnObfuscate');
+  const btnDeobf  = document.getElementById('btnDeobfuscate');
+  const btnReset  = document.getElementById('btnReset');
+  const btnDl     = document.getElementById('btnDownload');
+  const btnChange = document.getElementById('btnChange');
+
+  let originalImageData = null;
+  let hasImage = false;
+  let curveCache = { w: -1, h: -1, coords: null };
+
+  /* ============================================================
+     Gilbert 曲线生成器
+     —— 以下 p 函数直接移植自原版网站源码，未做任何改动
+     ============================================================ */
+  function generateGilbertCurve(w, h) {
+    if (curveCache.w === w && curveCache.h === h && curveCache.coords) {
+      return curveCache.coords;
+    }
+
+    const total = w * h;
+    const coords = new Uint32Array(total * 2);
+    let idx = 0;
+
+    function p(t, n, e, o, c, a) {
+      const m = Math.abs(e + o);
+      const l = Math.abs(c + a);
+      const u = Math.sign(e);
+      const d = Math.sign(o);
+      const L = Math.sign(c);
+      const s = Math.sign(a);
+
+      if (l === 1) {
+        for (let M = 0; M < m; M++) {
+          coords[idx++] = t;
+          coords[idx++] = n;
+          t += u; n += d;
+        }
+        return;
+      }
+      if (m === 1) {
+        for (let M = 0; M < l; M++) {
+          coords[idx++] = t;
+          coords[idx++] = n;
+          t += L; n += s;
+        }
+        return;
+      }
+
+      let hh = Math.floor(e / 2);
+      let gg = Math.floor(o / 2);
+      let ii = Math.floor(c / 2);
+      let ff = Math.floor(a / 2);
+
+      const S = Math.abs(hh + gg);
+      const _ = Math.abs(ii + ff);
+
+      if (2 * m > 3 * l) {
+        if (S % 2 && m > 2) { hh += u; gg += d; }
+        p(t, n, hh, gg, c, a);
+        p(t + hh, n + gg, e - hh, o - gg, c, a);
+      } else {
+        if (_ % 2 && l > 2) { ii += L; ff += s; }
+        p(t, n, ii, ff, hh, gg);
+        p(t + ii, n + ff, e, o, c - ii, a - ff);
+        p(
+          t + (e - u) + (ii - L),
+          n + (o - d) + (ff - s),
+          -ii, -ff,
+          -(e - hh), -(o - gg)
+        );
+      }
+    }
+
+    if (w >= h) {
+      p(0, 0, w, 0, 0, h);
+    } else {
+      p(0, 0, 0, h, w, 0);
+    }
+
+    curveCache = { w, h, coords };
+    return coords;
+  }
+
+  function setStatus(msg, type) {
+    statusEl.textContent = msg;
+    statusEl.className = 'status' + (type ? ' ' + type : '');
+  }
+
+  function loadImageFile(file) {
+    if (!file) return;
+    if (!file.type || !file.type.startsWith('image/')) {
+      setStatus('⚠️ 请拖入图片文件（PNG / JPG / GIF / WebP / BMP）', 'warn');
+      return;
+    }
+    setStatus('⏳ 正在读取图片…');
+
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      try { setupImage(img, file.name); }
+      catch (err) { console.error(err); setStatus('❌ 处理失败：' + err.message, 'warn'); }
+    };
+    img.onerror = function () {
+      URL.revokeObjectURL(url);
+      setStatus('❌ 图片加载失败，文件可能已损坏', 'warn');
+    };
+    img.src = url;
+  }
+
+  function setupImage(img, name) {
+    const w = img.naturalWidth || img.width;
+    const h = img.naturalHeight || img.height;
+    if (!w || !h) { setStatus('❌ 无法获取图片尺寸', 'warn'); return; }
+
+    canvas.width = w; canvas.height = h;
+    ctx.clearRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0);
+
+    originalImageData = ctx.getImageData(0, 0, w, h);
+    curveCache = { w: -1, h: -1, coords: null };
+    hasImage = true;
+
+    dropZone.hidden = true;
+    workspace.hidden = false;
+
+    const nameText = name ? ' · ' + name : '';
+    const sizeText = `${w} × ${h}`;
+    if (w * h > MAX_PIXELS_WARN) {
+      setStatus(`✅ 已加载 ${sizeText}${nameText}　⚠️ 图片较大，处理可能稍慢`, 'warn');
+    } else {
+      setStatus(`✅ 已加载 ${sizeText}${nameText}`, 'ok');
+    }
+  }
+
+  /* ============================================================
+     核心：混淆 / 解混淆
+     ============================================================ */
+  function transform(inverse) {
+    if (!hasImage) return;
+
+    const w = canvas.width;
+    const h = canvas.height;
+    const total = w * h;
+    const t0 = performance.now();
+
+    const srcData = ctx.getImageData(0, 0, w, h).data;
+    const dstData = new Uint8ClampedArray(srcData.length);
+
+    const curve = generateGilbertCurve(w, h);
+    const offset = Math.round(((Math.sqrt(5) - 1) / 2) * total) % total;
+
+    if (!inverse) {
+      // ===== 混淆 =====
+      for (let i = 0; i < total; i++) {
+        const si = i * 2;
+        const sIdx = (curve[si + 1] * w + curve[si]) << 2;
+
+        const di = ((i + offset) % total) * 2;
+        const dIdx = (curve[di + 1] * w + curve[di]) << 2;
+
+        dstData[dIdx]     = srcData[sIdx];
+        dstData[dIdx + 1] = srcData[sIdx + 1];
+        dstData[dIdx + 2] = srcData[sIdx + 2];
+        dstData[dIdx + 3] = srcData[sIdx + 3];
+      }
+    } else {
+      // ===== 解混淆 =====
+      for (let i = 0; i < total; i++) {
+        const si = i * 2;
+        const sIdx = (curve[si + 1] * w + curve[si]) << 2;
+
+        const di = ((i + offset) % total) * 2;
+        const dIdx = (curve[di + 1] * w + curve[di]) << 2;
+
+        dstData[sIdx]     = srcData[dIdx];
+        dstData[sIdx + 1] = srcData[dIdx + 1];
+        dstData[sIdx + 2] = srcData[dIdx + 2];
+        dstData[sIdx + 3] = srcData[dIdx + 3];
+      }
+    }
+
+    ctx.putImageData(new ImageData(dstData, w, h), 0, 0);
+
+    const ms = (performance.now() - t0).toFixed(0);
+    setStatus(
+      inverse
+        ? `🔓 已解混淆（${total.toLocaleString()} 像素，偏移 ${offset}，耗时 ${ms} ms）`
+        : `🔒 已混淆（${total.toLocaleString()} 像素，偏移 ${offset}，耗时 ${ms} ms）`,
+      'ok'
+    );
+  }
+
+  function resetImage() {
+    if (!originalImageData) return;
+    ctx.putImageData(originalImageData, 0, 0);
+    setStatus('↩️ 已还原为原图', 'ok');
+  }
+
+  function downloadImage() {
+    if (!hasImage) return;
+    canvas.toBlob(function (blob) {
+      if (!blob) { setStatus('❌ 导出失败', 'warn'); return; }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'obfuscated_' + Date.now() + '.png';
+      document.body.appendChild(a);
+      a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      setStatus('⬇️ 已开始下载', 'ok');
+    }, 'image/png');
+  }
+
+  /* ================= 拖拽上传 ================= */
+  let dragDepth = 0;
+  window.addEventListener('dragover', e => e.preventDefault());
+  window.addEventListener('drop',     e => e.preventDefault());
+
+  document.addEventListener('dragenter', function (e) {
+    e.preventDefault(); dragDepth++; document.body.classList.add('dragging');
+  });
+  document.addEventListener('dragleave', function (e) {
+    e.preventDefault(); dragDepth--;
+    if (dragDepth <= 0) { dragDepth = 0; document.body.classList.remove('dragging'); }
+  });
+  document.addEventListener('dragover', function (e) {
+    e.preventDefault(); if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+  });
+  document.addEventListener('drop', function (e) {
+    e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging');
+    const dt = e.dataTransfer; if (!dt) return;
+
+    let files = Array.from(dt.files || []);
+    if (files.length === 0 && dt.items) {
+      files = Array.from(dt.items).filter(it => it.kind === 'file')
+        .map(it => it.getAsFile()).filter(Boolean);
+    }
+    if (files.length === 0) { setStatus('⚠️ 未检测到文件', 'warn'); return; }
+
+    const imageFile = files.find(f => f.type && f.type.startsWith('image/'));
+    if (!imageFile) { setStatus('⚠️ 拖入的不是图片文件', 'warn'); return; }
+    loadImageFile(imageFile);
+  });
+
+  /* ================= 点击选择 ================= */
+  dropZone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', function (e) {
+    const f = e.target.files && e.target.files[0];
+    if (f) loadImageFile(f);
+  });
+
+  /* ================= 粘贴上传 ================= */
+  document.addEventListener('paste', function (e) {
+    const items = e.clipboardData && e.clipboardData.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type && items[i].type.startsWith('image/')) {
+        const f = items[i].getAsFile();
+        if (f) { e.preventDefault(); loadImageFile(f); }
+        break;
+      }
+    }
+  });
+
+  /* ================= 按钮绑定 ================= */
+  btnObf.addEventListener('click',    () => transform(false));
+  btnDeobf.addEventListener('click',  () => transform(true));
+  btnReset.addEventListener('click',  resetImage);
+  btnDl.addEventListener('click',     downloadImage);
+  btnChange.addEventListener('click', () => { fileInput.value = ''; fileInput.click(); });
+})();
+</script>
+</body>
+</html>

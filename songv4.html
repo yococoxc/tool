@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title id="titleMessage">木子才的歌曲</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        button, select {
+            padding: 8px 8px;
+            cursor: pointer;
+            margin: 0 5px;
+            border: none;
+            border-radius: 4px;
+        }
+        .bgColor { background-color: #fcfcfc; }
+        .textColor { color: #333333; text-align: center; }
+        .div2 button { border: 1px solid #333333; }
+        .buttonContentLoad {
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .buttonContent {
+            top: 0;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: auto;
+            padding: 10px;
+        }
+        .buttonContent button {
+            margin: 2px 0;
+            padding: 10px 15px;
+            border-bottom: 1px solid #939292;
+            border-radius: 0;
+            background-color: #f8f8f8;
+            text-align: center;
+        }
+        .buttonContent button:hover { background-color: #f0f0f0; }
+        .div1 { height: auto; margin: 20px 0; }
+        .div2 {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            height: auto;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 10px;
+        }
+        .songInfo { margin: 8px 0 0 0; padding: 0; }
+        select { border: 1px solid #ccc; }
+    </style>
+</head>
+<body onclick="bodyAction()" class="bgColor">
+    <div class="container">
+        <p id="songInfo" class="textColor songInfo">木子才的新歌曲，共 0 首</p>
+
+        <div class="div1">
+            <h3 id="title" class="textColor">请选择歌曲</h3>
+            <audio id="player" onended="handleEnded()" controls>
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+
+        <div class="div2">
+            <button class="textColor" onclick="handlePreviousTrack()">上一首</button>
+            <button class="textColor" id="playOrPauseButton">播放</button>
+            <button class="textColor" onclick="handleNextTrack()">下一首</button>
+            <button class="textColor" id="loopButton" onclick="handleLoop()">模式全部</button>
+            <button class="textColor" onclick="playRandomTrack()">抽歌</button>
+            <button class="textColor" id="listButton" onclick="listShowOrHidden()">列表显示</button>
+            <select class="textColor" id="sourceSelect" onchange="switchDataSource()"></select>
+        </div>
+
+        <div class="buttonContentLoad" id="songList" style="display: none;">
+            <div class="buttonContent" id="buttonContent"></div>
+        </div>
+    </div>
+
+    <!-- 只引入一个数据源文件 -->
+    <script src="https://yococoxc.github.io/tool/data/sunodata3.js"></script>
+
+    <script>
+        // ========== 数据源定义：不再依赖多个全局变量，而是基于 dataV3 动态生成视图 ==========
+        const VIEW_CONFIG = [
+            {
+                key: 'latest',
+                name: '最新歌曲',
+                filter: null,                    // 不过滤
+                sort: null,                      // 保持原始顺序
+                reverse: false
+            },
+            {
+                key: 'rank2025',
+                name: '2025年全部歌曲排名',
+                filter: item => item.rank2025 > 0,
+                sort: (a, b) => a.rank2025 - b.rank2025,
+                reverse: false
+            },
+            {
+                key: 'all',
+                name: '全部歌曲',
+                filter: null,
+                sort: null,
+                reverse: true                    // 倒序
+            },
+            {
+                key: 'show2025',
+                name: '2025年演唱会',
+                flatten: true                    // 特殊标记：需要扁平化处理
+            }
+        ];
+
+        // ========== 全局状态 ==========
+        let currentTracks = [];           // 当前视图的歌曲列表
+        let currentViewKey = 'latest';    // 当前视图 key
+        let loopValue = 0;
+        let isFirst = true;
+        let isPlaying = false;
+        const player = document.getElementById('player');
+        let currentTitle = null;
+        let currentIndex = 0;
+        let currentUrl = null;
+
+        // ========== 核心：根据视图配置从 dataV3 生成列表 ==========
+        function buildTrackList(viewKey) {
+            const config = VIEW_CONFIG.find(v => v.key === viewKey);
+            if (!config) return [];
+
+            // 特殊处理：2025年演唱会需要扁平化，提取所有子项中 is2025Show > 0 的歌曲
+            if (config.flatten) {
+                const result = [];
+                dataV3.forEach(group => {
+                    if (group.array) {
+                        group.array.forEach(sub => {
+                            if (sub.is2025Show > 0) {
+                                result.push({
+                                    title: sub.name2 || sub.title || group.title,
+                                    array: [sub],           // 只包含这一首歌
+                                    is2025Show: sub.is2025Show
+                                });
+                            }
+                        });
+                    }
+                });
+                // 按 is2025Show 升序排序
+                result.sort((a, b) => a.is2025Show - b.is2025Show);
+                return result;
+            }
+
+            // 其他视图：常规过滤 + 排序 + 倒序
+            let list = config.filter ? dataV3.filter(config.filter) : [...dataV3];
+
+            if (config.sort) {
+                list.sort(config.sort);
+            }
+
+            if (config.reverse) {
+                list.reverse();
+            }
+
+            return list;
+        }
+
+        // ========== 数据源切换 ==========
+        function switchDataSource() {
+            const selectEl = document.getElementById('sourceSelect');
+            currentViewKey = selectEl.value;
+            currentTracks = buildTrackList(currentViewKey);
+
+            if (!currentTracks || currentTracks.length === 0) {
+                alert(`视图「${selectEl.options[selectEl.selectedIndex].text}」没有歌曲`);
+            }
+
+            // 重置播放状态
+            currentIndex = 0;
+            player.pause();
+            isFirst = true;
+
+            initSongList();
+            if (currentTracks.length > 0) {
+                playNextTrack();
+            } else {
+                document.getElementById('title').innerHTML = '暂无歌曲';
+                document.getElementById('titleMessage').innerHTML = '木子才';
+                document.getElementById('songInfo').innerHTML = '木子才，共 0 首';
+            }
+        }
+
+        // ========== 原有播放控制逻辑（保持兼容） ==========
+        function handleLoop() {
+            loopValue = (loopValue + 1) % 4;
+            const names = ['模式全部', '模式歌组', '模式单曲', '模式随机'];
+            document.getElementById('loopButton').innerHTML = names[loopValue];
+        }
+
+        function listShowOrHidden() {
+            const list = document.getElementById('songList');
+            const btn = document.getElementById('listButton');
+            if (list.style.display === 'none') {
+                list.style.display = 'flex';
+                btn.innerHTML = '列表隐藏';
+            } else {
+                list.style.display = 'none';
+                btn.innerHTML = '列表显示';
+            }
+        }
+
+        function trackButtonAction(e) {
+            const index = parseInt(e.target.getAttribute('data-index'));
+            if (!currentTracks[index] || currentTracks[index].array.length === 0) return;
+            currentIndex = index;
+            playNextTrack();
+            e.stopPropagation();
+        }
+
+        player.addEventListener('play', () => {
+            isPlaying = true;
+            document.getElementById('playOrPauseButton').innerHTML = '暂停';
+        });
+
+        player.addEventListener('pause', () => {
+            isPlaying = false;
+            document.getElementById('playOrPauseButton').innerHTML = '播放';
+        });
+
+        function initSongList() {
+            const buttonContent = document.getElementById('buttonContent');
+            buttonContent.innerHTML = '';
+            let sumTrackNum = 0;
+
+            const config = VIEW_CONFIG.find(v => v.key === currentViewKey);
+            const viewName = config ? config.name : '';
+
+            currentTracks.forEach((track, i) => {
+                const button = document.createElement('button');
+                button.innerHTML = `${i + 1}. ${track.title} (${track.array.length})`;
+                button.className = 'textColor';
+                button.setAttribute('data-index', i);
+                button.onclick = trackButtonAction;
+                buttonContent.appendChild(button);
+                sumTrackNum += track.array.length;
+            });
+
+            requestAnimationFrame(() => {
+                buttonContent.scrollTop = 0;
+            });
+
+            document.getElementById('songInfo').innerHTML = `木子才${viewName}，共 ${sumTrackNum} 首`;
+        }
+
+        function playRandomTrack() {
+            if (currentTracks.length === 0) return;
+            let attempts = 0;
+            do {
+                currentIndex = Math.floor(Math.random() * currentTracks.length);
+                attempts++;
+            } while (currentTracks[currentIndex].array.length === 0 && attempts < 50);
+            playNextTrack();
+        }
+
+        function playNextTrack() {
+            if (isFirst) {
+                document.getElementById('playOrPauseButton').innerHTML = '播放';
+            } else {
+                document.getElementById('playOrPauseButton').innerHTML = '暂停';
+            }
+            isFirst = false;
+
+            if (currentTracks.length === 0) return;
+
+            // 如果当前条目没有音频，自动往后找
+            let track = currentTracks[currentIndex];
+            if (!track || track.array.length === 0) {
+                // 向后查找有音频的条目
+                let next = currentIndex;
+                for (let i = 0; i < currentTracks.length; i++) {
+                    next = (currentIndex + i + 1) % currentTracks.length;
+                    if (currentTracks[next].array.length > 0) {
+                        currentIndex = next;
+                        track = currentTracks[currentIndex];
+                        break;
+                    }
+                }
+                if (!track || track.array.length === 0) return;
+            }
+
+            const array = track.array;
+            const newIndex = Math.floor(Math.random() * array.length);
+            const tempTrack = array[newIndex];
+
+            currentTitle = tempTrack.name2;
+            currentUrl = './song/data/' + tempTrack.mp3;
+
+            player.src = currentUrl;
+            player.play();
+            isPlaying = true;
+
+            const config = VIEW_CONFIG.find(v => v.key === currentViewKey);
+            const viewName = config ? config.name : '';
+            document.getElementById('titleMessage').innerHTML = `木子才${viewName} 《${currentTitle}》`;
+            document.getElementById('title').innerHTML = currentTitle;
+        }
+
+        function handlePreviousTrack() {
+            if (loopValue === 3) { playRandomTrack(); return; }
+            if (currentTracks.length === 0) return;
+
+            let attempts = 0;
+            do {
+                currentIndex = (currentIndex - 1 + currentTracks.length) % currentTracks.length;
+                attempts++;
+            } while (currentTracks[currentIndex].array.length === 0 && attempts < currentTracks.length);
+            playNextTrack();
+        }
+
+        function handleNextTrack() {
+            if (loopValue === 3) { playRandomTrack(); return; }
+            if (currentTracks.length === 0) return;
+
+            let attempts = 0;
+            do {
+                currentIndex = (currentIndex + 1) % currentTracks.length;
+                attempts++;
+            } while (currentTracks[currentIndex].array.length === 0 && attempts < currentTracks.length);
+            playNextTrack();
+        }
+
+        function handleEnded() {
+            if (loopValue === 3) { playRandomTrack(); return; }
+            if (loopValue === 1) { playNextTrack(); return; }
+            if (loopValue === 2) {
+                player.src = currentUrl;
+                player.play();
+                isPlaying = true;
+                return;
+            }
+            handleNextTrack();
+        }
+
+        document.getElementById('playOrPauseButton').addEventListener('click', function() {
+            isFirst = false;
+            if (isPlaying) {
+                player.pause();
+                isPlaying = false;
+                document.getElementById('playOrPauseButton').innerHTML = '播放';
+            } else {
+                if (!player.src || player.ended) {
+                    playNextTrack();
+                } else {
+                    player.play();
+                    isPlaying = true;
+                }
+                document.getElementById('playOrPauseButton').innerHTML = '暂停';
+            }
+        });
+
+        function bodyAction() {
+            if (!isFirst) return;
+            isFirst = false;
+            if (currentTracks.length > 0) {
+                playNextTrack();
+            }
+        }
+
+        // ========== 页面初始化 ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            // 生成视图下拉框
+            const selectEl = document.getElementById('sourceSelect');
+            selectEl.innerHTML = '';
+            VIEW_CONFIG.forEach((view, idx) => {
+                const option = document.createElement('option');
+                option.value = view.key;
+                option.textContent = view.name;
+                if (idx === 0) option.selected = true;
+                selectEl.appendChild(option);
+            });
+
+            // 默认加载第一个视图
+            currentViewKey = VIEW_CONFIG[0].key;
+            currentTracks = buildTrackList(currentViewKey);
+            initSongList();
+            if (currentTracks.length > 0) {
+                playNextTrack();
+            }
+            isFirst = true;
+        });
+    </script>
+</body>
+</html>

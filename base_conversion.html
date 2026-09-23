@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>进制转换器</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f7f4ec 0%, #f1ede2 100%);
+    color: #3f3a33;
+    font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 36px 16px;
+  }
+  .app { width: 100%; max-width: 840px; }
+  h1 { font-size: 21px; font-weight: 600; margin: 0 0 6px; color: #3a352d; }
+  .sub { color: #8c8477; font-size: 13px; margin: 0 0 18px; }
+
+  textarea {
+    width: 100%;
+    min-height: 110px;
+    resize: vertical;
+    background: #fffdf8;
+    color: #3f3a33;
+    border: 1px solid #e3dccd;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 15px;
+    line-height: 1.65;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  textarea::placeholder { color: #b8b0a0; }
+  textarea:focus {
+    border-color: #8fa681;
+    box-shadow: 0 0 0 3px rgba(143, 166, 129, .18);
+  }
+
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  button.base {
+    padding: 9px 18px;
+    border-radius: 999px;
+    border: 1px solid #e3dccd;
+    background: #fffdf8;
+    color: #6b6355;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all .15s;
+    font-family: inherit;
+  }
+  button.base:hover {
+    border-color: #8fa681;
+    color: #3f3a33;
+    background: #fbfaf4;
+  }
+  button.base.active {
+    background: #8fa681;
+    border-color: #8fa681;
+    color: #ffffff;
+    box-shadow: 0 3px 10px rgba(143, 166, 129, .35);
+  }
+  button.base.special {
+    border-style: dashed;
+  }
+  button.base.special.active {
+    border-style: solid;
+    background: #7d9bb0;
+    border-color: #7d9bb0;
+    box-shadow: 0 3px 10px rgba(125, 155, 176, .35);
+  }
+
+  .out-box {
+    background: #fffdf8;
+    border: 1px solid #e3dccd;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(120, 110, 90, .06);
+  }
+  .out-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid #ece6d9;
+    background: #faf8f2;
+    font-size: 13px;
+    color: #8c8477;
+  }
+  button.copy {
+    background: #fffdf8;
+    border: 1px solid #e3dccd;
+    color: #8c8477;
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: .15s;
+  }
+  button.copy:hover {
+    border-color: #8fa681;
+    color: #4a7c59;
+    background: #fbfaf4;
+  }
+
+  .out-row {
+    padding: 12px 16px;
+    border-bottom: 1px solid #ece6d9;
+  }
+  .out-row:last-child { border-bottom: none; }
+  .out-row .tag {
+    display: block;
+    font-size: 11.5px;
+    color: #a39a8a;
+    margin-bottom: 6px;
+    letter-spacing: .3px;
+  }
+  .out-row pre {
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 15px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #4a7c59;
+  }
+  .out-row pre.muted { color: #b8b0a0; }
+
+  .tip {
+    margin: 14px 2px 0;
+    color: #8c8477;
+    font-size: 12.5px;
+    line-height: 1.8;
+  }
+  .tip code {
+    background: #efeadd;
+    border: 1px solid #e3dccd;
+    border-radius: 5px;
+    padding: 1px 5px;
+    color: #6b6355;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>进制转换器</h1>
+  <p class="sub">输入内容后，点击下方按钮，即可输出对应进制的表示。</p>
+
+  <textarea id="input" placeholder="例如：255, 1024 0xFF&#10;多个数据可用空格、逗号、分号、换行等分隔"></textarea>
+
+  <div class="buttons" id="buttons"></div>
+
+  <div class="out-box">
+    <div class="out-head">
+      <span id="label">16 进制结果</span>
+      <button id="copy" class="copy">复制</button>
+    </div>
+
+    <div class="out-row">
+      <span class="tag">空格分隔</span>
+      <pre id="output" class="muted">（等待输入…）</pre>
+    </div>
+    <div class="out-row">
+      <span class="tag">逗号+空格分隔</span>
+      <pre id="outputComma" class="muted">（等待输入…）</pre>
+    </div>
+  </div>
+
+  <p class="tip">
+    提示：纯数字默认按 <b>十进制</b> 解析，支持 <code>0x</code> / <code>0b</code> / <code>0o</code> 前缀；
+    含 A–F 字母的会按十六进制解析；其他内容按字符的 Unicode 码位转换。<br />
+    补零规则：<code>16 进制</code>补到 2 位的倍数，<code>4 进制</code>补到 4 位的倍数，<code>2 进制</code>补到 8 位的倍数（按字节对齐）。<br />
+    <b>ASCII码</b>：把每个字符转成 ASCII 数字。<b>ASCII字符</b>：把数字转回字符（多个数字之间用分隔符分开）。
+  </p>
+</div>
+
+<script>
+(function () {
+  /* ---------- 各进制字母表 ---------- */
+  const ALPHABETS = {
+    64: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/',
+    32: '0123456789ABCDEFGHIJKLMNOPQRSTUV',
+    16: '0123456789ABCDEF',
+    10: '0123456789',
+    8:  '01234567',
+    4:  '0123',
+    2:  '01'
+  };
+
+  /* ---------- 按钮配置 ---------- */
+  const BUTTON_CONFIG = [
+    { type: 'base', base: 64, label: '64进制' },
+    { type: 'base', base: 32, label: '32进制' },
+    { type: 'base', base: 16, label: '16进制' },
+    { type: 'base', base: 10, label: '10进制' },
+    { type: 'base', base: 8,  label: '8进制' },
+    { type: 'base', base: 4,  label: '4进制' },
+    { type: 'base', base: 2,  label: '2进制' },
+    { type: 'ascii-code', label: 'ASCII码',  special: true },
+    { type: 'ascii-char', label: 'ASCII字符', special: true }
+  ];
+
+  /* ---------- 补零分组：每个"字节"占多少位 ---------- */
+  const GROUP = { 16: 2, 4: 4, 2: 8 };
+
+  /* ---------- 元素 ---------- */
+  const inputEl       = document.getElementById('input');
+  const outputEl      = document.getElementById('output');
+  const outputCommaEl = document.getElementById('outputComma');
+  const buttonsEl     = document.getElementById('buttons');
+  const labelEl       = document.getElementById('label');
+  const copyBtn       = document.getElementById('copy');
+
+  /* ---------- 当前模式 ---------- */
+  let currentMode = { type: 'base', base: 16 };
+
+  /* ---------- 生成按钮 ---------- */
+  BUTTON_CONFIG.forEach(function (cfg) {
+    const btn = document.createElement('button');
+    btn.className = 'base' + (cfg.special ? ' special' : '');
+    btn.textContent = cfg.label;
+    btn.dataset.type = cfg.type;
+    if (cfg.type === 'base') btn.dataset.base = cfg.base;
+    btn.addEventListener('click', function () {
+      if (cfg.type === 'base') {
+        currentMode = { type: 'base', base: cfg.base };
+      } else {
+        currentMode = { type: cfg.type };
+      }
+      update();
+    });
+    buttonsEl.appendChild(btn);
+  });
+
+  /* ---------- BigInt -> 目标进制字符串（含补零） ---------- */
+  function toBase(num, base) {
+    const alpha = ALPHABETS[base];
+    const neg = num < 0n;
+    let n = neg ? -num : num;
+
+    let digits = '0';
+    if (n > 0n) {
+      const B = BigInt(base);
+      digits = '';
+      while (n > 0n) {
+        digits = alpha[Number(n % B)] + digits;
+        n /= B;
+      }
+    }
+
+    // 按字节对齐补前导 0
+    const unit = GROUP[base];
+    if (unit && digits.length % unit !== 0) {
+      digits = '0'.repeat(unit - (digits.length % unit)) + digits;
+    }
+
+    return (neg ? '-' : '') + digits;
+  }
+
+  /* ---------- 构造 BigInt（带符号） ---------- */
+  function mk(sign, digits, radix) {
+    const prefix = radix === 16 ? '0x' : radix === 8 ? '0o' : radix === 2 ? '0b' : '';
+    let v = BigInt(prefix + digits);
+    return sign === '-' ? -v : v;
+  }
+
+  /* ---------- 解析单个 token，返回 BigInt 或 null ---------- */
+  function parseToken(tok) {
+    let m;
+    if ((m = /^([+-]?)0[xX]([0-9a-fA-F]+)$/.exec(tok))) return mk(m[1], m[2], 16);
+    if ((m = /^([+-]?)0[bB]([01]+)$/.exec(tok)))       return mk(m[1], m[2], 2);
+    if ((m = /^([+-]?)0[oO]([0-7]+)$/.exec(tok)))      return mk(m[1], m[2], 8);
+
+    if (/^[+-]?\d+$/.test(tok)) return BigInt(tok);          // 十进制
+
+    if (/^[+-]?[0-9A-Fa-f]+$/.test(tok)) {                    // 含字母 -> 十六进制
+      const sign = /^[+-]/.test(tok) ? tok[0] : '';
+      const body = sign ? tok.slice(1) : tok;
+      return mk(sign, body, 16);
+    }
+    return null;
+  }
+
+  /* ---------- 分隔符：空格 / 逗号 / 顿号 / 分号 / 竖线 / 换行 ---------- */
+  const SEP = /[\s,，、;；|]+/;
+
+  /* ---------- 进制转换：返回结果数组 ---------- */
+  function convertToBase(text, base) {
+    const tokens = text.split(SEP).filter(function (t) { return t.length > 0; });
+    if (!tokens.length) return [];
+
+    const out = [];
+    tokens.forEach(function (tok) {
+      const val = parseToken(tok);
+      if (val !== null) {
+        out.push(toBase(val, base));
+      } else {
+        Array.from(tok).forEach(function (ch) {
+          out.push(toBase(BigInt(ch.codePointAt(0)), base));
+        });
+      }
+    });
+    return out;
+  }
+
+  /* ---------- ASCII码：字符 → 数字 ---------- */
+  function convertToAsciiCode(text) {
+    const out = [];
+    // 用 Array.from 按码点遍历，避免 emoji 被拆坏
+    Array.from(text).forEach(function (ch) {
+      if (ch === '\r') return;           // 忽略回车
+      out.push(String(ch.codePointAt(0)));
+    });
+    return out;
+  }
+
+  /* ---------- ASCII字符：数字 → 字符 ---------- */
+  function convertToAsciiChar(text) {
+    const tokens = text.split(SEP).filter(function (t) { return t.length > 0; });
+    if (!tokens.length) return [];
+
+    let str = '';
+    tokens.forEach(function (tok) {
+      const val = parseToken(tok);
+      if (val === null) return;
+      const n = Number(val);
+      if (!Number.isFinite(n) || n < 0 || n > 0x10FFFF) return;
+      try { str += String.fromCodePoint(n); } catch (e) {}
+    });
+    return [str];
+  }
+
+  /* ---------- 空状态 ---------- */
+  function setEmpty() {
+    outputEl.textContent = '（等待输入…）';
+    outputEl.classList.add('muted');
+    outputCommaEl.textContent = '（等待输入…）';
+    outputCommaEl.classList.add('muted');
+  }
+
+  /* ---------- 刷新界面 ---------- */
+  function update() {
+    /* 按钮高亮 */
+    Array.prototype.forEach.call(buttonsEl.children, function (btn) {
+      const type = btn.dataset.type;
+      let active = false;
+      if (currentMode.type === 'base' && type === 'base') {
+        active = Number(btn.dataset.base) === currentMode.base;
+      } else if (currentMode.type === type) {
+        active = true;
+      }
+      btn.classList.toggle('active', active);
+    });
+
+    /* 标题 */
+    if (currentMode.type === 'base') {
+      labelEl.textContent = currentMode.base + ' 进制结果';
+    } else if (currentMode.type === 'ascii-code') {
+      labelEl.textContent = 'ASCII 码（字符 → 数字）';
+    } else {
+      labelEl.textContent = 'ASCII 字符（数字 → 字符）';
+    }
+
+    /* 空输入 */
+    const text = inputEl.value;
+    if (!text.trim()) { setEmpty(); return; }
+
+    /* 转换 */
+    let list;
+    if (currentMode.type === 'base') {
+      list = convertToBase(text, currentMode.base);
+    } else if (currentMode.type === 'ascii-code') {
+      list = convertToAsciiCode(text);
+    } else {
+      list = convertToAsciiChar(text);
+    }
+
+    if (!list.length) { setEmpty(); return; }
+
+    /* 输出 */
+    outputEl.textContent = list.join(' ');
+    outputEl.classList.remove('muted');
+    outputCommaEl.textContent = list.join(', ');
+    outputCommaEl.classList.remove('muted');
+  }
+
+  /* ---------- 事件绑定 ---------- */
+  inputEl.addEventListener('input', update);
+
+  copyBtn.addEventListener('click', function () {
+    const txt = outputEl.textContent;
+    if (!txt || outputEl.classList.contains('muted')) return;
+    const done = function () {
+      copyBtn.textContent = '已复制 ✓';
+      setTimeout(function () { copyBtn.textContent = '复制'; }, 1200);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(done, done);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = txt;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      done();
+    }
+  });
+
+  /* ---------- 初始化 ---------- */
+  update();
+})();
+</script>
+</body>
+</html>

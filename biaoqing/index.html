@@ -54,7 +54,7 @@
   .waterfall{
     max-width:1280px;margin:0 auto;
     padding:16px 18px 60px;
-    column-width:170px;      /* 瀑布流核心：多列自适应 */
+    column-width:170px;
     column-gap:12px;
   }
   .card{
@@ -108,7 +108,6 @@
     user-select:none;
     box-shadow:0 1px 4px rgba(0,0,0,.12);
   }
-  /* 动图（GIF / APNG）用主题色高亮，一眼可辨 */
   .fmt-badge.is-anim{
     background:rgba(255,138,61,.95);
     box-shadow:0 2px 8px rgba(220,120,50,.4);
@@ -483,11 +482,6 @@
   countEl.textContent = images.length ? images.length + ' 张' : '暂无图片';
 
   /* ============== 工具：生成缩略图地址 ============== */
-  /**
-   * a.gif        -> a__mini.gif
-   * a.gif?v=1    -> a__mini.gif?v=1
-   * a/b.jpeg#x   -> a/b__mini.jpeg#x
-   */
   function miniUrl(src) {
     var i = src.search(/[?#]/);
     var base = i > -1 ? src.slice(0, i) : src;
@@ -495,10 +489,10 @@
 
     var slash = base.lastIndexOf('/');
     var dot   = base.lastIndexOf('.');
-    if (dot > slash + 1) {                       // 存在扩展名
+    if (dot > slash + 1) {
       return base.slice(0, dot) + MINI_SUFFIX + base.slice(dot) + rest;
     }
-    return base + MINI_SUFFIX + rest;            // 无扩展名兜底
+    return base + MINI_SUFFIX + rest;
   }
 
   /* ============== 工具：解析图片格式 ============== */
@@ -512,7 +506,7 @@
       var ext = base.slice(dot + 1).toLowerCase();
       if (/^[a-z0-9]{1,6}$/.test(ext)) return ext.toUpperCase();
     }
-    return '';                                   // 无扩展名则不显示徽章
+    return '';
   }
 
   /* ==================== 1) 渲染瀑布流 ==================== */
@@ -537,8 +531,8 @@
     /* ---- 缩略图 ---- */
     var img = document.createElement('img');
     img.alt = '图片 ' + (i + 1);
-    img.loading = 'lazy';        // 懒加载，首屏极快
-    img.decoding = 'async';      // 异步解码，不阻塞主线程
+    img.loading = 'lazy';
+    img.decoding = 'async';
     img.draggable = false;
     img.referrerPolicy = 'no-referrer';
 
@@ -547,7 +541,6 @@
     });
 
     img.addEventListener('error', function () {
-      // 缩略图缺失时自动回退到原图，再失败才标记错误
       if (img.dataset.fallback === '1') {
         card.classList.add('loaded', 'failed');
         return;
@@ -556,7 +549,7 @@
       img.src = src;
     });
 
-    img.src = thumb;             // 首页只请求缩略图
+    img.src = thumb;
 
     var btn = document.createElement('button');
     btn.type = 'button';
@@ -564,7 +557,7 @@
     btn.textContent = '复制';
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
-      copyImage(src, btn);       // 复制始终是原图
+      copyImage(src, btn);
     });
 
     card.appendChild(img);
@@ -574,7 +567,6 @@
       openLightbox(src, thumb);
     });
 
-    // 悬停时静默预取原图，点开通常瞬间完成
     card.addEventListener('mouseenter', function () {
       preload(src);
     }, { once: true });
@@ -582,7 +574,7 @@
     frag.appendChild(card);
   });
 
-  waterfall.appendChild(frag);   // 一次性插入，减少重排
+  waterfall.appendChild(frag);
 
   /* ==================== 2) 原图预取 ==================== */
   var preloaded = Object.create(null);
@@ -594,39 +586,65 @@
     im.src = src;
   }
 
-  /* ==================== 3) 灯箱 ==================== */
+  /* ==================== 3) 灯箱（已修复原图加载） ==================== */
   function openLightbox(src, thumb) {
     currentSrc   = src;
     currentThumb = thumb;
     var token = ++lbToken;
 
-    delete lbImg.dataset.fallback;   // 重置回退标记
-    lbStatus.textContent = '';
-    lbImg.src = thumb;               // 先用缩略图顶上，秒开
-
     lightbox.classList.add('open');
     lightbox.setAttribute('aria-hidden', 'false');
     document.documentElement.style.overflow = 'hidden';
 
-    // 后台加载原图，完成后无缝替换
+    var useThumb = thumb && thumb !== src;
+
+    /* --- 清理 lbImg 旧状态 --- */
+    lbImg.onload  = null;
+    lbImg.onerror = null;
+    lbImg.removeAttribute('src');
+
+    /* --- 先显示缩略图占位（如果和原图不同） --- */
+    if (useThumb) {
+      lbImg.onerror = function () {
+        lbImg.onerror = null;
+        lbImg.removeAttribute('src');
+        lbStatus.textContent = '缩略图加载失败，原图加载中…';
+      };
+      lbImg.src = thumb;
+      lbStatus.textContent = '原图加载中…';
+    } else {
+      lbStatus.textContent = '加载中…';
+    }
+
+    /* --- 后台加载原图，成功后替换 --- */
     var full = new Image();
     full.decoding = 'async';
     full.onload = function () {
-      if (token !== lbToken) return;  // 已切换到别的图，丢弃
-      lbImg.src = src;
+      if (token !== lbToken) return;     // 已切换到别的图，丢弃
+      lbImg.onload  = null;
+      lbImg.onerror = null;
+      lbImg.src = src;                   // 原图已缓存，立即显示
       lbStatus.textContent = '';
     };
     full.onerror = function () {
       if (token !== lbToken) return;
-      lbStatus.textContent = '原图加载失败，当前为缩略图';
+      lbImg.onerror = null;
+      var showingThumb = useThumb && lbImg.getAttribute('src') === thumb;
+      if (showingThumb) {
+        lbStatus.textContent = '原图加载失败，显示缩略图';
+      } else {
+        lbImg.removeAttribute('src');
+        lbStatus.textContent = '图片加载失败';
+      }
     };
-    lbStatus.textContent = '高清原图加载中…';
     full.src = src;
   }
 
   function closeLightbox() {
     if (!lightbox.classList.contains('open')) return;
-    lbToken++;                        // 让未完成的加载回调失效
+    lbToken++;
+    lbImg.onload  = null;
+    lbImg.onerror = null;
     lightbox.classList.remove('open');
     lightbox.setAttribute('aria-hidden', 'true');
     document.documentElement.style.overflow = '';
@@ -646,14 +664,7 @@
     if (currentSrc) window.open(currentSrc, '_blank', 'noopener');
   });
   lbCopy.addEventListener('click', function () {
-    if (currentSrc) copyImage(currentSrc, lbCopy);   // 复制原图
-  });
-
-  // 缩略图本身也打不开时，直接回退到原图
-  lbImg.addEventListener('error', function () {
-    if (lbImg.dataset.fallback === '1') return;
-    lbImg.dataset.fallback = '1';
-    if (currentSrc) lbImg.src = currentSrc;
+    if (currentSrc) copyImage(currentSrc, lbCopy);
   });
 
   /* ==================== 4) 复制图片（原图） ==================== */
@@ -683,12 +694,6 @@
     });
   }
 
-  /**
-   * 取到 PNG Blob：
-   *  1) 优先 fetch 原始数据（同源 / 有 CORS 头时最快，且命中缓存不重复下载）
-   *  2) 非 PNG 格式（jpg/gif/webp…）用 canvas 转 PNG ——
-   *     剪贴板多数浏览器只认 image/png，GIF 会取第一帧
-   */
   function getPngBlob(src) {
     var raw = null;
 
@@ -698,7 +703,7 @@
         return res.blob();
       })
       .then(function (blob) { raw = blob; })
-      .catch(function () { raw = null; })     // 跨域无 CORS 头时走兜底
+      .catch(function () { raw = null; })
       .then(function () {
         if (raw && raw.type === 'image/png') return raw;
 
@@ -736,7 +741,7 @@
             blob ? resolve(blob) : reject(new Error('toBlob 返回空'));
           }, 'image/png');
         } catch (e) {
-          reject(e);   // 画布被跨域污染时会走到这里
+          reject(e);
         }
       };
 

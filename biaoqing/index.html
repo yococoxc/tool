@@ -94,8 +94,28 @@
     font-size:12px;color:var(--muted);
   }
 
+  /* ---------- 左上角格式徽章 ---------- */
+  .fmt-badge{
+    position:absolute;top:8px;left:8px;z-index:2;
+    font-size:10.5px;font-weight:700;
+    line-height:1;letter-spacing:.6px;
+    padding:5px 8px;border-radius:7px;
+    color:#fff;
+    background:rgba(74,59,47,.58);
+    -webkit-backdrop-filter:blur(4px);
+    backdrop-filter:blur(4px);
+    pointer-events:none;
+    user-select:none;
+    box-shadow:0 1px 4px rgba(0,0,0,.12);
+  }
+  /* 动图（GIF / APNG）用主题色高亮，一眼可辨 */
+  .fmt-badge.is-anim{
+    background:rgba(255,138,61,.95);
+    box-shadow:0 2px 8px rgba(220,120,50,.4);
+  }
+
   .copy-btn{
-    position:absolute;top:8px;right:8px;
+    position:absolute;top:8px;right:8px;z-index:2;
     border:0;border-radius:999px;
     padding:6px 12px;
     font:inherit;font-size:12px;line-height:1;
@@ -118,7 +138,7 @@
     position:fixed;inset:0;z-index:100;
     display:flex;flex-direction:column;
     align-items:center;justify-content:center;
-    gap:16px;padding:24px;
+    gap:14px;padding:24px;
     background:rgba(44,30,20,.74);
     -webkit-backdrop-filter:blur(8px);
     backdrop-filter:blur(8px);
@@ -128,8 +148,8 @@
   .lightbox.open{opacity:1;visibility:visible;}
   .lightbox img{
     max-width:92vw;
-    max-height:calc(100vh - 160px);
-    max-height:calc(100dvh - 160px);
+    max-height:calc(100vh - 190px);
+    max-height:calc(100dvh - 190px);
     object-fit:contain;
     border-radius:12px;
     background:#fff;
@@ -138,6 +158,11 @@
     transition:transform .26s cubic-bezier(.2,.8,.3,1);
   }
   .lightbox.open img{transform:scale(1);}
+  .lb-status{
+    font-size:12px;color:rgba(255,255,255,.72);
+    min-height:16px;letter-spacing:.3px;
+    text-align:center;
+  }
   .lb-bar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
   .lb-bar button{
     font:inherit;font-size:13px;
@@ -177,7 +202,7 @@
     <span class="logo">😄</span>
     <h1>表情图片展示</h1>
     <span class="count" id="count"></span>
-    <span class="hint">点击放大 · 悬停复制</span>
+    <span class="hint">点击看原图 · 悬停复制</span>
   </div>
 </header>
 
@@ -185,8 +210,9 @@
 
 <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true">
   <img id="lbImg" alt="图片预览">
+  <div class="lb-status" id="lbStatus"></div>
   <div class="lb-bar">
-    <button type="button" class="primary" id="lbCopy">复制图片</button>
+    <button type="button" class="primary" id="lbCopy">复制原图</button>
     <button type="button" id="lbOpen">新标签打开</button>
     <button type="button" id="lbClose">关闭</button>
   </div>
@@ -199,8 +225,13 @@
   'use strict';
 
   /* =========================================================
-   *  1. 数据源：把你自己的图片地址替换进来即可
-   *     支持 png / jpg / gif / webp / svg / avif ... 任意浏览器能显示的格式
+   *  1. 数据源：把图片地址替换成你自己的即可
+   *     支持 png / jpg / gif / webp / svg / avif ……
+   *
+   *  2. 缩略图命名规则：
+   *     原图  https://x.com/a/b.gif
+   *     缩略  https://x.com/a/b__mini.gif
+   *     后缀与 query / hash 都会自动保留，规则可改 MINI_SUFFIX
    * ========================================================= */
   var images = [
   "00179036edad86781f3f9545d76dcbdc.jpg",
@@ -429,29 +460,81 @@
   "魔法未来10th.png",
   "魔法未来1th.jpeg",
   "黄色的怪兽.gif"
-];
+  ];
+
+  var MINI_SUFFIX = '__mini';                       // 缩略图后缀
+  var ANIM_EXT    = /^(GIF|APNG|WEBP)$/;            // 视为“动图”高亮的格式
 
   /* ========================= DOM ========================= */
   var waterfall = document.getElementById('waterfall');
   var countEl   = document.getElementById('count');
   var lightbox  = document.getElementById('lightbox');
   var lbImg     = document.getElementById('lbImg');
+  var lbStatus  = document.getElementById('lbStatus');
   var lbCopy    = document.getElementById('lbCopy');
   var lbOpen    = document.getElementById('lbOpen');
   var lbClose   = document.getElementById('lbClose');
   var toastEl   = document.getElementById('toast');
 
-  var currentSrc = '';
+  var currentSrc   = '';   // 灯箱当前原图
+  var currentThumb = '';   // 灯箱当前缩略图
+  var lbToken      = 0;    // 防止快速切换时旧回调覆盖
 
   countEl.textContent = images.length ? images.length + ' 张' : '暂无图片';
+
+  /* ============== 工具：生成缩略图地址 ============== */
+  /**
+   * a.gif        -> a__mini.gif
+   * a.gif?v=1    -> a__mini.gif?v=1
+   * a/b.jpeg#x   -> a/b__mini.jpeg#x
+   */
+  function miniUrl(src) {
+    var i = src.search(/[?#]/);
+    var base = i > -1 ? src.slice(0, i) : src;
+    var rest = i > -1 ? src.slice(i) : '';
+
+    var slash = base.lastIndexOf('/');
+    var dot   = base.lastIndexOf('.');
+    if (dot > slash + 1) {                       // 存在扩展名
+      return base.slice(0, dot) + MINI_SUFFIX + base.slice(dot) + rest;
+    }
+    return base + MINI_SUFFIX + rest;            // 无扩展名兜底
+  }
+
+  /* ============== 工具：解析图片格式 ============== */
+  function extOf(src) {
+    var i = src.search(/[?#]/);
+    var base = i > -1 ? src.slice(0, i) : src;
+
+    var slash = base.lastIndexOf('/');
+    var dot   = base.lastIndexOf('.');
+    if (dot > slash + 1) {
+      var ext = base.slice(dot + 1).toLowerCase();
+      if (/^[a-z0-9]{1,6}$/.test(ext)) return ext.toUpperCase();
+    }
+    return '';                                   // 无扩展名则不显示徽章
+  }
 
   /* ==================== 1) 渲染瀑布流 ==================== */
   var frag = document.createDocumentFragment();
 
   images.forEach(function (src, i) {
+    var thumb = miniUrl(src);
+
     var card = document.createElement('figure');
     card.className = 'card';
 
+    /* ---- 左上角格式徽章 ---- */
+    var fmt = extOf(src);
+    if (fmt) {
+      var badge = document.createElement('span');
+      badge.className = 'fmt-badge' + (ANIM_EXT.test(fmt) ? ' is-anim' : '');
+      badge.textContent = fmt;
+      badge.title = '格式：' + fmt;
+      card.appendChild(badge);
+    }
+
+    /* ---- 缩略图 ---- */
     var img = document.createElement('img');
     img.alt = '图片 ' + (i + 1);
     img.loading = 'lazy';        // 懒加载，首屏极快
@@ -461,13 +544,19 @@
 
     img.addEventListener('load', function () {
       card.classList.add('loaded');
-    }, { once: true });
+    });
 
     img.addEventListener('error', function () {
-      card.classList.add('loaded', 'failed');
-    }, { once: true });
+      // 缩略图缺失时自动回退到原图，再失败才标记错误
+      if (img.dataset.fallback === '1') {
+        card.classList.add('loaded', 'failed');
+        return;
+      }
+      img.dataset.fallback = '1';
+      img.src = src;
+    });
 
-    img.src = src;
+    img.src = thumb;             // 首页只请求缩略图
 
     var btn = document.createElement('button');
     btn.type = 'button';
@@ -475,29 +564,69 @@
     btn.textContent = '复制';
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
-      copyImage(src, btn);
+      copyImage(src, btn);       // 复制始终是原图
     });
 
     card.appendChild(img);
     card.appendChild(btn);
-    card.addEventListener('click', function () { openLightbox(src); });
+
+    card.addEventListener('click', function () {
+      openLightbox(src, thumb);
+    });
+
+    // 悬停时静默预取原图，点开通常瞬间完成
+    card.addEventListener('mouseenter', function () {
+      preload(src);
+    }, { once: true });
 
     frag.appendChild(card);
   });
 
   waterfall.appendChild(frag);   // 一次性插入，减少重排
 
-  /* ==================== 2) 灯箱 ==================== */
-  function openLightbox(src) {
-    currentSrc = src;
-    lbImg.src = src;
+  /* ==================== 2) 原图预取 ==================== */
+  var preloaded = Object.create(null);
+  function preload(src) {
+    if (preloaded[src]) return;
+    preloaded[src] = true;
+    var im = new Image();
+    im.decoding = 'async';
+    im.src = src;
+  }
+
+  /* ==================== 3) 灯箱 ==================== */
+  function openLightbox(src, thumb) {
+    currentSrc   = src;
+    currentThumb = thumb;
+    var token = ++lbToken;
+
+    delete lbImg.dataset.fallback;   // 重置回退标记
+    lbStatus.textContent = '';
+    lbImg.src = thumb;               // 先用缩略图顶上，秒开
+
     lightbox.classList.add('open');
     lightbox.setAttribute('aria-hidden', 'false');
     document.documentElement.style.overflow = 'hidden';
+
+    // 后台加载原图，完成后无缝替换
+    var full = new Image();
+    full.decoding = 'async';
+    full.onload = function () {
+      if (token !== lbToken) return;  // 已切换到别的图，丢弃
+      lbImg.src = src;
+      lbStatus.textContent = '';
+    };
+    full.onerror = function () {
+      if (token !== lbToken) return;
+      lbStatus.textContent = '原图加载失败，当前为缩略图';
+    };
+    lbStatus.textContent = '高清原图加载中…';
+    full.src = src;
   }
 
   function closeLightbox() {
     if (!lightbox.classList.contains('open')) return;
+    lbToken++;                        // 让未完成的加载回调失效
     lightbox.classList.remove('open');
     lightbox.setAttribute('aria-hidden', 'true');
     document.documentElement.style.overflow = '';
@@ -517,10 +646,17 @@
     if (currentSrc) window.open(currentSrc, '_blank', 'noopener');
   });
   lbCopy.addEventListener('click', function () {
-    if (currentSrc) copyImage(currentSrc, lbCopy);
+    if (currentSrc) copyImage(currentSrc, lbCopy);   // 复制原图
   });
 
-  /* ==================== 3) 复制图片 ==================== */
+  // 缩略图本身也打不开时，直接回退到原图
+  lbImg.addEventListener('error', function () {
+    if (lbImg.dataset.fallback === '1') return;
+    lbImg.dataset.fallback = '1';
+    if (currentSrc) lbImg.src = currentSrc;
+  });
+
+  /* ==================== 4) 复制图片（原图） ==================== */
   function copyImage(src, btn) {
     var label = btn.dataset.label || btn.textContent;
     btn.dataset.label = label;
@@ -536,7 +672,7 @@
       ]);
     }).then(function () {
       btn.textContent = '✓ 已复制';
-      toast('✅ 图片已复制到剪贴板');
+      toast('✅ 原图已复制到剪贴板');
     }).catch(function (err) {
       console.warn('[copy]', err);
       btn.textContent = '复制失败';
@@ -549,9 +685,9 @@
 
   /**
    * 取到 PNG Blob：
-   *  1) 优先 fetch 原始数据（同源 / 有 CORS 头时最快，且不重复下载）
-   *  2) 非 PNG 的格式（jpg/gif/webp…）用 canvas 转成 PNG ——
-   *     剪贴板绝大多数浏览器只认 image/png，GIF 会取第一帧
+   *  1) 优先 fetch 原始数据（同源 / 有 CORS 头时最快，且命中缓存不重复下载）
+   *  2) 非 PNG 格式（jpg/gif/webp…）用 canvas 转 PNG ——
+   *     剪贴板多数浏览器只认 image/png，GIF 会取第一帧
    */
   function getPngBlob(src) {
     var raw = null;
@@ -609,7 +745,7 @@
     });
   }
 
-  /* ==================== 4) Toast ==================== */
+  /* ==================== 5) Toast ==================== */
   var toastTimer;
   function toast(msg) {
     toastEl.textContent = msg;

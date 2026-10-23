@@ -50,10 +50,35 @@
   .hint{margin-left:auto;font-size:12px;color:var(--muted);}
   @media (max-width:520px){ .hint{display:none;} }
 
+  /* ---------- 分类切换 ---------- */
+  .tabs{
+    max-width:1280px;margin:0 auto;
+    padding:14px 18px 0;
+    display:flex;flex-wrap:wrap;gap:8px;
+  }
+  .tab{
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.55);
+    color:var(--muted);
+    padding:7px 16px;
+    border-radius:999px;
+    font:inherit;font-size:13px;
+    cursor:pointer;
+    transition:background .2s,color .2s,border-color .2s,box-shadow .2s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .tab:hover{background:rgba(255,255,255,.9);color:var(--text);}
+  .tab.active{
+    background:var(--accent);
+    border-color:transparent;
+    color:#fff;
+    box-shadow:0 2px 10px rgba(220,120,50,.35);
+  }
+
   /* ---------- 瀑布流 ---------- */
   .waterfall{
     max-width:1280px;margin:0 auto;
-    padding:16px 18px 60px;
+    padding:14px 18px 60px;
     column-width:170px;
     column-gap:12px;
   }
@@ -192,6 +217,10 @@
     white-space:nowrap;
   }
   .toast.show{opacity:1;transform:translate(-50%,0);}
+
+  .empty-tip{
+    padding:60px 20px;text-align:center;color:var(--muted);font-size:14px;
+  }
 </style>
 </head>
 <body>
@@ -204,6 +233,8 @@
     <span class="hint">点击看原图 · 悬停复制</span>
   </div>
 </header>
+
+<nav class="tabs" id="tabs" aria-label="分类切换"></nav>
 
 <main class="waterfall" id="waterfall"></main>
 
@@ -219,252 +250,21 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<!-- 数据文件：与页面同目录，负责提供分类与图片列表 -->
+<script src="data.js"></script>
+
 <script>
 (function () {
   'use strict';
 
   /* =========================================================
-   *  1. 数据源：把图片地址替换成你自己的即可
-   *     支持 png / jpg / gif / webp / svg / avif ……
-   *
-   *  2. 缩略图命名规则：
-   *     原图  https://x.com/a/b.gif
-   *     缩略  https://x.com/a/b__mini.gif
-   *     后缀与 query / hash 都会自动保留，规则可改 MINI_SUFFIX
+   *  配置
    * ========================================================= */
-  var images = [
-  "00179036edad86781f3f9545d76dcbdc.jpg",
-  "003MWcpMly8gv6kljb85pj608c08cwel02.jpg",
-  "003MWcpMly8gvlndz87ycg607s07s46b02.gif",
-  "003MWcpMly8gvmub4bmxsg60a30a31ky02.gif",
-  "006APoFYly1g07hc0z1fag308c08cnf4.gif",
-  "006APoFYly8gsuul1wviqg306o06on6b.gif",
-  "05e0df8e1f5dec190c82d049c9b1053f.jpg",
-  "0a6b96600c33874462bc9966170fd9f9d72aa004.jpg",
-  "0c1ab42bbd4beb813c8b4823cfac9b55.png",
-  "0c5d7fd7bbf6274e01e4b88bc8ab430cb34d5b3b.jpg@1256w_1152h_!web-article-pic.avif",
-  "0f95362c49d2ec9f602429f834b196de.jpg",
-  "10840b3cd7c530719c290cd5d17cf451.jpg",
-  "1125719e4ec83d0b3e7f320d9c9e61cd.jpg",
-  "1234.gif",
-  "129e5a5fc7c5aa0dfaecddd1c0f6516f.jpg",
-  "1302aeb94dc029966e5ca5809b648315.png",
-  "1517322130987818.gif",
-  "152874871EBF07A82D27005297809E9B.jpg",
-  "19bc7afd2849cfacfe9b9b77341ed085.jpg",
-  "1c18e6bbbe6547276a1aa8fdf13b0b03_0.png",
-  "1cb60c602aefde33b126a0ca8d7d6f8a.webp",
-  "1d3954da5b3ebfed7f9ca7067e09523e.jpg",
-  "1ff61c0d6d79e289b317164b1f931604f46d892e.png@1192w.png",
-  "20160123527500_VTFLnt.gif",
-  "20384fd4a3a3aef610ddf4c7d1c273df.png",
-  "243F20E529EA344B5720E3CE17E9AEAC.jpg",
-  "246085cab37b42ba6f03a01a78c285d1.png",
-  "24bad3a3b5813e73b3ccb62ef5fc47bc.gif",
-  "260.jpg",
-  "266c7afe8928da8d0810a22e44d10907.png",
-  "2a62f178870e9e51aaba3f03d6df188d.jpg",
-  "2a8cfb1a87fc006867db311c6f75f41d.png",
-  "2df0cc9d86dac88b60ea0ee597dbb189.jpg",
-  "2e9c97bca5bf9b9a525aa5fafae54f20.png",
-  "2f4ecbc3dcf02b3bc6433a6c8599fdcb.jpg",
-  "33cbc0a8daa1df5d6a4674c9673c50f3.png",
-  "34d20dfd436d1067688dd2d288007852.jpg",
-  "37596519b6e8b47719cef357683482ef.jpg",
-  "37da36a8fbaac07f2d0e841b980c7c89.png",
-  "382079a9d9debe8dbddcb1b3a05fe35e372813650.gif",
-  "394590ed4eb671926360d057b2f27f9e.gif",
-  "3978349ac51267e16e29e53fd321530c.png",
-  "3be67ce4e8ff487ff3d0427c15958e36.jpg",
-  "3f8475d9ca4f569322b0cdc58a775bd4.jpg",
-  "3fcc414dfc12f94d7ddd0358173c5041.jpg",
-  "42712f33bb29044ea4de417b6a0d83ac.jpg",
-  "443a84f66f64f34b8e896b5efead232a.png",
-  "4444.png",
-  "46b9bdd49a6b86f8a847dca680f815cf.jpg",
-  "49e14eea89918ed223068deafc98795d.jpg",
-  "4a30c118d2df3f72604ec4ba09ec0bc3.jpg",
-  "4ad305fc6bfc10f297eafede62f90579.jpg",
-  "4f5ea0f32e0072ddc70a24c62e89ba32.jpg",
-  "512f17a87f0f33fd9f32a5a2f039788b.png",
-  "51ec65f2c0f19aa7ce2b6738d1883826.jpg",
-  "5301066d9c282e2e373a1f1b281ac2a9.gif",
-  "5376679620003C8523EE52D3D6DAA56D.gif",
-  "576f5136c895ccd4d1c543943853a969.jpg",
-  "584_2022041954141751.gif",
-  "584_2022041954141888.gif",
-  "584_2022041954141893.gif",
-  "584_2022041954142744.gif",
-  "584_2022041954145675.gif",
-  "584_2022041954146298.gif",
-  "595ada9bbfb17744ad43234108599f2b.jpg",
-  "5a601ef35e5a3de250db75786d20185c.jpg",
-  "5b27d98ee70e0d1e83d6ec8a8531b638438381132.gif",
-  "5b4003b0588fe583a5896ee2ccdc438b.jpg",
-  "5bc8279c79ce974edc035ed0907d83e3.jpg",
-  "5bfd9817f19e08a095447172bf6b99ff.jpg",
-  "5d4696333477196048776927730fd3e2.jpg",
-  "5dc5dd390ba54d991d5538776334f335.jpg",
-  "5e5351edcb3c09e48ccb9782e2b3db13.gif",
-  "5e8c12e6497e5a90a51599bd103b77f7.jpg",
-  "619b4ea81336364f68468d13efcc163b.jpg",
-  "61e8c66447188aa112e60ddb84118818.jpg",
-  "61f0c8604153967cbe16669b74b57f56.jpg",
-  "638e411faf7ba54cedd4c2dbf61c3a88.jpg",
-  "694aa4ad97c546f8203f87d9.png",
-  "69ebc6e7912b374ebb74613c632be655.png",
-  "6C70EAE7367654093B6105768B14C1F6.jpg",
-  "6b2cb68868bc6a48e36f2fb627b9aeb2.gif",
-  "6b592454a5ae597d0902ae46f0f39764438381132.gif",
-  "6ef3e843855e6d4cafc3bce947907e23.png",
-  "7096462c80c2032d1bff2c806554c535.png",
-  "71329f00e46d9d5057ea9c4562ce2005.jpg",
-  "72c5f72917d2e9e0246584644f6f47fb.png",
-  "734c7aa1e7c467dcc06fe637d611c9a7.jpg",
-  "7480d1ead76a937ce3c3d19b87b26b95.jpg",
-  "748f2698160d0865d74756b086c6aa0a06073228.png@1192w.png",
-  "755ee9640124db228d828a8ead06ec3f.png",
-  "770a3151f6575fef9e92301bf2e69f32.jpg",
-  "783aed30fc942c182ea8bedc25429040.jpg",
-  "790a61c374f2d900ef27b8d26e9a1636.jpg",
-  "7bbca33b3aed4f6bbeded74ce8660c85~tplv-k3u1fbpfcp-zoom-in-crop-mark_1512_0_0_0.webp",
-  "7f720e98408798b61d74af3c80e545fa.jpg",
-  "7f92cc1e89d6ba690c7aec5159ac3a56.jpg",
-  "7f9d2318c3de407070c420173ccfe677.gif",
-  "81290118caa2e79ae7dad77b9bf6e92e.jpg",
-  "82216cb6e3e0838bbe4d5e2fed668c8b867012.gif",
-  "82412a05c21ab9bf51dee7c40b98034f.jpg",
-  "83b7182c27d6098c68697e1ee08aa385.png",
-  "85b8b38b098bb61f6b91e6a9e47a4417.png",
-  "87a17d9cf3beb377b3711118c67cd1e4584482891.jpg",
-  "889cc24a2d7d880372481e4c706fcb44.jpg",
-  "8b3c0109717edc57f1b516415c8b4df4.jpg",
-  "8c64c7d29ffefded88a12d97dd9e1270.jpg",
-  "8d420454efb4d94537fcae5367b4a75a.jpg",
-  "8d67b9dbe4e154ae3790ea3453a06647.jpg",
-  "8ee12acf6977f97c342b55ff09ab7e3d.jpg",
-  "91ea89d48396d57313841d7ce2bedb6f.jpg",
-  "92adc9257b808ec847cff6f2bdf42430.jpg",
-  "9688328e7b671a1ff561f6464f718a96.jpg",
-  "9c40cbac8265c3f5b03b0de96e5fd2d6.png",
-  "9db9ca7e0be13c5aae5ba0fa84d32e7f.jpg",
-  "AE56482F9DDC332145F1ED189427ED04.jpg",
-  "Cache_-5d8e6b384646a5f2.gif",
-  "D408ACA81D51D7EC7A36C51FB2B88BBE.jpg",
-  "E9996E318FCECD9F884911F023353F9C.png",
-  "QQ_1730785438469.png",
-  "QQ_1730785519575.png",
-  "a1081ad5a4c88cd3910f49b859eea1be.jpg",
-  "a34f908510580e799e68bb1e7d89a2616059dbe4.png@1192w.png",
-  "a406f4b1b3783e12b0d173eb1c54fe6c.jpg",
-  "a5be5521085bb803e451914d5b28cd37.png",
-  "a79c9c02f2b33834b7e14fd2922d9ef3.png",
-  "a83a29b12b391d794e77910c87e112fb.gif",
-  "b2666086e74f40c4881825e9bc230397_th.jpg",
-  "b45dd9904d3853ac4acf9c8c8f981bec.jpg",
-  "b8f668fbfea70a424f8600c459c3c101.jpg",
-  "bbdfd6d0c31fd49c09fe7414e99428de438381132.gif",
-  "bd32769f42531bbd425fb7498fc17e89.jpg",
-  "c5d01a86931292ca7af4be2503210d30.jpg",
-  "c6b744e044ef00a3a453dd4c73e6c246.jpeg",
-  "c8ae5e089039dbe9e85cd9aa038103a4.jpg",
-  "ceeb653ely1g2anute08dg208y051h9o.gif",
-  "ceeb653ely8gqp0rr8idbj20hs0gwwtb.jpg",
-  "cf89f7d54167bb21626a000cf4e07cdb.png",
-  "d2b15ad06be5571e908381c004a7a66f.jpg",
-  "d4241386a2a3483fc6a726a760645169.jpg",
-  "d77e258aa61ea8d3ce3cf1dbd20a304e241f585d.gif",
-  "ddefeceec91c897140b9a8bfd1fbb47b.jpg",
-  "e063ea51ad836162cfd99a119950a20f.png",
-  "e08338fff13598ddab76b83838895ae5.png",
-  "e0a0e78a99f8c88ab58e4a3db7e32d49_0.png",
-  "e56a63e366bdfae07a1b67f02bc19780.gif",
-  "e8a5700f2b964149f66b5239d2054ff5415278301.gif",
-  "ea2826d395f8d97e6b5b86e193e724c0.jpg",
-  "eb750ea533b14f90043bd140338c2055.gif",
-  "ec0670f95bc606e22e515f6f3e13d3e4.jpg",
-  "ecf302564a07e594a5701c2fbe2cb09f.jpg",
-  "ed39498817f24099736f7bb2655a41b5.jpg",
-  "ede18e24c32dab47463c8aed0ac4cfcb.jpg",
-  "f02514734ae9cd36609f302ac578de48fe451bb6.png@1192w.png",
-  "f070cbf313a502ecbbb535d6b63f2259.jpg",
-  "f186a46ef8a077cdad2e2340f3561f3b.jpg",
-  "f24077ba5d5ddb63d9db612a98928fb7.png",
-  "f289ceb4493db3952137020c29309a2e.png",
-  "f4f56e4cf10efff4f1fcd762d71322ae.jpg",
-  "f67d23ef9e14239ea8ff67ce79ab4e02.jpg",
-  "f69fdc62c4bf2a0ed6b271698fe7df06.jpg",
-  "f7506a3194edd9f34156bc96fbe4d585.jpg",
-  "f7c338d405edb2125b49319675a6d3a1381553185.gif",
-  "f8e1080a2ed5b3d0fd3364dbd58c544b.jpg",
-  "f93b50a178f139f6982f9a12bc0d59c3.jpg",
-  "f954f4cc1aca65056af2dacb7143cb13.jpg",
-  "fd1b688e32faac976760234f1c6144df.gif",
-  "fufu流下液体.gif",
-  "img_illust_mikunt.png",
-  "img_illust_mikuv4c.png",
-  "img_illust_mikuv4x.png",
-  "miku_rose_cage.jpeg",
-  "miku_rose_cage的副本.jpeg",
-  "mikunt_img1.jpg",
-  "mikuv3_img1.png",
-  "mikuv3_img2.png",
-  "test.jpg",
-  "u=2140246590,515555886&fm=253&fmt=auto&app=120&f=JPEG.webp",
-  "visual_2013.png",
-  "你可不要被三次元的女人骗了呀.gif",
-  "初音未来15th.png",
-  "别逗你水原姐笑了.jpg",
-  "又到了投喂群友的时间.jpg",
-  "哈气.jpg",
-  "图像描述与视频生成.gif",
-  "大脑一片空白.png",
-  "好女孩.jpg",
-  "好婊子.jpg",
-  "怎么还没下班.jpg",
-  "想知道出处，我也是转发的.jpg",
-  "捅死你.gif",
-  "无限龙兽抱手喷气.gif",
-  "是什么蒙蔽了我的双眼.gif",
-  "正在思考.jpg",
-  "猫喝水视频生成.gif",
-  "玩你吗 跳了.jpg",
-  "生成的视频 (1)-2.gif",
-  "生成的视频 (1).gif",
-  "生成的视频 (10).gif",
-  "生成的视频 (11).gif",
-  "生成的视频 (2)-2.gif",
-  "生成的视频 (2)-3.gif",
-  "生成的视频 (3).gif",
-  "生成的视频 (3).gif.crdownload.gif",
-  "生成的视频 (4).gif",
-  "生成的视频 (5)-2.gif",
-  "生成的视频 (5).gif",
-  "生成的视频 (6).gif",
-  "生成的视频 (7).gif",
-  "生成的视频 (8).gif",
-  "生成的视频 (9).gif",
-  "生成的视频-2.gif",
-  "生成的视频-3.gif",
-  "生成的视频.gif",
-  "电死你.jpg",
-  "疯狂电猪.gif",
-  "祥子偷走外卖.gif",
-  "第一天打卡.gif",
-  "胖.jpg",
-  "被（烧猪）群友包围了，好幸福.jpg",
-  "被（猪）群友包围了，好幸福.png",
-  "让我摸下你的鸟.gif",
-  "这奶子怎么这么小.jpg",
-  "魔法未来10th.png",
-  "魔法未来1th.jpeg",
-  "黄色的怪兽.gif"
-  ];
-
   var MINI_SUFFIX = '__mini';                       // 缩略图后缀
-  var ANIM_EXT    = /^(GIF|APNG|WEBP)$/;            // 视为“动图”高亮的格式
+  var ANIM_EXT    = /^(GIF|APNG|WEBP)$/;            // 视为"动图"高亮的格式
 
   /* ========================= DOM ========================= */
+  var tabsEl    = document.getElementById('tabs');
   var waterfall = document.getElementById('waterfall');
   var countEl   = document.getElementById('count');
   var lightbox  = document.getElementById('lightbox');
@@ -475,11 +275,58 @@
   var lbClose   = document.getElementById('lbClose');
   var toastEl   = document.getElementById('toast');
 
-  var currentSrc   = '';   // 灯箱当前原图
-  var currentThumb = '';   // 灯箱当前缩略图
-  var lbToken      = 0;    // 防止快速切换时旧回调覆盖
+  var currentSrc   = '';
+  var lbToken      = 0;
 
-  countEl.textContent = images.length ? images.length + ' 张' : '暂无图片';
+  /* ==================== 0) 读取并整理数据 ==================== */
+  var data = window.GALLERY_DATA;
+
+  if (!data || !Array.isArray(data.categories) || !data.categories.length) {
+    waterfall.innerHTML = '<p class="empty-tip">数据加载失败：请确认 data.js 与页面在同一目录，且 window.GALLERY_DATA 格式正确。</p>';
+    return;
+  }
+
+  var categories = resolveCategories(data);
+  var currentIndex = clampIndex(data.defaultIndex, categories.length);
+
+  /* ==================== 1) 分类解析 ==================== */
+  /**
+   * 支持 all: true 的分类自动合并其他分类的图片（去重、保持首次出现顺序）
+   */
+  function resolveCategories(raw) {
+    var list = raw.categories;
+
+    var pool = [];
+    var seen = Object.create(null);
+    list.forEach(function (c) {
+      if (c && c.all !== true && Array.isArray(c.images)) {
+        c.images.forEach(function (src) {
+          if (typeof src === 'string' && src && !seen[src]) {
+            seen[src] = true;
+            pool.push(src);
+          }
+        });
+      }
+    });
+
+    return list.map(function (c) {
+      var name = (c && c.name) ? String(c.name) : '未命名';
+      if (c && c.all === true) {
+        return { name: name, images: pool.slice() };
+      }
+      var imgs = (c && Array.isArray(c.images)) ? c.images.filter(function (x) {
+        return typeof x === 'string' && x;
+      }) : [];
+      return { name: name, images: imgs };
+    });
+  }
+
+  function clampIndex(idx, len) {
+    idx = parseInt(idx, 10);
+    if (isNaN(idx) || idx < 0) return 0;
+    if (idx >= len) return len - 1;
+    return idx;
+  }
 
   /* ============== 工具：生成缩略图地址 ============== */
   function miniUrl(src) {
@@ -509,74 +356,116 @@
     return '';
   }
 
-  /* ==================== 1) 渲染瀑布流 ==================== */
-  var frag = document.createDocumentFragment();
+  /* ==================== 2) 渲染分类切换栏 ==================== */
+  function renderTabs() {
+    tabsEl.innerHTML = '';
+    categories.forEach(function (cat, i) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tab' + (i === currentIndex ? ' active' : '');
+      btn.textContent = cat.name;
+      btn.setAttribute('data-index', i);
+      btn.addEventListener('click', function () {
+        if (i === currentIndex) return;
+        currentIndex = i;
+        updateActiveTab();
+        renderGallery();
+      });
+      tabsEl.appendChild(btn);
+    });
+  }
 
-  images.forEach(function (src, i) {
-    var thumb = miniUrl(src);
+  function updateActiveTab() {
+    var btns = tabsEl.children;
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle('active', i === currentIndex);
+    }
+  }
 
-    var card = document.createElement('figure');
-    card.className = 'card';
+  /* ==================== 3) 渲染瀑布流 ==================== */
+  function renderGallery() {
+    closeLightbox();                       // 切换分类时关闭灯箱
 
-    /* ---- 左上角格式徽章 ---- */
-    var fmt = extOf(src);
-    if (fmt) {
-      var badge = document.createElement('span');
-      badge.className = 'fmt-badge' + (ANIM_EXT.test(fmt) ? ' is-anim' : '');
-      badge.textContent = fmt;
-      badge.title = '格式：' + fmt;
-      card.appendChild(badge);
+    var cat = categories[currentIndex];
+    var images = cat.images;
+
+    countEl.textContent = images.length ? images.length + ' 张' : '暂无图片';
+
+    waterfall.innerHTML = '';
+
+    if (!images.length) {
+      waterfall.innerHTML = '<p class="empty-tip">这个分类还没有图片～</p>';
+      return;
     }
 
-    /* ---- 缩略图 ---- */
-    var img = document.createElement('img');
-    img.alt = '图片 ' + (i + 1);
-    img.loading = 'lazy';
-    img.decoding = 'async';
-    img.draggable = false;
-    img.referrerPolicy = 'no-referrer';
+    var frag = document.createDocumentFragment();
 
-    img.addEventListener('load', function () {
-      card.classList.add('loaded');
-    });
+    images.forEach(function (src, i) {
+      var thumb = miniUrl(src);
 
-    img.addEventListener('error', function () {
-      if (img.dataset.fallback === '1') {
-        card.classList.add('loaded', 'failed');
-        return;
+      var card = document.createElement('figure');
+      card.className = 'card';
+
+      /* ---- 左上角格式徽章 ---- */
+      var fmt = extOf(src);
+      if (fmt) {
+        var badge = document.createElement('span');
+        badge.className = 'fmt-badge' + (ANIM_EXT.test(fmt) ? ' is-anim' : '');
+        badge.textContent = fmt;
+        badge.title = '格式：' + fmt;
+        card.appendChild(badge);
       }
-      img.dataset.fallback = '1';
-      img.src = src;
+
+      /* ---- 缩略图 ---- */
+      var img = document.createElement('img');
+      img.alt = cat.name + ' 图片 ' + (i + 1);
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.draggable = false;
+      img.referrerPolicy = 'no-referrer';
+
+      img.addEventListener('load', function () {
+        card.classList.add('loaded');
+      });
+
+      img.addEventListener('error', function () {
+        if (img.dataset.fallback === '1') {
+          card.classList.add('loaded', 'failed');
+          return;
+        }
+        img.dataset.fallback = '1';
+        img.src = src;
+      });
+
+      img.src = thumb;
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'copy-btn';
+      btn.textContent = '复制';
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        copyImage(src, btn);
+      });
+
+      card.appendChild(img);
+      card.appendChild(btn);
+
+      card.addEventListener('click', function () {
+        openLightbox(src, thumb);
+      });
+
+      card.addEventListener('mouseenter', function () {
+        preload(src);
+      }, { once: true });
+
+      frag.appendChild(card);
     });
 
-    img.src = thumb;
+    waterfall.appendChild(frag);
+  }
 
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'copy-btn';
-    btn.textContent = '复制';
-    btn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      copyImage(src, btn);
-    });
-
-    card.appendChild(img);
-    card.appendChild(btn);
-
-    card.addEventListener('click', function () {
-      openLightbox(src, thumb);
-    });
-
-    card.addEventListener('mouseenter', function () {
-      preload(src);
-    }, { once: true });
-
-    frag.appendChild(card);
-  });
-
-  waterfall.appendChild(frag);
-
-  /* ==================== 2) 原图预取 ==================== */
+  /* ==================== 4) 原图预取 ==================== */
   var preloaded = Object.create(null);
   function preload(src) {
     if (preloaded[src]) return;
@@ -586,10 +475,9 @@
     im.src = src;
   }
 
-  /* ==================== 3) 灯箱（已修复原图加载） ==================== */
+  /* ==================== 5) 灯箱 ==================== */
   function openLightbox(src, thumb) {
-    currentSrc   = src;
-    currentThumb = thumb;
+    currentSrc = src;
     var token = ++lbToken;
 
     lightbox.classList.add('open');
@@ -598,12 +486,10 @@
 
     var useThumb = thumb && thumb !== src;
 
-    /* --- 清理 lbImg 旧状态 --- */
     lbImg.onload  = null;
     lbImg.onerror = null;
     lbImg.removeAttribute('src');
 
-    /* --- 先显示缩略图占位（如果和原图不同） --- */
     if (useThumb) {
       lbImg.onerror = function () {
         lbImg.onerror = null;
@@ -616,14 +502,13 @@
       lbStatus.textContent = '加载中…';
     }
 
-    /* --- 后台加载原图，成功后替换 --- */
     var full = new Image();
     full.decoding = 'async';
     full.onload = function () {
-      if (token !== lbToken) return;     // 已切换到别的图，丢弃
+      if (token !== lbToken) return;
       lbImg.onload  = null;
       lbImg.onerror = null;
-      lbImg.src = src;                   // 原图已缓存，立即显示
+      lbImg.src = src;
       lbStatus.textContent = '';
     };
     full.onerror = function () {
@@ -667,7 +552,7 @@
     if (currentSrc) copyImage(currentSrc, lbCopy);
   });
 
-  /* ==================== 4) 复制图片（原图） ==================== */
+  /* ==================== 6) 复制原图 ==================== */
   function copyImage(src, btn) {
     var label = btn.dataset.label || btn.textContent;
     btn.dataset.label = label;
@@ -750,7 +635,7 @@
     });
   }
 
-  /* ==================== 5) Toast ==================== */
+  /* ==================== 7) Toast ==================== */
   var toastTimer;
   function toast(msg) {
     toastEl.textContent = msg;
@@ -760,6 +645,10 @@
       toastEl.classList.remove('show');
     }, 1800);
   }
+
+  /* ==================== 8) 启动 ==================== */
+  renderTabs();
+  renderGallery();
 
 })();
 </script>

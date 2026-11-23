@@ -1,0 +1,2036 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多功能图片拼版工具</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 24px;
+    color: #263244;
+    background: #f3f5f9;
+    font-family: Arial, "Microsoft YaHei", sans-serif;
+}
+
+.container {
+    max-width: 1250px;
+    margin: auto;
+    padding: 25px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.05);
+}
+
+h2 {
+    margin: 0 0 8px;
+}
+
+h3 {
+    margin: 23px 0 12px;
+}
+
+.subtitle,
+.tip {
+    color: #9099a8;
+    font-size: 12px;
+}
+
+/* 上传 */
+
+.upload {
+    display: block;
+    padding: 30px;
+    margin-top: 20px;
+    text-align: center;
+    border: 2px dashed #cbd3df;
+    border-radius: 10px;
+    background: #fafcff;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.upload:hover,
+.upload.active {
+    border-color: #1677ff;
+    color: #1677ff;
+    background: #f3f8ff;
+}
+
+.upload input {
+    display: none;
+}
+
+/* 图片列表 */
+
+.image-list {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 3px;
+    min-height: 165px;
+    overflow-x: auto;
+}
+
+.image-item {
+    position: relative;
+    flex: 0 0 138px;
+    padding: 9px;
+    border: 1px solid #e0e5ed;
+    border-radius: 9px;
+    background: white;
+    text-align: center;
+    cursor: grab;
+    user-select: none;
+    transition: transform .15s, opacity .15s;
+}
+
+.image-item:active {
+    cursor: grabbing;
+}
+
+.image-item.dragging {
+    opacity: .35;
+    border: 2px dashed #1677ff;
+}
+
+.image-item.drag-over {
+    border: 2px solid #1677ff;
+    transform: scale(1.04);
+}
+
+.image-item img {
+    display: block;
+    width: 100%;
+    height: 85px;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.image-name {
+    margin-top: 8px;
+    font-size: 12px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.image-size {
+    margin-top: 4px;
+    color: #999;
+    font-size: 10px;
+}
+
+.image-number {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #1677ff;
+}
+
+/* 左右按钮 */
+
+.image-actions {
+    display: flex;
+    gap: 7px;
+    margin-top: 10px;
+}
+
+.move-btn {
+    flex: 1;
+    height: 29px;
+    border: 1px solid #dbe3ef;
+    border-radius: 5px;
+    background: #f6f8fc;
+    color: #1677ff;
+    cursor: pointer;
+    font-size: 17px;
+}
+
+.move-btn:hover:not(:disabled) {
+    background: #1677ff;
+    color: white;
+}
+
+.move-btn:disabled {
+    color: #ccc;
+    background: #f5f5f5;
+    cursor: not-allowed;
+}
+
+/* 删除 */
+
+.remove-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 23px;
+    height: 23px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #f04444;
+    color: white;
+    cursor: pointer;
+}
+
+/* 配置面板 */
+
+.panel {
+    padding: 17px;
+    margin-top: 16px;
+    border: 1px solid #e8ecf2;
+    border-radius: 10px;
+    background: #fbfcfe;
+}
+
+.panel-title {
+    margin-bottom: 15px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.settings {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px 20px;
+}
+
+.setting {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+}
+
+.setting input[type="number"],
+.setting select {
+    height: 34px;
+    padding: 5px 9px;
+    border: 1px solid #d9e0e9;
+    border-radius: 6px;
+    background: white;
+    color: #333;
+}
+
+.setting input[type="number"] {
+    width: 78px;
+}
+
+.setting input[type="color"] {
+    width: 35px;
+    height: 30px;
+    border: none;
+    cursor: pointer;
+}
+
+.setting input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.main-select {
+    min-width: 225px;
+    font-weight: bold;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.divider {
+    height: 1px;
+    background: #edf0f4;
+    margin: 14px 0;
+}
+
+/* 按钮 */
+
+.button {
+    padding: 9px 16px;
+    border: none;
+    border-radius: 6px;
+    background: #1677ff;
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.button:hover {
+    background: #0958d9;
+}
+
+.button.gray {
+    background: #667085;
+}
+
+.button.danger {
+    background: #e5484d;
+}
+
+.button:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+/* 预览 */
+
+.info {
+    margin: 15px 0;
+    color: #667085;
+    font-size: 13px;
+}
+
+.preview {
+    min-height: 220px;
+    padding: 20px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    overflow: auto;
+    border: 1px solid #dce2eb;
+    border-radius: 8px;
+
+    /* 透明背景棋盘格 */
+    background-color: #fff;
+    background-image:
+        linear-gradient(45deg,#eee 25%,transparent 25%),
+        linear-gradient(-45deg,#eee 25%,transparent 25%),
+        linear-gradient(45deg,transparent 75%,#eee 75%),
+        linear-gradient(-45deg,transparent 75%,#eee 75%);
+    background-size: 20px 20px;
+    background-position:
+        0 0,0 10px,10px -10px,-10px 0;
+}
+
+canvas {
+    display: block;
+    flex-shrink: 0;
+    max-width: none;
+    height: auto;
+    margin: auto;
+}
+
+.action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 18px 0;
+}
+
+@media(max-width:650px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 14px;
+    }
+
+    .panel {
+        padding: 12px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>多功能图片拼版工具</h2>
+<div class="subtitle">
+    图片排序、网格拼版、瀑布流、照片墙、图片合成及 PNG 导出
+</div>
+
+<!-- 上传 -->
+
+<label class="upload" id="uploadArea">
+    <input type="file" id="fileInput" accept="image/*" multiple>
+    <div style="font-size:21px">＋ 添加图片</div>
+    <div style="font-size:13px;margin-top:8px">
+        点击选择图片，也可以拖放图片到这里
+    </div>
+</label>
+
+<!-- 图片列表 -->
+
+<h3>图片排列顺序</h3>
+
+<div class="tip">
+    可以拖动缩略图排序，也可以使用左右按钮移动图片
+</div>
+
+<div class="image-list" id="imageList"></div>
+
+<!-- 排列设置 -->
+
+<div class="panel">
+
+    <div class="panel-title">① 排列方式</div>
+
+    <div class="settings">
+
+        <label class="setting">
+            排列类型
+
+            <select id="layout" class="main-select">
+
+                <optgroup label="基础排列">
+                    <option value="horizontal">水平排列</option>
+                    <option value="vertical">垂直排列</option>
+                </optgroup>
+
+                <optgroup label="网格排列">
+                    <option value="cols-2">每行 2 张</option>
+                    <option value="cols-3" selected>九宫格 / 每行 3 张</option>
+                    <option value="cols-4">每行 4 张</option>
+                    <option value="cols-5">每行 5 张</option>
+                    <option value="cols-6">每行 6 张</option>
+                    <option value="cols-7">每行 7 张</option>
+                    <option value="cols-8">每行 8 张</option>
+
+                    <option value="rows-2">每列 2 张（向下填充）</option>
+                    <option value="rows-3">每列 3 张（向下填充）</option>
+                    <option value="rows-4">每列 4 张（向下填充）</option>
+                    <option value="rows-5">每列 5 张（向下填充）</option>
+                    <option value="rows-6">每列 6 张（向下填充）</option>
+
+                    <option value="square">自适应方格</option>
+                    <option value="custom">自定义列数</option>
+                    <option value="offset">错位网格</option>
+                </optgroup>
+
+                <optgroup label="特殊排列">
+                    <option value="masonry">瀑布流</option>
+                    <option value="justified">照片墙（统一行高）</option>
+                </optgroup>
+
+            </select>
+        </label>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 线性尺寸 -->
+
+    <div id="linearSettings" class="settings">
+
+        <label class="setting">
+            图片尺寸
+
+            <select id="scaleMode">
+                <option value="original">保持原始尺寸</option>
+                <option value="height">统一图片高度</option>
+                <option value="width">统一图片宽度</option>
+            </select>
+        </label>
+
+        <label class="setting" id="scaleValueWrap">
+            目标尺寸
+
+            <input type="number" id="scaleValue" value="300" min="1">
+            px
+        </label>
+
+    </div>
+
+    <!-- 网格参数 -->
+
+    <div id="gridSettings" class="settings hidden">
+
+        <label class="setting">
+            单元格宽度
+
+            <input type="number" id="cellWidth" value="240" min="1">
+            px
+        </label>
+
+        <label class="setting" id="cellHeightWrap">
+            单元格高度
+
+            <input type="number" id="cellHeight" value="180" min="1">
+            px
+        </label>
+
+        <label class="setting" id="fitModeWrap">
+            图片适配
+
+            <select id="fitMode">
+                <option value="contain">完整显示（Contain）</option>
+                <option value="cover">填满裁切（Cover）</option>
+            </select>
+        </label>
+
+    </div>
+
+    <!-- 自定义列数 -->
+
+    <div id="customSettings" class="settings hidden">
+
+        <label class="setting">
+            每行列数
+
+            <input type="number" id="customCols" value="3" min="1" max="30">
+        </label>
+
+    </div>
+
+    <!-- 瀑布流 -->
+
+    <div id="masonrySettings" class="settings hidden">
+
+        <label class="setting">
+            瀑布流列数
+
+            <input type="number" id="masonryCols" value="3" min="1" max="20">
+        </label>
+
+        <div class="tip">图片按比例缩放至统一列宽，自动放入当前最短的列</div>
+
+    </div>
+
+    <!-- 照片墙 -->
+
+    <div id="justifiedSettings" class="settings hidden">
+
+        <label class="setting">
+            每行图片高度
+
+            <input type="number" id="rowHeight" value="220" min="1">
+            px
+        </label>
+
+        <label class="setting">
+            最大行宽
+
+            <input type="number" id="maxRowWidth" value="1200" min="1">
+            px
+        </label>
+
+    </div>
+
+</div>
+
+<!-- 样式设置 -->
+
+<div class="panel">
+
+    <div class="panel-title">② 间距及对齐设置</div>
+
+    <div class="settings">
+
+        <label class="setting">
+            图片间距
+
+            <input type="number" id="gap" value="8" min="0">
+            px
+        </label>
+
+        <label class="setting">
+            水平对齐
+
+            <select id="alignX">
+                <option value="left">靠左</option>
+                <option value="center" selected>居中</option>
+                <option value="right">靠右</option>
+            </select>
+        </label>
+
+        <label class="setting">
+            垂直对齐
+
+            <select id="alignY">
+                <option value="top">顶部</option>
+                <option value="center" selected>居中</option>
+                <option value="bottom">底部</option>
+            </select>
+        </label>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="settings">
+
+        <label class="setting">
+            背景颜色
+
+            <input type="color" id="bgColor" value="#ffffff">
+        </label>
+
+        <label class="setting">
+            <input type="checkbox" id="transparent" checked>
+            透明背景
+        </label>
+
+        <label class="setting" id="borderSetting">
+            <input type="checkbox" id="showBorder">
+            显示网格边框
+        </label>
+
+        <label class="setting" id="borderColorSetting">
+            边框颜色
+
+            <input type="color" id="borderColor" value="#dddddd">
+        </label>
+
+    </div>
+
+</div>
+
+<!-- 操作 -->
+
+<div class="action-bar">
+
+    <button class="button" id="composeBtn">
+        重新合成
+    </button>
+
+    <button class="button" id="downloadBtn" disabled>
+        下载 PNG 图片
+    </button>
+
+    <button class="button gray" id="clearBtn">
+        清空全部
+    </button>
+
+</div>
+
+<div class="info" id="info">
+    暂无图片，请先添加图片
+</div>
+
+<h3>合成预览</h3>
+
+<div class="preview">
+    <canvas id="canvas"></canvas>
+</div>
+
+<div class="tip" style="margin-top:12px">
+    提示：预览可以滚动查看，下载图片将使用实际画布像素尺寸，不受屏幕预览缩放影响。
+</div>
+
+</div>
+
+<script>
+
+// ==========================================
+// 1. 全局变量
+// ==========================================
+
+const $ = id => document.getElementById(id);
+
+const fileInput = $("fileInput");
+const imageList = $("imageList");
+const canvas = $("canvas");
+const ctx = canvas.getContext("2d");
+
+let images = [];
+let nextId = 1;
+let dragId = null;
+
+
+// ==========================================
+// 2. 获取设置
+// ==========================================
+
+function getNumber(id, fallback, min = 1) {
+
+    const value = Number($(id).value);
+
+    if (!Number.isFinite(value)) return fallback;
+
+    return Math.max(min, Math.floor(value));
+
+}
+
+function getSettings() {
+
+    return {
+
+        layout: $("layout").value,
+
+        gap: getNumber("gap", 0, 0),
+
+        alignX: $("alignX").value,
+
+        alignY: $("alignY").value,
+
+        transparent: $("transparent").checked,
+
+        bgColor: $("bgColor").value,
+
+        cellWidth: getNumber("cellWidth", 240),
+
+        cellHeight: getNumber("cellHeight", 180),
+
+        fitMode: $("fitMode").value,
+
+        customCols: Math.min(30, getNumber("customCols", 3)),
+
+        masonryCols: Math.min(20, getNumber("masonryCols", 3)),
+
+        rowHeight: getNumber("rowHeight", 220),
+
+        maxRowWidth: getNumber("maxRowWidth", 1200),
+
+        showBorder: $("showBorder").checked,
+
+        borderColor: $("borderColor").value,
+
+        scaleMode: $("scaleMode").value,
+
+        scaleValue: getNumber("scaleValue", 300)
+
+    };
+
+}
+
+
+// ==========================================
+// 3. 图片加载和添加
+// ==========================================
+
+function loadImage(file) {
+
+    return new Promise((resolve, reject) => {
+
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+
+        img.onload = () => {
+
+            resolve({
+
+                id: nextId++,
+                name: file.name,
+                img,
+                url,
+
+                width: img.naturalWidth,
+                height: img.naturalHeight
+
+            });
+
+        };
+
+        img.onerror = () => {
+
+            URL.revokeObjectURL(url);
+
+            reject(new Error("图片加载失败"));
+
+        };
+
+        img.src = url;
+
+    });
+
+}
+
+
+async function addImages(files) {
+
+    const list = Array.from(files).filter(
+        file => file.type.startsWith("image/")
+    );
+
+    if (!list.length) return;
+
+    $("info").textContent = "正在加载图片...";
+
+    const results = await Promise.allSettled(
+        list.map(loadImage)
+    );
+
+    let success = 0;
+
+    results.forEach(result => {
+
+        if (result.status === "fulfilled") {
+
+            images.push(result.value);
+            success++;
+
+        }
+
+    });
+
+    renderImageList();
+    compose();
+
+    const failed = results.length - success;
+
+    if (failed) {
+        $("info").textContent += `，${failed} 张图片加载失败`;
+    }
+
+}
+
+
+fileInput.addEventListener("change", function() {
+
+    addImages(this.files);
+
+    this.value = "";
+
+});
+
+
+// ==========================================
+// 4. 图片移动
+// ==========================================
+
+function moveImage(index, direction) {
+
+    const target = index + direction;
+
+    if (target < 0 || target >= images.length) {
+        return;
+    }
+
+    const temp = images[index];
+
+    images[index] = images[target];
+    images[target] = temp;
+
+    renderImageList();
+
+    compose();
+
+}
+
+
+// ==========================================
+// 5. 删除图片
+// ==========================================
+
+function removeImage(id) {
+
+    const index = images.findIndex(
+        item => item.id === id
+    );
+
+    if (index === -1) return;
+
+    URL.revokeObjectURL(images[index].url);
+
+    images.splice(index, 1);
+
+    renderImageList();
+
+    compose();
+
+}
+
+
+// ==========================================
+// 6. 渲染图片列表
+// ==========================================
+
+function renderImageList() {
+
+    imageList.innerHTML = "";
+
+    images.forEach((item, index) => {
+
+        const div = document.createElement("div");
+
+        div.className = "image-item";
+        div.draggable = true;
+        div.dataset.id = item.id;
+
+        const img = document.createElement("img");
+
+        img.src = item.url;
+        img.draggable = false;
+
+        const name = document.createElement("div");
+
+        name.className = "image-name";
+        name.textContent = item.name;
+
+        const size = document.createElement("div");
+
+        size.className = "image-size";
+        size.textContent = `${item.width} × ${item.height}`;
+
+        const number = document.createElement("div");
+
+        number.className = "image-number";
+        number.textContent = `第 ${index + 1} 张`;
+
+        // 删除按钮
+        const removeBtn = document.createElement("button");
+
+        removeBtn.className = "remove-btn";
+        removeBtn.textContent = "×";
+        removeBtn.type = "button";
+        removeBtn.draggable = false;
+
+        removeBtn.addEventListener("click", e => {
+
+            e.stopPropagation();
+
+            removeImage(item.id);
+
+        });
+
+        // 左右按钮
+        const actions = document.createElement("div");
+
+        actions.className = "image-actions";
+
+        const left = document.createElement("button");
+
+        left.className = "move-btn";
+        left.textContent = "←";
+        left.type = "button";
+        left.draggable = false;
+        left.disabled = index === 0;
+        left.title = "向左移动";
+
+        left.addEventListener("click", e => {
+
+            e.stopPropagation();
+
+            moveImage(index, -1);
+
+        });
+
+        const right = document.createElement("button");
+
+        right.className = "move-btn";
+        right.textContent = "→";
+        right.type = "button";
+        right.draggable = false;
+        right.disabled = index === images.length - 1;
+        right.title = "向右移动";
+
+        right.addEventListener("click", e => {
+
+            e.stopPropagation();
+
+            moveImage(index, 1);
+
+        });
+
+        actions.append(left, right);
+
+        div.append(
+            img,
+            name,
+            size,
+            number,
+            actions,
+            removeBtn
+        );
+
+
+        // 拖拽开始
+        div.addEventListener("dragstart", e => {
+
+            dragId = item.id;
+
+            e.dataTransfer.effectAllowed = "move";
+
+            e.dataTransfer.setData(
+                "text/plain",
+                String(item.id)
+            );
+
+            div.classList.add("dragging");
+
+        });
+
+
+        // 拖动经过
+        div.addEventListener("dragover", e => {
+
+            e.preventDefault();
+
+            if (dragId === null || dragId === item.id) {
+                return;
+            }
+
+            document.querySelectorAll(".image-item")
+                .forEach(el => el.classList.remove("drag-over"));
+
+            div.classList.add("drag-over");
+
+        });
+
+
+        div.addEventListener("dragleave", () => {
+
+            div.classList.remove("drag-over");
+
+        });
+
+
+        // 放下
+        div.addEventListener("drop", e => {
+
+            e.preventDefault();
+
+            const from = images.findIndex(
+                v => v.id === dragId
+            );
+
+            const to = images.findIndex(
+                v => v.id === item.id
+            );
+
+            if (from < 0 || to < 0) {
+                dragId = null;
+                return;
+            }
+
+            const rect = div.getBoundingClientRect();
+
+            let insertIndex = e.clientX >
+                rect.left + rect.width / 2
+                ? to + 1
+                : to;
+
+            const moved = images.splice(from, 1)[0];
+
+            if (from < insertIndex) {
+                insertIndex--;
+            }
+
+            insertIndex = Math.max(
+                0,
+                Math.min(insertIndex, images.length)
+            );
+
+            images.splice(insertIndex, 0, moved);
+
+            dragId = null;
+
+            renderImageList();
+
+            compose();
+
+        });
+
+
+        // 拖动结束
+        div.addEventListener("dragend", () => {
+
+            dragId = null;
+
+            document.querySelectorAll(".image-item")
+                .forEach(el => {
+
+                    el.classList.remove(
+                        "dragging",
+                        "drag-over"
+                    );
+
+                });
+
+        });
+
+        imageList.appendChild(div);
+
+    });
+
+}
+
+
+// ==========================================
+// 7. 对齐计算
+// ==========================================
+
+function alignOffset(space, used, align) {
+
+    const remain = Math.max(0, space - used);
+
+    if (align === "center") return remain / 2;
+
+    if (align === "right" || align === "bottom") {
+        return remain;
+    }
+
+    return 0;
+
+}
+
+
+// ==========================================
+// 8. 线性排列图片尺寸
+// ==========================================
+
+function getImageSize(item, settings) {
+
+    let width = item.width;
+    let height = item.height;
+
+    if (settings.scaleMode === "height") {
+
+        const scale = settings.scaleValue / item.height;
+
+        width *= scale;
+        height = settings.scaleValue;
+
+    }
+
+    if (settings.scaleMode === "width") {
+
+        const scale = settings.scaleValue / item.width;
+
+        height *= scale;
+        width = settings.scaleValue;
+
+    }
+
+    return { width, height };
+
+}
+
+
+// ==========================================
+// 9. 绘制背景
+// ==========================================
+
+function drawBackground(settings) {
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    if (!settings.transparent) {
+
+        ctx.fillStyle = settings.bgColor;
+
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+    }
+
+}
+
+
+// ==========================================
+// 10. 网格单元图片绘制
+// ==========================================
+
+function drawGridImage(item, x, y, cellW, cellH, settings) {
+
+    const scale = settings.fitMode === "cover"
+
+        ? Math.max(
+            cellW / item.width,
+            cellH / item.height
+        )
+
+        : Math.min(
+            cellW / item.width,
+            cellH / item.height
+        );
+
+    const drawW = item.width * scale;
+    const drawH = item.height * scale;
+
+    const offsetX = alignOffset(
+        cellW,
+        drawW,
+        settings.alignX
+    );
+
+    const offsetY = alignOffset(
+        cellH,
+        drawH,
+        settings.alignY
+    );
+
+    const dx = settings.fitMode === "cover"
+        ? x - offsetX
+        : x + offsetX;
+
+    const dy = settings.fitMode === "cover"
+        ? y - offsetY
+        : y + offsetY;
+
+    ctx.save();
+
+    // Cover 模式裁剪到单元格范围
+    if (settings.fitMode === "cover") {
+
+        ctx.beginPath();
+
+        ctx.rect(x, y, cellW, cellH);
+
+        ctx.clip();
+
+    }
+
+    ctx.drawImage(
+        item.img,
+        dx,
+        dy,
+        drawW,
+        drawH
+    );
+
+    ctx.restore();
+
+}
+
+
+// ==========================================
+// 11. 网格边框
+// ==========================================
+
+function drawCellBorder(x, y, w, h, settings) {
+
+    if (!settings.showBorder) return;
+
+    ctx.save();
+
+    ctx.strokeStyle = settings.borderColor;
+    ctx.lineWidth = 1;
+
+    ctx.strokeRect(
+        x + 0.5,
+        y + 0.5,
+        Math.max(0, w - 1),
+        Math.max(0, h - 1)
+    );
+
+    ctx.restore();
+
+}
+
+
+// ==========================================
+// 12. 水平排列
+// ==========================================
+
+function composeHorizontal(settings) {
+
+    const sizes = images.map(item =>
+        getImageSize(item, settings)
+    );
+
+    const width = sizes.reduce(
+        (sum, size) => sum + size.width,
+        0
+    ) + settings.gap * (images.length - 1);
+
+    const height = Math.max(
+        ...sizes.map(size => size.height)
+    );
+
+    setCanvasSize(width, height);
+
+    drawBackground(settings);
+
+    let x = 0;
+
+    images.forEach((item, index) => {
+
+        const size = sizes[index];
+
+        const y = alignOffset(
+            height,
+            size.height,
+            settings.alignY
+        );
+
+        ctx.drawImage(
+            item.img,
+            x,
+            y,
+            size.width,
+            size.height
+        );
+
+        x += size.width + settings.gap;
+
+    });
+
+}
+
+
+// ==========================================
+// 13. 垂直排列
+// ==========================================
+
+function composeVertical(settings) {
+
+    const sizes = images.map(item =>
+        getImageSize(item, settings)
+    );
+
+    const width = Math.max(
+        ...sizes.map(size => size.width)
+    );
+
+    const height = sizes.reduce(
+        (sum, size) => sum + size.height,
+        0
+    ) + settings.gap * (images.length - 1);
+
+    setCanvasSize(width, height);
+
+    drawBackground(settings);
+
+    let y = 0;
+
+    images.forEach((item, index) => {
+
+        const size = sizes[index];
+
+        const x = alignOffset(
+            width,
+            size.width,
+            settings.alignX
+        );
+
+        ctx.drawImage(
+            item.img,
+            x,
+            y,
+            size.width,
+            size.height
+        );
+
+        y += size.height + settings.gap;
+
+    });
+
+}
+
+
+// ==========================================
+// 14. 网格排列
+// ==========================================
+
+function getGridPositions(count, layout, settings) {
+
+    let cols = 1;
+    let rows = 1;
+
+    let columnMajor = false;
+    let offset = false;
+
+    if (layout.startsWith("cols-")) {
+
+        const requested = Number(
+            layout.split("-")[1]
+        );
+
+        cols = Math.min(count, requested);
+
+    }
+
+    else if (layout.startsWith("rows-")) {
+
+        const requested = Number(
+            layout.split("-")[1]
+        );
+
+        rows = Math.min(count, requested);
+
+        cols = Math.ceil(count / rows);
+
+        columnMajor = true;
+
+    }
+
+    else if (layout === "square") {
+
+        cols = Math.ceil(Math.sqrt(count));
+
+    }
+
+    else if (layout === "custom") {
+
+        cols = Math.min(
+            count,
+            settings.customCols
+        );
+
+    }
+
+    else if (layout === "offset") {
+
+        cols = Math.min(count, 3);
+
+        offset = true;
+
+    }
+
+    rows = columnMajor
+        ? Math.min(count, rows)
+        : Math.ceil(count / cols);
+
+    const positions = [];
+
+    images.forEach((item, index) => {
+
+        let row;
+        let col;
+
+        if (columnMajor) {
+
+            row = index % rows;
+            col = Math.floor(index / rows);
+
+        } else {
+
+            row = Math.floor(index / cols);
+            col = index % cols;
+
+        }
+
+        let x = col * (
+            settings.cellWidth + settings.gap
+        );
+
+        const y = row * (
+            settings.cellHeight + settings.gap
+        );
+
+        if (offset && row % 2 === 1) {
+
+            x += (settings.cellWidth + settings.gap) / 2;
+
+        }
+
+        positions.push({
+
+            item,
+            row,
+            col,
+            x,
+            y
+
+        });
+
+    });
+
+    return {
+
+        cols,
+        rows,
+        positions,
+        offset
+
+    };
+
+}
+
+
+function composeGrid(settings) {
+
+    const layout = settings.layout;
+
+    const grid = getGridPositions(
+        images.length,
+        layout,
+        settings
+    );
+
+    const { cols, rows, positions, offset } = grid;
+
+    let width =
+        cols * settings.cellWidth +
+        (cols - 1) * settings.gap;
+
+    const height =
+        rows * settings.cellHeight +
+        (rows - 1) * settings.gap;
+
+    if (offset && rows > 1) {
+
+        width += (
+            settings.cellWidth + settings.gap
+        ) / 2;
+
+    }
+
+    setCanvasSize(width, height);
+
+    drawBackground(settings);
+
+    positions.forEach(p => {
+
+        drawGridImage(
+            p.item,
+            p.x,
+            p.y,
+            settings.cellWidth,
+            settings.cellHeight,
+            settings
+        );
+
+        drawCellBorder(
+            p.x,
+            p.y,
+            settings.cellWidth,
+            settings.cellHeight,
+            settings
+        );
+
+    });
+
+}
+
+
+// ==========================================
+// 15. 瀑布流
+// ==========================================
+
+function composeMasonry(settings) {
+
+    const cols = Math.min(
+        settings.masonryCols,
+        images.length
+    );
+
+    const colHeights = Array(cols).fill(0);
+
+    const placements = [];
+
+    images.forEach(item => {
+
+        // 找出当前最短的列
+        let col = 0;
+
+        for (let i = 1; i < cols; i++) {
+
+            if (colHeights[i] < colHeights[col]) {
+                col = i;
+            }
+
+        }
+
+        // 图片统一宽度，保持原始比例
+        const width = settings.cellWidth;
+
+        const height = item.height *
+            width / item.width;
+
+        const x = col * (
+            settings.cellWidth + settings.gap
+        );
+
+        const y = colHeights[col];
+
+        placements.push({
+            item,
+            x,
+            y,
+            width,
+            height
+        });
+
+        colHeights[col] +=
+            height + settings.gap;
+
+    });
+
+    const width =
+        cols * settings.cellWidth +
+        (cols - 1) * settings.gap;
+
+    const height = Math.max(...colHeights) - settings.gap;
+
+    setCanvasSize(width, height);
+
+    drawBackground(settings);
+
+    placements.forEach(p => {
+
+        ctx.drawImage(
+            p.item.img,
+            p.x,
+            p.y,
+            p.width,
+            p.height
+        );
+
+    });
+
+}
+
+
+// ==========================================
+// 16. 照片墙：统一行高，自动换行
+// ==========================================
+
+function composeJustified(settings) {
+
+    const rowHeight = settings.rowHeight;
+    const maxWidth = settings.maxRowWidth;
+
+    const rows = [];
+
+    let currentRow = [];
+    let currentWidth = 0;
+
+    images.forEach(item => {
+
+        const width = item.width *
+            rowHeight / item.height;
+
+        // 超出最大行宽则换行
+        if (
+            currentRow.length > 0 &&
+            currentWidth + settings.gap + width > maxWidth
+        ) {
+
+            rows.push({
+                items: currentRow,
+                width: currentWidth
+            });
+
+            currentRow = [];
+            currentWidth = 0;
+
+        }
+
+        if (currentRow.length > 0) {
+            currentWidth += settings.gap;
+        }
+
+        currentRow.push({
+            item,
+            width
+        });
+
+        currentWidth += width;
+
+    });
+
+    if (currentRow.length > 0) {
+
+        rows.push({
+            items: currentRow,
+            width: currentWidth
+        });
+
+    }
+
+    const width = Math.max(
+        ...rows.map(row => row.width)
+    );
+
+    const height =
+        rows.length * rowHeight +
+        (rows.length - 1) * settings.gap;
+
+    setCanvasSize(width, height);
+
+    drawBackground(settings);
+
+    let y = 0;
+
+    rows.forEach(row => {
+
+        let x = 0;
+
+        row.items.forEach(p => {
+
+            ctx.drawImage(
+                p.item.img,
+                x,
+                y,
+                p.width,
+                rowHeight
+            );
+
+            x += p.width + settings.gap;
+
+        });
+
+        y += rowHeight + settings.gap;
+
+    });
+
+}
+
+
+// ==========================================
+// 17. 设置画布尺寸
+// ==========================================
+
+function setCanvasSize(width, height) {
+
+    width = Math.ceil(width);
+    height = Math.ceil(height);
+
+    // 防止超大画布造成浏览器崩溃
+    const MAX_SIDE = 32767;
+    const MAX_PIXELS = 180000000;
+
+    if (
+        !Number.isFinite(width) ||
+        !Number.isFinite(height) ||
+        width <= 0 ||
+        height <= 0 ||
+        width > MAX_SIDE ||
+        height > MAX_SIDE ||
+        width * height > MAX_PIXELS
+    ) {
+
+        throw new Error(
+            "合成图片尺寸过大，请降低尺寸或减少图片数量"
+        );
+
+    }
+
+    canvas.width = width;
+    canvas.height = height;
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
+}
+
+
+// ==========================================
+// 18. 总合成入口
+// ==========================================
+
+function compose() {
+
+    if (!images.length) {
+
+        canvas.width = 0;
+        canvas.height = 0;
+
+        $("info").textContent =
+            "暂无图片，请先添加图片";
+
+        $("downloadBtn").disabled = true;
+
+        return;
+
+    }
+
+    const settings = getSettings();
+
+    try {
+
+        switch (settings.layout) {
+
+            case "horizontal":
+                composeHorizontal(settings);
+                break;
+
+            case "vertical":
+                composeVertical(settings);
+                break;
+
+            case "masonry":
+                composeMasonry(settings);
+                break;
+
+            case "justified":
+                composeJustified(settings);
+                break;
+
+            default:
+                composeGrid(settings);
+                break;
+
+        }
+
+        $("info").textContent =
+            `合成成功：${images.length} 张图片 | ` +
+            `尺寸：${canvas.width} × ${canvas.height} px`;
+
+        $("downloadBtn").disabled = false;
+
+    } catch (error) {
+
+        $("downloadBtn").disabled = true;
+
+        $("info").textContent = error.message;
+
+        console.error(error);
+
+    }
+
+}
+
+
+// ==========================================
+// 19. 根据排列类型显示配置
+// ==========================================
+
+function updateControls() {
+
+    const layout = $("layout").value;
+
+    const linear = [
+        "horizontal",
+        "vertical"
+    ].includes(layout);
+
+    const grid = [
+        "cols-2",
+        "cols-3",
+        "cols-4",
+        "cols-5",
+        "cols-6",
+        "cols-7",
+        "cols-8",
+        "rows-2",
+        "rows-3",
+        "rows-4",
+        "rows-5",
+        "rows-6",
+        "square",
+        "custom",
+        "offset"
+    ].includes(layout);
+
+    const masonry = layout === "masonry";
+
+    const justified = layout === "justified";
+
+    $("linearSettings").classList.toggle(
+        "hidden",
+        !linear
+    );
+
+    $("scaleValueWrap").classList.toggle(
+        "hidden",
+        $("scaleMode").value === "original"
+    );
+
+    $("gridSettings").classList.toggle(
+        "hidden",
+        !(grid || masonry)
+    );
+
+    $("cellHeightWrap").classList.toggle(
+        "hidden",
+        masonry
+    );
+
+    $("fitModeWrap").classList.toggle(
+        "hidden",
+        !grid
+    );
+
+    $("customSettings").classList.toggle(
+        "hidden",
+        layout !== "custom"
+    );
+
+    $("masonrySettings").classList.toggle(
+        "hidden",
+        !masonry
+    );
+
+    $("justifiedSettings").classList.toggle(
+        "hidden",
+        !justified
+    );
+
+    $("borderSetting").classList.toggle(
+        "hidden",
+        !grid
+    );
+
+    $("borderColorSetting").classList.toggle(
+        "hidden",
+        !grid || !$("showBorder").checked
+    );
+
+}
+
+$("layout").addEventListener("change", () => {
+
+    updateControls();
+
+    compose();
+
+});
+
+$("scaleMode").addEventListener("change", () => {
+
+    updateControls();
+
+    compose();
+
+});
+
+$("showBorder").addEventListener("change", () => {
+
+    updateControls();
+
+    compose();
+
+});
+
+
+// ==========================================
+// 20. 所有配置自动刷新
+// ==========================================
+
+[
+    "gap",
+    "scaleValue",
+    "cellWidth",
+    "cellHeight",
+    "fitMode",
+    "customCols",
+    "masonryCols",
+    "rowHeight",
+    "maxRowWidth",
+    "alignX",
+    "alignY",
+    "bgColor",
+    "transparent",
+    "borderColor"
+].forEach(id => {
+
+    $(id).addEventListener("input", compose);
+
+    $(id).addEventListener("change", compose);
+
+});
+
+$("composeBtn").addEventListener("click", compose);
+
+
+// ==========================================
+// 21. 下载 PNG
+// ==========================================
+
+$("downloadBtn").addEventListener("click", function() {
+
+    if (!images.length) return;
+
+    canvas.toBlob(blob => {
+
+        if (!blob) {
+
+            alert("图片生成失败，请降低图片尺寸");
+
+            return;
+
+        }
+
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+
+        a.href = url;
+        a.download = "图片拼版.png";
+
+        document.body.appendChild(a);
+
+        a.click();
+
+        a.remove();
+
+        setTimeout(() => {
+
+            URL.revokeObjectURL(url);
+
+        }, 2000);
+
+    }, "image/png");
+
+});
+
+
+// ==========================================
+// 22. 清空所有图片
+// ==========================================
+
+function clearImages() {
+
+    images.forEach(item => {
+
+        URL.revokeObjectURL(item.url);
+
+    });
+
+    images = [];
+
+    canvas.width = 0;
+    canvas.height = 0;
+
+    renderImageList();
+
+    compose();
+
+    fileInput.value = "";
+
+}
+
+$("clearBtn").addEventListener("click", clearImages);
+
+
+// ==========================================
+// 23. 上传区域支持文件拖放
+// ==========================================
+
+const uploadArea = $("uploadArea");
+
+uploadArea.addEventListener("dragover", e => {
+
+    e.preventDefault();
+
+    uploadArea.classList.add("active");
+
+});
+
+uploadArea.addEventListener("dragleave", e => {
+
+    if (!uploadArea.contains(e.relatedTarget)) {
+
+        uploadArea.classList.remove("active");
+
+    }
+
+});
+
+uploadArea.addEventListener("drop", e => {
+
+    e.preventDefault();
+
+    uploadArea.classList.remove("active");
+
+    addImages(e.dataTransfer.files);
+
+});
+
+
+// ==========================================
+// 24. 初始化
+// ==========================================
+
+updateControls();
+
+renderImageList();
+
+</script>
+
+</body>
+</html>
